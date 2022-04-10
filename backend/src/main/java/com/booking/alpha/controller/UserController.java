@@ -1,15 +1,13 @@
 package com.booking.alpha.controller;
 
+import com.booking.alpha.entry.LoginEntry;
 import com.booking.alpha.entry.UserEntry;
 import com.booking.alpha.service.UserService;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/v1/user")
@@ -21,13 +19,57 @@ public class UserController {
         this.userService = userService;
     }
 
-    @PostMapping("/")
+    @PostMapping("/register")
     public ResponseEntity<UserEntry> create(@RequestBody UserEntry userEntry) {
-        return new ResponseEntity<>( userService.create(userEntry), HttpStatus.OK);
+        UserEntry newUserEntry = userService.create(userEntry);
+        if(newUserEntry != null){
+            return new ResponseEntity<>( newUserEntry, HttpStatus.CREATED);
+        }
+        return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<UserEntry> findOneById(@PathVariable("id") Long id) {
-        return new ResponseEntity<>( userService.findOneById(id), HttpStatus.OK);
+        UserEntry userEntry = userService.findOneById(id);
+        if(userEntry != null){
+            return new ResponseEntity<>( userEntry, HttpStatus.OK);
+        }
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
+
+    @PostMapping("/{id}/upload-image")
+    public ResponseEntity<UserEntry> uploadImage(@PathVariable("id") Long id, @RequestBody MultipartFile file){
+        UserEntry userEntry = userService.uploadImage(file,id);
+        if(userEntry != null){
+            return new ResponseEntity<>( userEntry, HttpStatus.OK);
+        }
+        return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<UserEntry> loginUser(@RequestBody LoginEntry loginEntry){
+        UserEntry userEntry = userService.userLogin(loginEntry);
+        if(userEntry != null){
+            return new ResponseEntity<>( userEntry, HttpStatus.OK);
+        }
+        return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<UserEntry> updateRewards(@PathVariable("id") Long id, @RequestParam("rewards") Long reward){
+        UserEntry userEntry = userService.updateRewards(reward, id);
+        if(userEntry != null){
+            return new ResponseEntity<>( userEntry, HttpStatus.OK);
+        }
+        return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<String> deleteUser(@PathVariable("id") Long id){
+        Boolean deleted = userService.deleteUser(id);
+        if(deleted){
+            return new ResponseEntity<>( "User with id: " + id + "deleted successfully", HttpStatus.OK);
+        }
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 }

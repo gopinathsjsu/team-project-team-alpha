@@ -28,4 +28,8 @@ public class S3Utils {
     public void uploadFile(String bucketName, String folder, InputStream inputStream) {
         s3Client.putObject( bucketName, folder, inputStream, new ObjectMetadata());
     }
+
+    public String getFileURL(String bucketName, String fileName){
+        return (s3Client.getUrl(bucketName, fileName)).toString();
+    }
 }

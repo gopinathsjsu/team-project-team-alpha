@@ -22,5 +22,9 @@ public class UserEntry {
 
     String emailId;
 
+    String password;
+
+    String imageUrl;
+
     Long rewardPoints;
 }
