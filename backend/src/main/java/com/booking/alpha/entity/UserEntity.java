@@ -41,5 +41,14 @@ public class UserEntity {
 
     @Column
     @NonNull
+    String password;
+
+    @Column
+    String imageUrl;
+
+    @Column
+    @NonNull
     Long rewardPoints;
+
+
 }
