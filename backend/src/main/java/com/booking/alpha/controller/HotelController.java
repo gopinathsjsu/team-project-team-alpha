@@ -1,15 +1,13 @@
 package com.booking.alpha.controller;
 
 import com.booking.alpha.entry.HotelEntry;
+import com.booking.alpha.entry.LoginEntry;
+import com.booking.alpha.entry.UserEntry;
 import com.booking.alpha.service.HotelService;
+import com.booking.alpha.service.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 
@@ -35,7 +33,12 @@ public class HotelController {
 
     @GetMapping("/{id}")
     public ResponseEntity<HotelEntry> findOneById( @PathVariable("id") Long id) {
-        return new ResponseEntity<>( hotelService.findOneById(id), HttpStatus.OK);
+        HotelEntry hotelEntry = hotelService.findOneById(id);
+        if(hotelEntry != null){
+            return new ResponseEntity<>( hotelEntry, HttpStatus.OK);
+        }
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        //return new ResponseEntity<>( hotelService.findOneById(id), HttpStatus.OK);
     }
 
     @PostMapping(value = "/upload-img")
@@ -43,4 +46,64 @@ public class HotelController {
         System.out.println(" ACCEPTED Request ");
         return new ResponseEntity<>( HttpStatus.ACCEPTED);
     }
+
+    @PostMapping("/register")
+    public ResponseEntity<HotelEntry> create(@RequestBody HotelEntry hotelEntry) {
+        HotelEntry newHotelEntry = hotelService.create(hotelEntry);
+        if(newHotelEntry != null){
+            return new ResponseEntity<>( newHotelEntry, HttpStatus.CREATED);
+        }
+        return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+    }
+
+
+    @PostMapping("/{id}/upload-image")
+    public ResponseEntity<HotelEntry> uploadImage(@PathVariable("id") Long id, @RequestBody MultipartFile file){
+        HotelEntry hotelEntry = hotelService.uploadImage(file,id);
+        if(hotelEntry != null){
+            return new ResponseEntity<>( hotelEntry, HttpStatus.OK);
+        }
+        return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+    }
+
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<String> deleteUser(@PathVariable("id") Long id){
+        Boolean deleted = hotelService.deleteHotel(id);
+        if(deleted){
+            return new ResponseEntity<>( "Hotel with id: " + id + " deleted successfully", HttpStatus.OK);
+        }
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
+
+
+    @PostMapping("/login")
+    public ResponseEntity<HotelEntry> loginHotel(@RequestBody LoginEntry loginEntry){
+        HotelEntry hotelEntry = hotelService.hotelLogin(loginEntry);
+        if(hotelEntry != null){
+            return new ResponseEntity<>( hotelEntry, HttpStatus.OK);
+        }
+        return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+    }
+
+
+    @PutMapping("/{id}/update")
+    public ResponseEntity<HotelEntry> updateHotel(@PathVariable("id") Long id, @RequestBody HotelEntry hotelEntry){
+        HotelEntry updatedHotelEntry = hotelService.updateHotel(id, hotelEntry);
+        if(updatedHotelEntry != null){
+            return new ResponseEntity<>( updatedHotelEntry, HttpStatus.OK);
+        }
+        return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+    }
+
+
+    @PutMapping("/{id}/password")
+    public ResponseEntity<HotelEntry> updateHotelPassword(@PathVariable("id") Long id, @RequestBody LoginEntry loginEntry){
+        HotelEntry updatedHotelEntry = hotelService.updatePassword(id, loginEntry);
+        if(updatedHotelEntry != null){
+            return new ResponseEntity<>( updatedHotelEntry, HttpStatus.OK);
+        }
+        return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+    }
+
 }

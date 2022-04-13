@@ -29,4 +29,8 @@ public class HotelEntry {
     String country;
 
     String zipCode;
+
+    String password;
+
+    String imageUrl;
 }
