@@ -17,36 +17,34 @@ import javax.persistence.GenerationType;
 import javax.persistence.Column;
 
 @Entity
-@Table(name="user")
+@Table(name="reservation")
 @Getter
 @Setter
 @ToString
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @AllArgsConstructor
 @NoArgsConstructor
-public class UserEntity {
+public class ReservationEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column
+    @NonNull
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
 
     @Column
     @NonNull
-    String name;
+    Long userId;
 
     @Column
     @NonNull
-    String emailId;
+    Long roomId;
 
     @Column
     @NonNull
-    String password;
-
-    @Column
-    String imageUrl;
+    Long startTime;
 
     @Column
     @NonNull
-    Long rewardPoints;
+    Long endTime;
 }

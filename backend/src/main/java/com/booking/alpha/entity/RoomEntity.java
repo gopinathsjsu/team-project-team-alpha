@@ -1,5 +1,6 @@
 package com.booking.alpha.entity;
 
+import com.booking.alpha.constant.RoomType;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -15,38 +16,31 @@ import javax.persistence.Id;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Column;
+import javax.persistence.Enumerated;
+import javax.persistence.EnumType;
 
 @Entity
-@Table(name="user")
+@Table(name="room")
 @Getter
 @Setter
 @ToString
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @AllArgsConstructor
 @NoArgsConstructor
-public class UserEntity {
+public class RoomEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column
+    @NonNull
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
 
     @Column
     @NonNull
-    String name;
+    Long hotel_id;
 
     @Column
     @NonNull
-    String emailId;
-
-    @Column
-    @NonNull
-    String password;
-
-    @Column
-    String imageUrl;
-
-    @Column
-    @NonNull
-    Long rewardPoints;
+    @Enumerated(EnumType.STRING)
+    RoomType type;
 }
