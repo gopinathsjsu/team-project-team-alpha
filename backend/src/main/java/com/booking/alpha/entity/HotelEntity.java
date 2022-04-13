@@ -55,4 +55,11 @@ public class HotelEntity {
     @Column
     @NotNull
     String zipCode;
+
+    @Column
+    @NonNull
+    String password;
+
+    @Column
+    String imageUrl;
 }

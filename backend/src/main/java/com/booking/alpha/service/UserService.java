@@ -1,6 +1,8 @@
 package com.booking.alpha.service;
 
+import com.booking.alpha.entity.HotelEntity;
 import com.booking.alpha.entity.UserEntity;
+import com.booking.alpha.entry.HotelEntry;
 import com.booking.alpha.entry.LoginEntry;
 import com.booking.alpha.entry.UserEntry;
 import com.booking.alpha.respository.UserRepository;
@@ -126,6 +128,46 @@ public class UserService {
             System.out.println("Exception in  boolean deleteUser(Long id), msg :  " + exception.getMessage());
             return false;
         }
+    }
+
+
+    public UserEntry updateUser(Long id, UserEntry userEntry){
+        try {
+            UserEntry oldUserEntry = findOneById(id);
+            oldUserEntry.setName(userEntry.getName());
+            oldUserEntry.setEmailId(userEntry.getEmailId());
+            oldUserEntry.setPassword(userEntry.getPassword());
+            oldUserEntry.setRewardPoints(userEntry.getRewardPoints());
+            oldUserEntry.setImageUrl(userEntry.getImageUrl());
+            oldUserEntry.setId(userEntry.getId());
+
+            UserEntity userEntity = convertToEntity(oldUserEntry);
+            UserEntity updatedUserEntity = userRepository.save(userEntity);
+            return convertToEntry(updatedUserEntity);
+        }catch (Exception exception){
+            System.out.println("Exception in UserEntry updateUser(Long id, UserEntry userEntry), msg : " + exception.getMessage());
+            return null;
+        }
+    }
+
+
+    public UserEntry updatePassword(Long id, LoginEntry loginEntry){
+
+        try {
+            UserEntry userEntry = findOneById(id);
+            if (userEntry == null)
+                return null;
+            String newPassword = BCrypt.hashpw(loginEntry.getPassword(), BCrypt.gensalt());
+            userEntry.setPassword(newPassword);
+            UserEntity userEntity = convertToEntity(userEntry);
+            UserEntity updatedUserEntity = userRepository.save(userEntity);
+            return convertToEntry(updatedUserEntity);
+        }catch (Exception exception){
+            System.out.println("Exception in UserEntry updatePassword(Long id, LoginEntry loginEntry), msg : " + exception.getMessage());
+            return null;
+        }
+
+
     }
 }
 

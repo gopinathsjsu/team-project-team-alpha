@@ -1,5 +1,6 @@
 package com.booking.alpha.controller;
 
+import com.booking.alpha.entry.HotelEntry;
 import com.booking.alpha.entry.LoginEntry;
 import com.booking.alpha.entry.UserEntry;
 import com.booking.alpha.service.UserService;
@@ -68,8 +69,27 @@ public class UserController {
     public ResponseEntity<String> deleteUser(@PathVariable("id") Long id){
         Boolean deleted = userService.deleteUser(id);
         if(deleted){
-            return new ResponseEntity<>( "User with id: " + id + "deleted successfully", HttpStatus.OK);
+            return new ResponseEntity<>( "User with id: " + id + " deleted successfully", HttpStatus.OK);
         }
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
+
+
+    @PutMapping("/{id}/update")
+    public ResponseEntity<UserEntry> updateUser(@PathVariable("id") Long id, @RequestBody UserEntry userEntry){
+        UserEntry updatedUserEntry = userService.updateUser(id, userEntry);
+        if(updatedUserEntry != null){
+            return new ResponseEntity<>( updatedUserEntry, HttpStatus.OK);
+        }
+        return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+    }
+
+    @PutMapping("/{id}/password")
+    public ResponseEntity<UserEntry> updateUserPassword(@PathVariable("id") Long id, @RequestBody LoginEntry loginEntry){
+        UserEntry updatedUserEntry = userService.updatePassword(id, loginEntry);
+        if(updatedUserEntry != null){
+            return new ResponseEntity<>( updatedUserEntry, HttpStatus.OK);
+        }
+        return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
 }
