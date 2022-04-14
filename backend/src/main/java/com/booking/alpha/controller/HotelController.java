@@ -106,4 +106,9 @@ public class HotelController {
         return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
 
+    @PostMapping("/find")
+    public ResponseEntity<Void> getAll() {
+        hotelService.find();
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
 }

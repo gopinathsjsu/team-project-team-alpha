@@ -2,6 +2,7 @@ package com.booking.alpha.service;
 
 import com.booking.alpha.entity.HotelEntity;
 import com.booking.alpha.entity.UserEntity;
+import com.booking.alpha.entry.HotelAvailabilityMapping;
 import com.booking.alpha.entry.HotelEntry;
 import com.booking.alpha.entry.LoginEntry;
 import com.booking.alpha.entry.UserEntry;
@@ -18,16 +19,23 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.sql.Timestamp;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Service
 public class HotelService {
 
     private final HotelRepository hotelRepository;
+
+    private final ReservationService reservationService;
+
     private final S3Utils s3Utils;
 
-    public HotelService(HotelRepository hotelRepository, S3Utils s3Utils) {
+    public HotelService(HotelRepository hotelRepository, ReservationService reservationService, S3Utils s3Utils) {
         this.hotelRepository = hotelRepository;
+        this.reservationService = reservationService;
         this.s3Utils = s3Utils;
     }
 
@@ -162,8 +170,13 @@ public class HotelService {
             System.out.println("Exception in HotelEntry updatePassword(Long id,  LoginEntry loginEntry), msg : " + exception.getMessage());
             return null;
         }
-
-
     }
 
+    public void find() {
+        Set<Long> hotelIds = new HashSet<Long>();
+        hotelIds.add(1L);
+        hotelIds.add(2L);
+        List<HotelAvailabilityMapping> hotelAvailabilityMappings = reservationService.getAvailableHotelRooms( 1648796400000L, 1651388399000L, hotelIds);
+        System.out.println(hotelAvailabilityMappings);
+    }
 }
