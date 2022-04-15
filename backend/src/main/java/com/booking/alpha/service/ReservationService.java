@@ -1,26 +1,22 @@
 package com.booking.alpha.service;
 
 import com.booking.alpha.entity.ReservationEntity;
-import com.booking.alpha.entry.HotelAvailabilityMapping;
 import com.booking.alpha.entry.ReservationEntry;
 import com.booking.alpha.respository.ReservationRepository;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.stream.Collectors;
 
 @Service
 public class ReservationService {
 
-    private final ObjectMapper objectMapper;
-
     private final ReservationRepository reservationRepository;
 
-    public ReservationService( ReservationRepository reservationRepository, ObjectMapper objectMapper) {
+    public ReservationService( ReservationRepository reservationRepository) {
         this.reservationRepository = reservationRepository;
-        this.objectMapper = objectMapper;
     }
 
     public ReservationEntry convertToEntry(ReservationEntity reservationEntity) {
@@ -35,16 +31,11 @@ public class ReservationService {
         return reservationEntity;
     }
 
-    public List<HotelAvailabilityMapping> getAvailableHotelRooms( Long startTime, Long endTime, Set<Long> hotelIds) {
-        List<HotelAvailabilityMapping> hotelAvailabilityMappings = new ArrayList<>();
-        List<Object[]> res = reservationRepository.lookupAvailabilityForHotels(startTime, endTime, hotelIds);
-        for(Object[] ob: res) {
-            HashMap<String,Object> hm = new HashMap<>();
-            hm.put("hotelId", ob[0]);
-            hm.put("type", ob[1]);
-            hm.put("count", ob[2]);
-            hotelAvailabilityMappings.add(objectMapper.convertValue(hm, new TypeReference<HotelAvailabilityMapping>() {}));
+    public List<ReservationEntry> getReservationsForUser( Long userId) {
+        List<ReservationEntity> reservationEntities = reservationRepository.getAllByUserId(userId);
+        if(reservationEntities.isEmpty()) {
+            return new ArrayList<>();
         }
-        return hotelAvailabilityMappings;
+        return reservationEntities.stream().map(this::convertToEntry).collect(Collectors.toList());
     }
 }

@@ -1,14 +1,15 @@
 package com.booking.alpha.controller;
 
-import com.booking.alpha.entry.HotelEntry;
-import com.booking.alpha.entry.LoginEntry;
-import com.booking.alpha.entry.UserEntry;
+import com.booking.alpha.entry.*;
 import com.booking.alpha.service.HotelService;
 import com.booking.alpha.service.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.text.ParseException;
+import java.util.List;
 
 
 @RestController
@@ -106,9 +107,8 @@ public class HotelController {
         return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
 
-    @PostMapping("/find")
-    public ResponseEntity<Void> getAll() {
-        hotelService.find();
-        return new ResponseEntity<>(HttpStatus.OK);
+    @PostMapping("/get-availability")
+    public ResponseEntity<List<HotelAvailabilityEntry>> getAll(@RequestBody HotelSearchPagedRequest hotelSearchPagedRequest) throws ParseException {
+        return new ResponseEntity<>( hotelService.find( hotelSearchPagedRequest), HttpStatus.OK);
     }
 }

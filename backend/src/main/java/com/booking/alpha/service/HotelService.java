@@ -1,28 +1,31 @@
 package com.booking.alpha.service;
 
+import com.booking.alpha.constant.RoomType;
 import com.booking.alpha.entity.HotelEntity;
-import com.booking.alpha.entity.UserEntity;
-import com.booking.alpha.entry.HotelAvailabilityMapping;
-import com.booking.alpha.entry.HotelEntry;
-import com.booking.alpha.entry.LoginEntry;
-import com.booking.alpha.entry.UserEntry;
+import com.booking.alpha.entry.*;
 import com.booking.alpha.respository.HotelRepository;
 import com.booking.alpha.utils.S3Utils;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.text.StringSubstitutor;
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.beans.BeanUtils;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.persistence.EntityManager;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.sql.Timestamp;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class HotelService {
@@ -33,10 +36,17 @@ public class HotelService {
 
     private final S3Utils s3Utils;
 
-    public HotelService(HotelRepository hotelRepository, ReservationService reservationService, S3Utils s3Utils) {
+    private final EntityManager entityManager;
+
+    private final ObjectMapper objectMapper;
+
+    public HotelService(HotelRepository hotelRepository, ReservationService reservationService, S3Utils s3Utils,
+                        EntityManager entityManager, ObjectMapper objectMapper) {
         this.hotelRepository = hotelRepository;
         this.reservationService = reservationService;
         this.s3Utils = s3Utils;
+        this.entityManager = entityManager;
+        this.objectMapper = objectMapper;
     }
 
     public HotelEntry convertToEntry(HotelEntity hotelEntity) {
@@ -172,11 +182,58 @@ public class HotelService {
         }
     }
 
-    public void find() {
-        Set<Long> hotelIds = new HashSet<Long>();
-        hotelIds.add(1L);
-        hotelIds.add(2L);
-        List<HotelAvailabilityMapping> hotelAvailabilityMappings = reservationService.getAvailableHotelRooms( 1648796400000L, 1651388399000L, hotelIds);
-        System.out.println(hotelAvailabilityMappings);
+    public List<HotelAvailabilityEntry> find(HotelSearchPagedRequest hotelSearchPagedRequest) throws ParseException {
+        String query = getSqlQuery(hotelSearchPagedRequest);
+        List<Object> resultList = entityManager.createNativeQuery(query).getResultList();
+        List<HotelAvailabilityMappingEntry> hotelAvailabilityMappingEntries = new ArrayList<>();
+        for(Object ob: resultList) {
+            Object[] valueList = (Object[]) ob;
+            HashMap<String,Object> hm = new HashMap<>();
+            hm.put("hotelId", valueList[0]);
+            hm.put("type", valueList[1]);
+            hm.put("count", valueList[2]);
+            hotelAvailabilityMappingEntries.add(objectMapper.convertValue(hm, new TypeReference<HotelAvailabilityMappingEntry>() {}));
+        }
+        Map< Long, List<HotelAvailabilityMappingEntry>> hotelAvailabilityMap = hotelAvailabilityMappingEntries.stream().collect(Collectors.groupingBy(HotelAvailabilityMappingEntry::getHotelId));
+        List<HotelAvailabilityEntry> hotelAvailabilityEntries = new ArrayList<>();
+        for(Long hotelId: hotelAvailabilityMap.keySet()) {
+            Map<RoomType, Long> countMap = new HashMap<>();
+            for(RoomType roomType: RoomType.values()) {
+                countMap.put(roomType, 0L);
+            }
+            for(HotelAvailabilityMappingEntry hotelAvailabilityMappingEntry: hotelAvailabilityMap.get(hotelId)) {
+                countMap.put(hotelAvailabilityMappingEntry.getType(), hotelAvailabilityMappingEntry.getCount());
+            }
+            hotelAvailabilityEntries.add(new HotelAvailabilityEntry( hotelId, countMap));
+        }
+        return hotelAvailabilityEntries;
+    }
+
+    private String getConditionString( HotelSearchPagedRequest hotelSearchPagedRequest) throws ParseException {
+        TimeZone timeZone = TimeZone.getTimeZone("GMT-7");
+        DateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
+        dateFormat.setTimeZone(timeZone);
+        Date startTime = new DateTime(dateFormat.parse(hotelSearchPagedRequest.getStartDate()))
+                .withZone(DateTimeZone.forTimeZone(timeZone)).withTimeAtStartOfDay().plusHours(12).toDate();
+        Date endTime = new DateTime(dateFormat.parse(hotelSearchPagedRequest.getEndDate()))
+                .withZone(DateTimeZone.forTimeZone(timeZone)).withTimeAtStartOfDay().plusHours(12).plusMillis(-1).toDate();
+        List<String> conditions = new ArrayList<>();
+        conditions.add(" ( ((${START_TIME_STAMP} <= ${START_DATE_COLUMN}) and ( ${END_DATE_COLUMN} <= ${END_TIME_STAMP})) OR ((${START_TIME_STAMP} <= ${END_DATE_COLUMN}) and ( ${END_DATE_COLUMN} <= ${END_TIME_STAMP})) ) ");
+        conditions.add(" ( ${CITY_COLUMN} = '${TARGET_CITY}' ) ");
+        Map<String, String> values = new HashMap<>();
+        values.put("START_TIME_STAMP", Long.valueOf(startTime.getTime()).toString());
+        values.put("END_TIME_STAMP", Long.valueOf(endTime.getTime()).toString());
+        values.put("TARGET_CITY", hotelSearchPagedRequest.getCity());
+        values.put("START_DATE_COLUMN", "reservation.start_time");
+        values.put("END_DATE_COLUMN", "reservation.end_time");
+        values.put("CITY_COLUMN", "hotel.city");
+        StringSubstitutor substitutor = new StringSubstitutor(values);
+        return substitutor.replace(StringUtils.join(conditions, " and "));
+    }
+
+    private String getSqlQuery( HotelSearchPagedRequest hotelSearchPagedRequest) throws ParseException {
+        String condition = getConditionString( hotelSearchPagedRequest);
+        String query = String.format(" SELECT room.hotel_id as hotelId, room.type as type, count(*) as count FROM room JOIN hotel ON room.hotel_id = hotel.id LEFT JOIN reservation ON room.id = reservation.room_id and %s WHERE reservation.room_id IS NULL GROUP BY room.hotel_id, room.type ", condition);
+        return query;
     }
 }
