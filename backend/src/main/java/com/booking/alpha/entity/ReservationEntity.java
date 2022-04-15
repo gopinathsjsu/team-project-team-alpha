@@ -25,7 +25,6 @@ public class ReservationEntity {
 
     @Id
     @Column
-    @NonNull
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
 

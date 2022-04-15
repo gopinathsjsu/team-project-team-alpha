@@ -48,8 +48,8 @@ public class ReservationService {
         return convertToEntry(reservationRepository.getById(reservationId));
     }
 
-    public List<ReservationEntry> getReservationsForUser( Long userId) {
-        List<ReservationEntity> reservationEntities = reservationRepository.getAllByUserIdAndAndBookingStateIs(userId, BookingState.CONFIRMED);
+    public List<ReservationEntry> getReservationsForUser( Long userId, BookingState bookingState) {
+        List<ReservationEntity> reservationEntities = reservationRepository.getAllByUserIdAndAndBookingStateIs(userId, bookingState);
         if(reservationEntities.isEmpty()) {
             return new ArrayList<>();
         }

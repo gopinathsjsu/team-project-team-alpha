@@ -31,7 +31,7 @@ public class RoomService {
     }
 
     public RoomEntry findOneAvailable(Long hotelId, RoomType roomType, Long startDate, Long endDate) {
-        RoomEntity roomEntity = null; //roomRepository.findOneAvailable(hotelId, roomType, startDate, endDate);
+        RoomEntity roomEntity = roomRepository.findOneAvailable(hotelId, roomType.toString(), startDate, endDate);
         if(ObjectUtils.isEmpty(roomEntity)) {
             return null;
         }

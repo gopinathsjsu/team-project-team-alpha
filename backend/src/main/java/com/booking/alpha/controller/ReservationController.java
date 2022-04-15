@@ -1,5 +1,6 @@
 package com.booking.alpha.controller;
 
+import com.booking.alpha.constant.BookingState;
 import com.booking.alpha.constant.RoomType;
 import com.booking.alpha.entry.BookingRequestEntry;
 import com.booking.alpha.entry.ReservationEntry;
@@ -23,12 +24,17 @@ public class ReservationController {
 
     @GetMapping("/user/{userId}")
     ResponseEntity<List<ReservationEntry>> getReservationForUser(@PathVariable("userId") Long userId) {
-        return new ResponseEntity<>( reservationService.getReservationsForUser(userId), HttpStatus.OK);
+        return new ResponseEntity<>( reservationService.getReservationsForUser(userId, BookingState.CONFIRMED), HttpStatus.OK);
     }
 
     @GetMapping("/hotel/{hotelId}")
     ResponseEntity<List<ReservationEntry>> getReservationForHotel(@PathVariable("hotelId") Long hotelId) {
         return new ResponseEntity<>( reservationService.getReservationForHotel(hotelId), HttpStatus.OK);
+    }
+
+    @GetMapping("/user-cart/{userId}")
+    ResponseEntity<List<ReservationEntry>> getUserCart(@PathVariable("userId") Long userId) {
+        return new ResponseEntity<>( reservationService.getReservationsForUser(userId, BookingState.PENDING), HttpStatus.OK);
     }
 
     @PostMapping("/add-to-cart")
