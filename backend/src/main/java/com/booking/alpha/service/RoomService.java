@@ -1,5 +1,6 @@
 package com.booking.alpha.service;
 
+import com.booking.alpha.constant.BookingState;
 import com.booking.alpha.constant.RoomType;
 import com.booking.alpha.entity.RoomEntity;
 import com.booking.alpha.entry.RoomEntry;
@@ -8,6 +9,9 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
+
+import java.util.Arrays;
+import java.util.HashSet;
 
 @Service
 public class RoomService {
@@ -31,7 +35,10 @@ public class RoomService {
     }
 
     public RoomEntry findOneAvailable(Long hotelId, RoomType roomType, Long startDate, Long endDate) {
-        RoomEntity roomEntity = roomRepository.findOneAvailable(hotelId, roomType.toString(), startDate, endDate);
+        RoomEntity roomEntity = roomRepository.findOneAvailable(hotelId, roomType.toString(),
+                new HashSet<String>(Arrays.asList(BookingState.CONFIRMED.toString(),
+                        BookingState.PENDING.toString())),
+                startDate, endDate);
         if(ObjectUtils.isEmpty(roomEntity)) {
             return null;
         }
