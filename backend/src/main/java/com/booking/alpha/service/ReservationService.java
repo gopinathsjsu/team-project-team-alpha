@@ -38,4 +38,12 @@ public class ReservationService {
         }
         return reservationEntities.stream().map(this::convertToEntry).collect(Collectors.toList());
     }
+
+    public List<ReservationEntry> getReservationForHotel( Long hotelId) {
+        List<ReservationEntity> reservationEntities = reservationRepository.getAllByHotelId(hotelId);
+        if(reservationEntities.isEmpty()) {
+            return new ArrayList<>();
+        }
+        return reservationEntities.stream().map(this::convertToEntry).collect(Collectors.toList());
+    }
 }

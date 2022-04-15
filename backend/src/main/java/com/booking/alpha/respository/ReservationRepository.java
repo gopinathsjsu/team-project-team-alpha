@@ -13,4 +13,7 @@ import java.util.Set;
 public interface ReservationRepository extends JpaRepository<ReservationEntity, Long> {
 
     public List<ReservationEntity> getAllByUserId(Long userId);
+
+    @Query(value = " SELECT * FROM   reservation JOIN room ON reservation.room_id = room.id AND room.hotel_id = :hotelId  ", nativeQuery = true)
+    public List<ReservationEntity> getAllByHotelId(@Param("hotelId") Long hotelId);
 }

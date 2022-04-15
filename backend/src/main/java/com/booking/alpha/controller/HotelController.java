@@ -2,7 +2,6 @@ package com.booking.alpha.controller;
 
 import com.booking.alpha.entry.*;
 import com.booking.alpha.service.HotelService;
-import com.booking.alpha.service.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

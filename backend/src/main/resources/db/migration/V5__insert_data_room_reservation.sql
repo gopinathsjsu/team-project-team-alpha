@@ -16,4 +16,7 @@ insert into reservation(user_id, room_id, start_time, end_time) values( 1, 7, 16
 insert into reservation(user_id, room_id, start_time, end_time) values( 1, 9, 1649876400000, 1650135599000);
 insert into reservation(user_id, room_id, start_time, end_time) values( 1, 5, 1649876400000, 1650135599000);
 
+insert into reservation(user_id, room_id, start_time, end_time) values( 2, 7, 1656183600000, 1656615599000);
+insert into reservation(user_id, room_id, start_time, end_time) values( 2, 9, 1656183600000, 1656615599000);
+insert into reservation(user_id, room_id, start_time, end_time) values( 2, 5, 1656183600000, 1656615599000);
 

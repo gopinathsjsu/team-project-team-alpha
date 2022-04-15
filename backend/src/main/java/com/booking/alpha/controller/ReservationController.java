@@ -25,4 +25,9 @@ public class ReservationController {
     ResponseEntity<List<ReservationEntry>> getReservationForUser(@PathVariable("userId") Long userId) {
         return new ResponseEntity<>( reservationService.getReservationsForUser(userId), HttpStatus.OK);
     }
+
+    @GetMapping("/hotel/{hotelId}")
+    ResponseEntity<List<ReservationEntry>> getReservationForHotel(@PathVariable("hotelId") Long hotelId) {
+        return new ResponseEntity<>( reservationService.getReservationForHotel(hotelId), HttpStatus.OK);
+    }
 }
