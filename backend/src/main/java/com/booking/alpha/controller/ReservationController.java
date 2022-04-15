@@ -1,14 +1,14 @@
 package com.booking.alpha.controller;
 
+import com.booking.alpha.constant.RoomType;
+import com.booking.alpha.entry.BookingRequestEntry;
 import com.booking.alpha.entry.ReservationEntry;
 import com.booking.alpha.service.ReservationService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import java.text.ParseException;
 import java.util.List;
 
 @RequestMapping("/v1/reservation")
@@ -29,5 +29,20 @@ public class ReservationController {
     @GetMapping("/hotel/{hotelId}")
     ResponseEntity<List<ReservationEntry>> getReservationForHotel(@PathVariable("hotelId") Long hotelId) {
         return new ResponseEntity<>( reservationService.getReservationForHotel(hotelId), HttpStatus.OK);
+    }
+
+    @PostMapping("/add-to-cart")
+    public ResponseEntity< ReservationEntry > reserveOne(@RequestBody BookingRequestEntry bookingRequestEntry) throws ParseException {
+        return new ResponseEntity<>( reservationService.reserve(bookingRequestEntry), HttpStatus.OK);
+    }
+
+    @PostMapping("/book/{userId}")
+    public ResponseEntity<List<ReservationEntry>> makeBooking(@PathVariable("userId") Long userId) {
+        return new ResponseEntity<>( reservationService.makeBooking(userId), HttpStatus.OK);
+    }
+
+    @PostMapping("/remove-from-cart/{id}")
+    public ResponseEntity<ReservationEntry> unreserve(@PathVariable("id") Long reservationId) {
+        return new ResponseEntity<>( reservationService.unreserve(reservationId), HttpStatus.OK);
     }
 }

@@ -4,6 +4,7 @@ create table reservation (
     room_id bigint,
     start_time bigint,
     end_time bigint,
+    booking_state varchar(64),
     constraint foreign key (user_id) references user(id),
     constraint foreign key (room_id) references room(id)
 );

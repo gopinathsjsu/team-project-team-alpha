@@ -4,6 +4,7 @@ import com.booking.alpha.constant.RoomType;
 import com.booking.alpha.entity.HotelEntity;
 import com.booking.alpha.entry.*;
 import com.booking.alpha.respository.HotelRepository;
+import com.booking.alpha.utils.AccountingUtils;
 import com.booking.alpha.utils.S3Utils;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -32,7 +33,7 @@ public class HotelService {
 
     private final HotelRepository hotelRepository;
 
-    private final ReservationService reservationService;
+    private final AccountingUtils accountingUtils;
 
     private final S3Utils s3Utils;
 
@@ -40,10 +41,10 @@ public class HotelService {
 
     private final ObjectMapper objectMapper;
 
-    public HotelService(HotelRepository hotelRepository, ReservationService reservationService, S3Utils s3Utils,
+    public HotelService(HotelRepository hotelRepository, AccountingUtils accountingUtils, S3Utils s3Utils,
                         EntityManager entityManager, ObjectMapper objectMapper) {
         this.hotelRepository = hotelRepository;
-        this.reservationService = reservationService;
+        this.accountingUtils = accountingUtils;
         this.s3Utils = s3Utils;
         this.entityManager = entityManager;
         this.objectMapper = objectMapper;
@@ -210,13 +211,8 @@ public class HotelService {
     }
 
     private String getConditionString( HotelSearchPagedRequest hotelSearchPagedRequest) throws ParseException {
-        TimeZone timeZone = TimeZone.getTimeZone("GMT-7");
-        DateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
-        dateFormat.setTimeZone(timeZone);
-        Date startTime = new DateTime(dateFormat.parse(hotelSearchPagedRequest.getStartDate()))
-                .withZone(DateTimeZone.forTimeZone(timeZone)).withTimeAtStartOfDay().plusHours(12).toDate();
-        Date endTime = new DateTime(dateFormat.parse(hotelSearchPagedRequest.getEndDate()))
-                .withZone(DateTimeZone.forTimeZone(timeZone)).withTimeAtStartOfDay().plusHours(12).plusMillis(-1).toDate();
+        Date startTime = accountingUtils.getCheckInTime(hotelSearchPagedRequest.getStartDate());
+        Date endTime = accountingUtils.getCheckOutTime(hotelSearchPagedRequest.getEndDate());
         List<String> conditions = new ArrayList<>();
         conditions.add(" ( ((${START_TIME_STAMP} <= ${START_DATE_COLUMN}) and ( ${END_DATE_COLUMN} <= ${END_TIME_STAMP})) OR ((${START_TIME_STAMP} <= ${END_DATE_COLUMN}) and ( ${END_DATE_COLUMN} <= ${END_TIME_STAMP})) ) ");
         conditions.add(" ( ${CITY_COLUMN} = '${TARGET_CITY}' ) ");

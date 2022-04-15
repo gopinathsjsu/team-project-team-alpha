@@ -1,6 +1,6 @@
 package com.booking.alpha.entry;
 
-import com.booking.alpha.constant.BookingState;
+import com.booking.alpha.constant.RoomType;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -15,17 +15,15 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @AllArgsConstructor
 @NoArgsConstructor
-public class ReservationEntry {
-
-    Long id;
+public class BookingRequestEntry {
 
     Long userId;
 
-    Long roomId;
+    Long hotelId;
 
-    Long startTime;
+    String startDate;
 
-    Long endTime;
+    String endDate;
 
-    BookingState bookingState;
+    RoomType roomType;
 }
