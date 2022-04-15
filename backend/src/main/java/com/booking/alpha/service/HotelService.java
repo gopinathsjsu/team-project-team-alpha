@@ -1,5 +1,6 @@
 package com.booking.alpha.service;
 
+import com.booking.alpha.constant.BookingState;
 import com.booking.alpha.constant.RoomType;
 import com.booking.alpha.entity.HotelEntity;
 import com.booking.alpha.entry.*;
@@ -214,15 +215,18 @@ public class HotelService {
         Date startTime = accountingUtils.getCheckInTime(hotelSearchPagedRequest.getStartDate());
         Date endTime = accountingUtils.getCheckOutTime(hotelSearchPagedRequest.getEndDate());
         List<String> conditions = new ArrayList<>();
-        conditions.add(" ( ((${START_TIME_STAMP} <= ${START_DATE_COLUMN}) and ( ${END_DATE_COLUMN} <= ${END_TIME_STAMP})) OR ((${START_TIME_STAMP} <= ${END_DATE_COLUMN}) and ( ${END_DATE_COLUMN} <= ${END_TIME_STAMP})) ) ");
+        conditions.add(" ( ((${START_TIME_STAMP} <= ${START_DATE_COLUMN}) and ( ${END_DATE_COLUMN} <= ${END_TIME_STAMP})) OR ((${START_TIME_STAMP} <= ${END_DATE_COLUMN}) and ( ${END_DATE_COLUMN} <= ${END_TIME_STAMP})) OR ((${START_DATE_COLUMN} <= ${START_TIME_STAMP}) and ( ${END_TIME_STAMP} <= ${END_DATE_COLUMN})) ) ");
         conditions.add(" ( ${CITY_COLUMN} = '${TARGET_CITY}' ) ");
+        conditions.add(" ( ${BOOKING_STATE_COLUMN}) in (${BOOKING_STATE_VALUES}) ");
         Map<String, String> values = new HashMap<>();
         values.put("START_TIME_STAMP", Long.valueOf(startTime.getTime()).toString());
         values.put("END_TIME_STAMP", Long.valueOf(endTime.getTime()).toString());
         values.put("TARGET_CITY", hotelSearchPagedRequest.getCity());
+        values.put("BOOKING_STATE_VALUES", StringUtils.join(Arrays.asList(String.format("'%s'", BookingState.CONFIRMED.toString()), String.format("'%s'", BookingState.PENDING.toString())),","));
         values.put("START_DATE_COLUMN", "reservation.start_time");
         values.put("END_DATE_COLUMN", "reservation.end_time");
         values.put("CITY_COLUMN", "hotel.city");
+        values.put("BOOKING_STATE_COLUMN", "reservation.booking_state");
         StringSubstitutor substitutor = new StringSubstitutor(values);
         return substitutor.replace(StringUtils.join(conditions, " and "));
     }
