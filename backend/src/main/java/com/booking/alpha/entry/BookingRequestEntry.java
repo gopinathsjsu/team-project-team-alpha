@@ -1,5 +1,6 @@
 package com.booking.alpha.entry;
 
+import com.booking.alpha.constant.HotelServiceType;
 import com.booking.alpha.constant.RoomType;
 import lombok.Getter;
 import lombok.Setter;
@@ -8,6 +9,8 @@ import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
+
+import java.util.Set;
 
 @Setter
 @Getter
@@ -26,4 +29,6 @@ public class BookingRequestEntry {
     String endDate;
 
     RoomType roomType;
+
+    Set<HotelServiceType> serviceTypeSet;
 }

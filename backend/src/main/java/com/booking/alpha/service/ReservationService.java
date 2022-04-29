@@ -3,6 +3,7 @@ package com.booking.alpha.service;
 import com.booking.alpha.constant.BookingState;
 import com.booking.alpha.entity.ReservationEntity;
 import com.booking.alpha.entry.BookingRequestEntry;
+import com.booking.alpha.entry.HotelEntry;
 import com.booking.alpha.entry.ReservationEntry;
 import com.booking.alpha.entry.RoomEntry;
 import com.booking.alpha.respository.ReservationRepository;
@@ -26,10 +27,14 @@ public class ReservationService {
 
     private final RoomService roomService;
 
-    public ReservationService( ReservationRepository reservationRepository, AccountingUtils accountingUtils, RoomService roomService) {
+    private final HotelService hotelService;
+
+    public ReservationService( ReservationRepository reservationRepository, AccountingUtils accountingUtils,
+            RoomService roomService, HotelService hotelService) {
         this.reservationRepository = reservationRepository;
         this.accountingUtils = accountingUtils;
         this.roomService = roomService;
+        this.hotelService = hotelService;
     }
 
     public ReservationEntry convertToEntry(ReservationEntity reservationEntity) {
@@ -71,7 +76,8 @@ public class ReservationService {
         if(ObjectUtils.isEmpty(roomToBook)) {
             return null;
         }
-        ReservationEntry reservationEntry = new ReservationEntry(null, bookingRequestEntry.getUserId(), roomToBook.getId(), startDate.getTime(), endDate.getTime(), BookingState.PENDING);
+        HotelEntry hotelEntry = hotelService.findOneById(roomToBook.getHotel_id());
+        ReservationEntry reservationEntry = new ReservationEntry(null, bookingRequestEntry.getUserId(), roomToBook.getId(), startDate.getTime(), endDate.getTime(), BookingState.PENDING, hotelEntry.getServiceList());
         ReservationEntry reservationCompleted = convertToEntry(reservationRepository.save(convertToEntity(reservationEntry)));
         return reservationCompleted;
     }

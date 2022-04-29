@@ -5,6 +5,7 @@ create table reservation (
     start_time bigint,
     end_time bigint,
     booking_state varchar(64),
+    service_list json not null,
     constraint foreign key (user_id) references user(id),
     constraint foreign key (room_id) references room(id)
 );

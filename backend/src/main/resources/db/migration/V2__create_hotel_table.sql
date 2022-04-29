@@ -7,12 +7,12 @@ create table hotel(
      country varchar(128) not null,
      zip_code varchar(128) not null,
      password varchar(256) not null,
-     image_url varchar(256)
-     /*unique( name, city, country, zip_code)   */
+     image_url varchar(256),
+     service_list json not null
 )engine=InnoDB;
 
-insert into hotel(name, contact_no, email_id, city, country, zip_code, password)
+insert into hotel(name, contact_no, email_id, city, country, zip_code, password, service_list)
     values
-        ('Wyndham Garden', '+1-408-453-5340', 'wyndham_hello@gmail.com', 'San Jose', 'USA', '95112', 'abc' ),
-        ('Hyatt Place', '+1-669-342-0007', 'hyatt_hello@gmail.com','San Jose', 'USA', '95131', 'abc' ),
-        ('La Quinta', '+1-408-435-8800', 'la_quinta_hello@gmail.com','San Jose', 'USA', '95131', 'abc' );
+        ('Wyndham Garden', '+1-408-453-5340', 'wyndham_hello@gmail.com', 'San Jose', 'USA', '95112', 'abc',  '[ { "type": "FITNESS_ROOM", "cost": 50 }, { "type": "SWIMMING_POOL", "cost": 50 }, { "type": "DAILY_PARKING", "cost": 50 }, { "type": "CONTINENTAL_BREAKFAST", "cost": 50 }, { "type": "ALL_MEALS_INCLUDED", "cost": 50 }]'),
+        ('Hyatt Place', '+1-669-342-0007', 'hyatt_hello@gmail.com','San Jose', 'USA', '95131', 'abc',  '[ { "type": "FITNESS_ROOM", "cost": 50 }, { "type": "SWIMMING_POOL", "cost": 50 }, { "type": "DAILY_PARKING", "cost": 50 }, { "type": "CONTINENTAL_BREAKFAST", "cost": 50 }, { "type": "ALL_MEALS_INCLUDED", "cost": 50 }]'),
+        ('La Quinta', '+1-408-435-8800', 'la_quinta_hello@gmail.com','San Jose', 'USA', '95131', 'abc',  '[ { "type": "FITNESS_ROOM", "cost": 50 }, { "type": "SWIMMING_POOL", "cost": 50 }, { "type": "DAILY_PARKING", "cost": 50 }, { "type": "CONTINENTAL_BREAKFAST", "cost": 50 }, { "type": "ALL_MEALS_INCLUDED", "cost": 50 }]');

@@ -8,6 +8,8 @@ import lombok.AllArgsConstructor;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 
+import java.util.List;
+
 @Setter
 @Getter
 @ToString
@@ -33,4 +35,6 @@ public class HotelEntry {
     String password;
 
     String imageUrl;
+
+    List<ServiceEntry> serviceList;
 }

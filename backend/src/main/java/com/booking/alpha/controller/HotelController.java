@@ -1,5 +1,6 @@
 package com.booking.alpha.controller;
 
+import com.booking.alpha.constant.HotelServiceType;
 import com.booking.alpha.entry.*;
 import com.booking.alpha.service.HotelService;
 import org.springframework.http.HttpStatus;
@@ -8,7 +9,10 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.text.ParseException;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 
 @RestController
@@ -109,5 +113,10 @@ public class HotelController {
     @PostMapping("/get-availability")
     public ResponseEntity<List<HotelAvailabilityEntry>> getAll(@RequestBody HotelSearchPagedRequest hotelSearchPagedRequest) throws ParseException {
         return new ResponseEntity<>( hotelService.find( hotelSearchPagedRequest), HttpStatus.OK);
+    }
+
+    @GetMapping("/service-types")
+    public ResponseEntity<Set<HotelServiceType>> getHotelServiceTypes() {
+        return new ResponseEntity<>(new HashSet<>(Arrays.asList(HotelServiceType.values())), HttpStatus.OK);
     }
 }

@@ -1,6 +1,7 @@
 package com.booking.alpha.entry;
 
-import com.booking.alpha.constant.BookingState;
+import com.booking.alpha.constant.HotelServiceType;
+
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -9,27 +10,15 @@ import lombok.AllArgsConstructor;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 
-import java.util.List;
-
 @Setter
 @Getter
 @ToString
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @AllArgsConstructor
 @NoArgsConstructor
-public class ReservationEntry {
+public class ServiceEntry {
 
-    Long id;
+    Long cost;
 
-    Long userId;
-
-    Long roomId;
-
-    Long startTime;
-
-    Long endTime;
-
-    BookingState bookingState;
-
-    List<ServiceEntry> serviceList;
+    HotelServiceType type;
 }
