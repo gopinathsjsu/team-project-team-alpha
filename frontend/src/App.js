@@ -1,23 +1,25 @@
 import logo from './logo.svg';
 import './App.css';
-
-function App() {
+import LandPage from "./views/Dashboard"
+import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import UserLogin from "./views/hotel/UserLogin"
+import HotelRegister from "./views/hotel/HotelRegister";
+import HotelProfile from "./views/hotel/HotelProfile"
+import HotelDashboard from './views/hotel/HotelDashboard';
+import AddRoom from './views/hotel/AddRoom';
+const App = () =>{
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div >
+      <BrowserRouter>
+      <Routes>
+      <Route path="/" exact element={<LandPage/>}></Route>
+      <Route path="/UserLogin" exact element={<UserLogin/>}></Route>
+      <Route path="/HotelRegister" exact element={<HotelRegister/>}></Route>
+      <Route path="/HotelProfile" exact element={<HotelProfile/>}></Route>
+      <Route path="/HotelDashboard" exact element={<HotelDashboard/>}></Route>
+      <Route path="/AddRoom" exact element={<AddRoom/>}></Route>
+      </Routes>
+      </BrowserRouter>
     </div>
   );
 }
