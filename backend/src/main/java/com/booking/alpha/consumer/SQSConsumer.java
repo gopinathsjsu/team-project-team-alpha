@@ -1,18 +1,30 @@
 package com.booking.alpha.consumer;
 
+import com.amazonaws.services.sqs.model.Message;
 import com.booking.alpha.configuration.SQSConfiguration;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.json.simple.parser.JSONParser;
+import com.booking.alpha.constant.ConsumerKeys;
+import com.booking.alpha.service.ReservationService;
+import com.booking.alpha.utils.SQSUtils;
+import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
-public class SQSConsumer extends BaseSQSConsumer {
+public class SQSConsumer {
 
-    public SQSConsumer(SQSConfiguration sqsConfiguration, ObjectMapper objectMapper) {
+    private final String queueUrl;
 
-        super( sqsConfiguration, sqsConfiguration.getGetUnReservingQueueUrl(), objectMapper, new JSONParser());
+    private final SQSUtils sqsUtils;
+
+    private final ReservationService reservationService;
+
+    public SQSConsumer(SQSUtils sqsUtils, SQSConfiguration sqsConfiguration, ReservationService reservationService) {
+
+        this.sqsUtils = sqsUtils;
+        this.queueUrl = sqsConfiguration.getGetUnReservingQueueUrl();
+        this.reservationService = reservationService;
+
         new Thread(()->{
             try {
                 start();
@@ -24,10 +36,25 @@ public class SQSConsumer extends BaseSQSConsumer {
 
     public void start() throws Throwable {
         while(true) {
-            List<Object> objectList = getMessages();
-            if(objectList.isEmpty()) {
+            List<Message> messages = sqsUtils.getMessages(queueUrl);
+            if(ObjectUtils.isEmpty(messages)) {
                 Thread.sleep(2000L);
             }
+            for(Message message: messages) {
+                if(process(message)) {
+                    sqsUtils.deleteMessage( queueUrl, message);
+                }
+            }
+        }
+    }
+
+    Boolean process(Message message) {
+        try{
+            Long reservationId = Long.valueOf(message.getAttributes().get(ConsumerKeys.RESERVATION_ID_KEY));
+            reservationService.removeReservation(reservationId);
+            return true;
+        } catch (Throwable e) {
+            return false;
         }
     }
 }

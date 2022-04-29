@@ -53,6 +53,12 @@ public class ReservationService {
         return convertToEntry(reservationRepository.getById(reservationId));
     }
 
+    public ReservationEntry removeReservation( Long reservationId) {
+        ReservationEntry reservationEntry = findOneById(reservationId);
+        reservationEntry.setBookingState(BookingState.EXPIRED);
+        return convertToEntry(reservationRepository.save(convertToEntity(reservationEntry)));
+    }
+
     public List<ReservationEntry> getReservationsForUser( Long userId, BookingState bookingState) {
         List<ReservationEntity> reservationEntities = reservationRepository.getAllByUserIdAndAndBookingStateIs(userId, bookingState);
         if(reservationEntities.isEmpty()) {
