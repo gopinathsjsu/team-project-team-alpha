@@ -7,6 +7,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.json.simple.parser.ParseException;
 import org.springframework.stereotype.Service;
+import org.springframework.util.ObjectUtils;
 
 import java.util.HashMap;
 import java.util.List;
@@ -37,9 +38,22 @@ public class SQSUtils {
         return amazonSQS.receiveMessage(messageRequest).getMessages();
     }
 
-    public SendMessageResult publishMessage(String queueUrl, Object message) {
+    public SendMessageResult publishMessage(String queueUrl, HashMap<String, Object> attributes, Object message) {
+        if(ObjectUtils.isEmpty(attributes)) {
+            attributes = new HashMap<>();
+        }
+        if(ObjectUtils.isEmpty(message)) {
+            message = new HashMap<>();
+        }
         int DELAY_SECONDS = 600;
         Map<String, MessageAttributeValue> messageAttributeValueMap = new HashMap<>();
+        for( String key: attributes.keySet()) {
+            Object value = attributes.get(key);
+            MessageAttributeValue attributeValue = new MessageAttributeValue()
+                    .withStringValue(objectMapper.convertValue(value, new TypeReference<String>() {}))
+                    .withDataType("String");
+            messageAttributeValueMap.put(key, attributeValue);
+        }
         String messageBody = objectMapper.convertValue(message, new TypeReference<String>() {});
         SendMessageRequest messageRequest = new SendMessageRequest()
                 .withQueueUrl(queueUrl)

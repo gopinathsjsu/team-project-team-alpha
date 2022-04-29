@@ -19,7 +19,7 @@ import java.util.Map;
 @NoArgsConstructor
 public class HotelAvailabilityEntry {
 
-    Long hotelId;
+    HotelEntry hotelEntry;
 
     Map<RoomType, Long> countMap;
 }

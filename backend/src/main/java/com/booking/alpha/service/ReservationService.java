@@ -1,6 +1,8 @@
 package com.booking.alpha.service;
 
+import com.booking.alpha.configuration.SQSConfiguration;
 import com.booking.alpha.constant.BookingState;
+import com.booking.alpha.constant.ConsumerKeys;
 import com.booking.alpha.entity.ReservationEntity;
 import com.booking.alpha.entry.BookingRequestEntry;
 import com.booking.alpha.entry.HotelEntry;
@@ -8,12 +10,14 @@ import com.booking.alpha.entry.ReservationEntry;
 import com.booking.alpha.entry.RoomEntry;
 import com.booking.alpha.respository.ReservationRepository;
 import com.booking.alpha.utils.AccountingUtils;
+import com.booking.alpha.utils.SQSUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 
 import java.text.ParseException;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.stream.Collectors;
@@ -29,12 +33,18 @@ public class ReservationService {
 
     private final HotelService hotelService;
 
+    private final SQSUtils sqsUtils;
+
+    private final SQSConfiguration sqsConfiguration;
+
     public ReservationService( ReservationRepository reservationRepository, AccountingUtils accountingUtils,
-            RoomService roomService, HotelService hotelService) {
+            RoomService roomService, HotelService hotelService, SQSUtils sqsUtils, SQSConfiguration sqsConfiguration) {
         this.reservationRepository = reservationRepository;
         this.accountingUtils = accountingUtils;
         this.roomService = roomService;
         this.hotelService = hotelService;
+        this.sqsUtils = sqsUtils;
+        this.sqsConfiguration = sqsConfiguration;
     }
 
     public ReservationEntry convertToEntry(ReservationEntity reservationEntity) {
@@ -85,14 +95,10 @@ public class ReservationService {
         HotelEntry hotelEntry = hotelService.findOneById(roomToBook.getHotel_id());
         ReservationEntry reservationEntry = new ReservationEntry(null, bookingRequestEntry.getUserId(), roomToBook.getId(), startDate.getTime(), endDate.getTime(), BookingState.PENDING, hotelEntry.getServiceList());
         ReservationEntry reservationCompleted = convertToEntry(reservationRepository.save(convertToEntity(reservationEntry)));
+        HashMap<String, Object> messageAttributes = new HashMap<>();
+        messageAttributes.put(ConsumerKeys.RESERVATION_ID_KEY, reservationCompleted.getId());
+        sqsUtils.publishMessage( sqsConfiguration.getGetUnReservingQueueUrl(), messageAttributes, null);
         return reservationCompleted;
-    }
-
-    public ReservationEntry unreserve( Long reservationId) {
-        ReservationEntry reservationEntry = findOneById(reservationId);
-        reservationEntry.setBookingState(BookingState.EXPIRED);
-        ReservationEntry updatedReservationEntry = convertToEntry(reservationRepository.save(convertToEntity(reservationEntry)));
-        return updatedReservationEntry;
     }
 
     public List<ReservationEntry> makeBooking( Long userId) {

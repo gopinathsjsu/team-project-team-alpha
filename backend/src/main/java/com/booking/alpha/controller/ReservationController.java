@@ -49,6 +49,6 @@ public class ReservationController {
 
     @PostMapping("/remove-from-cart/{id}")
     public ResponseEntity<ReservationEntry> unreserve(@PathVariable("id") Long reservationId) {
-        return new ResponseEntity<>( reservationService.unreserve(reservationId), HttpStatus.OK);
+        return new ResponseEntity<>( reservationService.removeReservation(reservationId), HttpStatus.OK);
     }
 }

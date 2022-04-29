@@ -277,3 +277,102 @@ Response Body, STATUS-CODE - 200, 400
   "imageUrl": "https://alpha-hotel-images.s3.us-east-2.amazonaws.com/1649814804247Git_Cheat.jpeg"
 }
 ```
+
+### 8. Get availability for a search request, 
+
+To search hotels in San Jose from 1st April 2022 to 30th April 2022
+Curl:
+```yaml
+curl --location --request POST 'http://127.0.0.1:8080/v1/hotel/get-availability' \
+--header 'Content-Type: application/json' \
+  --data-raw '{
+"city": "San Jose",
+"startDate": "01-04-2022",
+"endDate": "30-04-2022"
+}'
+```
+Response
+```yaml
+[
+  {
+    "hotelEntry": {
+      "id": 1,
+      "name": "Wyndham Garden",
+      "contactNo": "+1-408-453-5340",
+      "emailId": "wyndham_hello@gmail.com",
+      "city": "San Jose",
+      "country": "USA",
+      "zipCode": "95112",
+      "password": "abc",
+      "imageUrl": null,
+      "serviceList": [
+        {
+          "cost": 50,
+          "type": "FITNESS_ROOM"
+        },
+        {
+          "cost": 50,
+          "type": "SWIMMING_POOL"
+        },
+        {
+          "cost": 50,
+          "type": "DAILY_PARKING"
+        },
+        {
+          "cost": 50,
+          "type": "CONTINENTAL_BREAKFAST"
+        },
+        {
+          "cost": 50,
+          "type": "ALL_MEALS_INCLUDED"
+        }
+      ]
+    },
+    "countMap": {
+      "DOUBLE": 2,
+      "SUITE": 1,
+      "SINGLE": 2
+    }
+  },
+  {
+    "hotelEntry": {
+      "id": 2,
+      "name": "Hyatt Place",
+      "contactNo": "+1-669-342-0007",
+      "emailId": "hyatt_hello@gmail.com",
+      "city": "San Jose",
+      "country": "USA",
+      "zipCode": "95131",
+      "password": "abc",
+      "imageUrl": null,
+      "serviceList": [
+        {
+          "cost": 50,
+          "type": "FITNESS_ROOM"
+        },
+        {
+          "cost": 50,
+          "type": "SWIMMING_POOL"
+        },
+        {
+          "cost": 50,
+          "type": "DAILY_PARKING"
+        },
+        {
+          "cost": 50,
+          "type": "CONTINENTAL_BREAKFAST"
+        },
+        {
+          "cost": 50,
+          "type": "ALL_MEALS_INCLUDED"
+        }
+      ]
+    },
+    "countMap": {
+      "DOUBLE": 1,
+      "SUITE": 2,
+      "SINGLE": 1
+    }
+  }
+]
+```

@@ -16,6 +16,7 @@ import org.joda.time.DateTimeZone;
 import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.util.ObjectUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.persistence.EntityManager;
@@ -197,6 +198,8 @@ public class HotelService {
             hotelAvailabilityMappingEntries.add(objectMapper.convertValue(hm, new TypeReference<HotelAvailabilityMappingEntry>() {}));
         }
         Map< Long, List<HotelAvailabilityMappingEntry>> hotelAvailabilityMap = hotelAvailabilityMappingEntries.stream().collect(Collectors.groupingBy(HotelAvailabilityMappingEntry::getHotelId));
+        List<HotelEntry> hotelEntries = findByIds(new HashSet<>(hotelAvailabilityMap.keySet()));
+        Map<Long, HotelEntry> hotelEntryMap = hotelEntries.stream().collect(Collectors.toMap(HotelEntry::getId,hotelEntry -> hotelEntry));
         List<HotelAvailabilityEntry> hotelAvailabilityEntries = new ArrayList<>();
         for(Long hotelId: hotelAvailabilityMap.keySet()) {
             Map<RoomType, Long> countMap = new HashMap<>();
@@ -206,12 +209,12 @@ public class HotelService {
             for(HotelAvailabilityMappingEntry hotelAvailabilityMappingEntry: hotelAvailabilityMap.get(hotelId)) {
                 countMap.put(hotelAvailabilityMappingEntry.getType(), hotelAvailabilityMappingEntry.getCount());
             }
-            hotelAvailabilityEntries.add(new HotelAvailabilityEntry( hotelId, countMap));
+            hotelAvailabilityEntries.add(new HotelAvailabilityEntry( hotelEntryMap.get(hotelId), countMap));
         }
         return hotelAvailabilityEntries;
     }
 
-    private String getConditionString( HotelSearchPagedRequest hotelSearchPagedRequest) throws ParseException {
+    public String getConditionString( HotelSearchPagedRequest hotelSearchPagedRequest) throws ParseException {
         Date startTime = accountingUtils.getCheckInTime(hotelSearchPagedRequest.getStartDate());
         Date endTime = accountingUtils.getCheckOutTime(hotelSearchPagedRequest.getEndDate());
         List<String> conditions = new ArrayList<>();
@@ -231,9 +234,20 @@ public class HotelService {
         return substitutor.replace(StringUtils.join(conditions, " and "));
     }
 
-    private String getSqlQuery( HotelSearchPagedRequest hotelSearchPagedRequest) throws ParseException {
+    public String getSqlQuery( HotelSearchPagedRequest hotelSearchPagedRequest) throws ParseException {
         String condition = getConditionString( hotelSearchPagedRequest);
         String query = String.format(" SELECT room.hotel_id as hotelId, room.type as type, count(*) as count FROM room JOIN hotel ON room.hotel_id = hotel.id LEFT JOIN reservation ON room.id = reservation.room_id and %s WHERE reservation.room_id IS NULL GROUP BY room.hotel_id, room.type ", condition);
         return query;
+    }
+
+    public List<HotelEntry> findByIds( Set<Long> hotelIds) {
+        if(ObjectUtils.isEmpty(hotelIds)) {
+            return new ArrayList<>();
+        }
+        List<HotelEntity> hotelEntityList = hotelRepository.findAllById(hotelIds);
+        if(ObjectUtils.isEmpty(hotelEntityList)) {
+            return new ArrayList<>();
+        }
+        return hotelEntityList.stream().map(this::convertToEntry).collect(Collectors.toList());
     }
 }

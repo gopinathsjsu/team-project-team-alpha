@@ -119,4 +119,9 @@ public class HotelController {
     public ResponseEntity<Set<HotelServiceType>> getHotelServiceTypes() {
         return new ResponseEntity<>(new HashSet<>(Arrays.asList(HotelServiceType.values())), HttpStatus.OK);
     }
+
+    @PostMapping("/get-sql-query")
+    public ResponseEntity<String> getSqlQuery(@RequestBody HotelSearchPagedRequest hotelSearchPagedRequest) throws ParseException {
+        return new ResponseEntity<>( hotelService.getSqlQuery(hotelSearchPagedRequest), HttpStatus.OK);
+    }
 }
