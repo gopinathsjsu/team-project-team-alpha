@@ -2,6 +2,7 @@ package com.booking.alpha.service;
 
 import com.booking.alpha.constant.BookingState;
 import com.booking.alpha.constant.RoomType;
+import com.booking.alpha.entity.HotelEntity;
 import com.booking.alpha.entity.RoomEntity;
 import com.booking.alpha.entry.RoomEntry;
 import com.booking.alpha.respository.RoomRepository;
@@ -12,6 +13,7 @@ import org.springframework.util.ObjectUtils;
 
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 
 @Service
 public class RoomService {
@@ -44,4 +46,18 @@ public class RoomService {
         }
         return convertToEntry(roomEntity);
     }
+
+
+    public RoomEntry addRoom(RoomEntry roomEntry){
+        RoomEntity roomEntity = convertToEntity(roomEntry);
+        RoomEntity createdRoomEntity = roomRepository.save(roomEntity);
+        return convertToEntry(createdRoomEntity);
+    }
+
+
+    public List<RoomEntity> getAllRoomsOfAHotel(Long hotelId){
+        List<RoomEntity> rooms = roomRepository.getAllRoomsOfAHotel(hotelId);
+        return rooms;
+    }
+
 }

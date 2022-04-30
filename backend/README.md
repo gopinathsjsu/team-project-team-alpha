@@ -140,120 +140,172 @@ Request Body (email and contact should be unique) <br>
 ```yaml
 {
   "name": "Hilton",
-  "contactNo" : "+15566557892",
-  "emailId": "abc@gmail.com",
-  "city" : "San Jose",
-  "country" : "US",
-  "zipCode" : "95112",
+  "emailId": "abc2@gmail.com",
   "password": "pass"
 }
 ```
 Response Body, STATUS-CODE - 201, 400 <br>
 ```yaml
 {
-  "id": 10,
+  "id": 5,
   "name": "Hilton",
-  "contactNo": "+15566557892",
-  "emailId": "abc@gmail.com",
-  "city": "San Jose",
-  "country": "US",
-  "zipCode": "95112",
-  "password": "$2a$10$8EF4s9SudutmkQzNfhM2WehREOGruvMWMkT5UTO0rf1xAPMoQJ6wa",
-  "imageUrl": null
+  "contactNo": null,
+  "description": null,
+  "emailId": "abc2@gmail.com",
+  "city": null,
+  "country": null,
+  "zipCode": null,
+  "password": "$2a$10$vaYqMZ.FgiUjMO6u5nsP7OlEU98qUP0tuzdyzVBCjfkt2e4K8RF9W",
+  "imageUrl": null,
+  "serviceList": null
 }
 ```
 
-###  2. Upload image for a hotel, POST - http://localhost:8080/v1/hotel/6/upload-image
+###  2. Upload image for a hotel, POST - http://localhost:8080/v1/hotel/5/upload-image
 Request Body- form-data, key: file
 Response Body, STATUS-CODE - 200, 400(when user id not present) <br>
 ####NOTE - CHECK in S3, if images are getting uploaded, url "https://alpha-hotel-images.s3.us-east-2.amazonaws.com/1649814804247Git_Cheat.jpeg"
 
 ```yaml
 {
-  "id": 10,
+  "id": 5,
   "name": "Hilton",
-  "contactNo": "+15566557892",
-  "emailId": "abc@gmail.com",
-  "city": "San Jose",
-  "country": "US",
-  "zipCode": "95112",
-  "password": "$2a$10$gEqtz34RM9RG3HWwPfO.t.GNonPSY..px8mfyHROAd7fJvGn/Vm.G",
-  "imageUrl": "https://alpha-hotel-images.s3.us-east-2.amazonaws.com/1649814804247Git_Cheat.jpeg"
+  "contactNo": null,
+  "description": null,
+  "emailId": "abc2@gmail.com",
+  "city": null,
+  "country": null,
+  "zipCode": null,
+  "password": "$2a$10$vaYqMZ.FgiUjMO6u5nsP7OlEU98qUP0tuzdyzVBCjfkt2e4K8RF9W",
+  "imageUrl": "https://alpha-hotel-images.s3.us-east-2.amazonaws.com/1651283117521Git_Cheat.jpeg",
+  "serviceList": null
 }
 ```
 
-###  3. Get a hotel, GET - http://localhost:8080/v1/hotel/10
-Response Body, STATUS-CODE - 200, 404 <br>
-```yaml
-{
-  "id": 10,
-  "name": "Hilton",
-  "contactNo": "+15566557892",
-  "emailId": "abc@gmail.com",
-  "city": "San Jose",
-  "country": "US",
-  "zipCode": "95112",
-  "password": "$2a$10$gEqtz34RM9RG3HWwPfO.t.GNonPSY..px8mfyHROAd7fJvGn/Vm.G",
-  "imageUrl": "https://alpha-hotel-images.s3.us-east-2.amazonaws.com/1649814804247Git_Cheat.jpeg"
-}
-```
-### 4. Login in to a hotel, POST - http://localhost:8080/v1/hotel/login
-Request Body <br>
-```yaml
-{
-  "emailId": "abc@gmail.com",
-  "password": "password2"
-}
-```
-Response Body, STATUS-CODE - 200, 401 <br>
-```yaml
-{
-  "id": 10,
-  "name": "Hilton",
-  "contactNo": "+15566557892",
-  "emailId": "abc@gmail.com",
-  "city": "San Jose",
-  "country": "US",
-  "zipCode": "95112",
-  "password": "$2a$10$gEqtz34RM9RG3HWwPfO.t.GNonPSY..px8mfyHROAd7fJvGn/Vm.G",
-  "imageUrl": "https://alpha-hotel-images.s3.us-east-2.amazonaws.com/1649814804247Git_Cheat.jpeg"
-}
-```
-
-### 5. Delete a hotel, DELETE - http://localhost:8080/v1/hotel/10
-Response Body, STATUS-CODE - 200, 404 <br>
-Hotel with id: 10 deleted successfully
-
-
-### 6. Update a hotel, PUT - http://localhost:8080/v1/hotel/10/update
+### 3. Update a hotel, PUT - http://localhost:8080/v1/hotel/5/update
 Request Body
 ```yaml
 {
-  "id": 10,
-  "name": "Hilton",
   "contactNo": "+15566557892",
-  "emailId": "abc@gmail.com",
+  "description" : "Hotel Test",
   "city": "San Jose",
   "country": "US",
   "zipCode": "95112",
-  "password": "$2a$10$gEqtz34RM9RG3HWwPfO.t.GNonPSY..px8mfyHROAd7fJvGn/Vm.G",
-  "imageUrl": "https://alpha-hotel-images.s3.us-east-2.amazonaws.com/1649814804247Git_Cheat.jpeg"
+  "serviceList": [
+    {"cost": 50, "type": "FITNESS_ROOM"},
+    {"cost": 50, "type": "SWIMMING_POOL"},
+    {"cost": 50, "type": "DAILY_PARKING"},
+    {"cost": 50, "type": "CONTINENTAL_BREAKFAST"},
+    {"cost": 50, "type": "ALL_MEALS_INCLUDED"}
+  ]
 }
 ```
 Response Body, STATUS-CODE - 200, 400
 ```yaml
 {
+  "id": 5,
+  "name": "Hilton",
+  "contactNo": "+15566557892",
+  "description": "Hotel Test",
+  "emailId": "abc2@gmail.com",
+  "city": "San Jose",
+  "country": "US",
+  "zipCode": "95112",
+  "password": "$2a$10$vaYqMZ.FgiUjMO6u5nsP7OlEU98qUP0tuzdyzVBCjfkt2e4K8RF9W",
+  "imageUrl": "https://alpha-hotel-images.s3.us-east-2.amazonaws.com/1651283117521Git_Cheat.jpeg",
+  "serviceList": [
+    {
+      "cost": 50,
+      "type": "FITNESS_ROOM"
+    },
+    {
+      "cost": 50,
+      "type": "SWIMMING_POOL"
+    },
+    {
+      "cost": 50,
+      "type": "DAILY_PARKING"
+    },
+    {
+      "cost": 50,
+      "type": "CONTINENTAL_BREAKFAST"
+    },
+    {
+      "cost": 50,
+      "type": "ALL_MEALS_INCLUDED"
+    }
+  ]
+}
+```
+
+
+###  4. Get a hotel, GET - http://localhost:8080/v1/hotel/10
+Response Body, STATUS-CODE - 200, 404 <br>
+```yaml
+{
   "id": 10,
   "name": "Hilton",
   "contactNo": "+15566557892",
   "emailId": "abc@gmail.com",
   "city": "San Jose",
   "country": "US",
-  "zipCode": "95192",
+  "zipCode": "95112",
   "password": "$2a$10$gEqtz34RM9RG3HWwPfO.t.GNonPSY..px8mfyHROAd7fJvGn/Vm.G",
   "imageUrl": "https://alpha-hotel-images.s3.us-east-2.amazonaws.com/1649814804247Git_Cheat.jpeg"
 }
 ```
+### 5. Login in to a hotel, POST - http://localhost:8080/v1/hotel/login
+Request Body <br>
+```yaml
+{
+  "emailId": "abc2@gmail.com",
+  "password": "pass"
+}
+```
+Response Body, STATUS-CODE - 200, 401 <br>
+```yaml
+{
+  "id": 5,
+  "name": "Hilton",
+  "contactNo": "+15566557892",
+  "description": "Hotel Test",
+  "emailId": "abc2@gmail.com",
+  "city": "San Jose",
+  "country": "US",
+  "zipCode": "95112",
+  "password": "$2a$10$vaYqMZ.FgiUjMO6u5nsP7OlEU98qUP0tuzdyzVBCjfkt2e4K8RF9W",
+  "imageUrl": "https://alpha-hotel-images.s3.us-east-2.amazonaws.com/1651283117521Git_Cheat.jpeg",
+  "serviceList": [
+    {
+      "cost": 50,
+      "type": "FITNESS_ROOM"
+    },
+    {
+      "cost": 50,
+      "type": "SWIMMING_POOL"
+    },
+    {
+      "cost": 50,
+      "type": "DAILY_PARKING"
+    },
+    {
+      "cost": 50,
+      "type": "CONTINENTAL_BREAKFAST"
+    },
+    {
+      "cost": 50,
+      "type": "ALL_MEALS_INCLUDED"
+    }
+  ]
+}
+```
+
+### 6. Delete a hotel, DELETE - http://localhost:8080/v1/hotel/10
+Response Body, STATUS-CODE - 200, 404 <br>
+Hotel with id: 10 deleted successfully
+
+
+
 
 ### 7. Reset the password, PUT - http://localhost:8080/v1/hotel/10/password
 Request Body
@@ -262,6 +314,15 @@ Request Body
 "emailId": "abc@gmail.com",
 "password": "password"
 }
+
+
+  ### 8. Find all the hotels based on city GET - http://localhost:8080/v1/hotel?city=San Jose
+  Request Body
+  ```yaml
+  {
+    "emailId": "abc@gmail.com",
+    "password": "password"
+  }
 ```
 Response Body, STATUS-CODE - 200, 400
 ```yaml
@@ -373,6 +434,45 @@ Response
       "SUITE": 2,
       "SINGLE": 1
     }
+  }
+]
+```
+
+
+## 3. ROOM APIs
+###  1. Register a Room, POST - http://localhost:8080/v1/room
+Request Body<br>
+```yaml
+{
+  "hotel_id" : 4,
+  "type" : "SINGLE",
+  "cost":100
+}
+```
+Response
+```yaml
+{
+  "id": 14,
+  "hotel_id": 4,
+  "type": "SINGLE",
+  "cost": 100
+}
+```
+
+###  2. Get all Rooms of a hotel, GET - http://localhost:8080/v1/room/4
+```yaml
+[
+  {
+    "id": 14,
+    "hotel_id": 4,
+    "type": "SINGLE",
+    "cost": 100
+  },
+  {
+    "id": 13,
+    "hotel_id": 4,
+    "type": "SUITE",
+    "cost": 100
   }
 ]
 ```

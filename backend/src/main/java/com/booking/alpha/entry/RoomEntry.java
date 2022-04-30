@@ -23,4 +23,6 @@ public class RoomEntry {
     Long hotel_id;
 
     RoomType type;
+
+    Long cost;
 }

@@ -1,14 +1,28 @@
+-- create table hotel(
+--      id bigint primary key auto_increment,
+--      name varchar(128) not null,
+--      contact_no varchar(128) not null unique,
+--      email_id varchar(128) unique not null unique,
+--      city varchar(128) not null,
+--      country varchar(128) not null,
+--      zip_code varchar(128) not null,
+--      password varchar(256) not null,
+--      image_url varchar(256),
+--      service_list json not null
+-- )engine=InnoDB;
+
 create table hotel(
-     id bigint primary key auto_increment,
-     name varchar(128) not null,
-     contact_no varchar(128) not null unique,
-     email_id varchar(128) unique not null unique,
-     city varchar(128) not null,
-     country varchar(128) not null,
-     zip_code varchar(128) not null,
-     password varchar(256) not null,
-     image_url varchar(256),
-     service_list json not null
+                      id bigint primary key auto_increment,
+                      name varchar(128) not null,
+                      contact_no varchar(128),
+                      description varchar(128),
+                      email_id varchar(128) unique not null unique,
+                      city varchar(128),
+                      country varchar(128),
+                      zip_code varchar(128),
+                      password varchar(256) not null,
+                      image_url varchar(256),
+                      service_list json
 )engine=InnoDB;
 
 insert into hotel(name, contact_no, email_id, city, country, zip_code, password, service_list)

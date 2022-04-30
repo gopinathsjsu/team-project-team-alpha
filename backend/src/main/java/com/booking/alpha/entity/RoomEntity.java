@@ -31,7 +31,7 @@ public class RoomEntity {
 
     @Id
     @Column
-    @NonNull
+    //@NonNull
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
 
@@ -43,4 +43,8 @@ public class RoomEntity {
     @NonNull
     @Enumerated(EnumType.STRING)
     RoomType type;
+
+    @Column
+    @NonNull
+    Long cost;
 }

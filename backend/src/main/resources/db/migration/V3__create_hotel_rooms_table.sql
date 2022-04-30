@@ -2,6 +2,7 @@ create table room (
     id bigint primary key auto_increment,
     hotel_id bigint,
     type varchar(64),
+    cost bigint,
     foreign key (hotel_id) references hotel(id)
 );
 

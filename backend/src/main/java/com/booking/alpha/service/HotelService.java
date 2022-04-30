@@ -149,15 +149,17 @@ public class HotelService {
     public HotelEntry updateHotel(Long id, HotelEntry hotelEntry){
         try {
             HotelEntry oldHotelEntry = findOneById(id);
-            oldHotelEntry.setName(hotelEntry.getName());
-            oldHotelEntry.setEmailId(hotelEntry.getEmailId());
-            oldHotelEntry.setPassword(hotelEntry.getPassword());
+            //oldHotelEntry.setName(hotelEntry.getName());
+            //oldHotelEntry.setEmailId(hotelEntry.getEmailId());
+            //oldHotelEntry.setPassword(hotelEntry.getPassword());
             oldHotelEntry.setCity(hotelEntry.getCity());
             oldHotelEntry.setCountry(hotelEntry.getCountry());
             oldHotelEntry.setZipCode(hotelEntry.getZipCode());
-            oldHotelEntry.setImageUrl(hotelEntry.getImageUrl());
-            oldHotelEntry.setId(hotelEntry.getId());
+            //oldHotelEntry.setImageUrl(hotelEntry.getImageUrl());
+            //oldHotelEntry.setId(hotelEntry.getId());
             oldHotelEntry.setContactNo(hotelEntry.getContactNo());
+            oldHotelEntry.setDescription(hotelEntry.getDescription());
+            oldHotelEntry.setServiceList(hotelEntry.getServiceList());
 
             HotelEntity hotelEntity = convertToEntity(oldHotelEntry);
             HotelEntity updatedHotelEntity = hotelRepository.save(hotelEntity);

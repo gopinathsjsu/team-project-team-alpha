@@ -39,27 +39,31 @@ public class HotelEntity {
     Long id;
 
     @Column
-    @NonNull
+    //@NonNull
     String name;
 
     @Column
-    @NonNull
+    //@NonNull
     String contactNo;
+
+    @Column
+    //@NonNull
+    String description;
 
     @Column
     @NonNull
     String emailId;
 
     @Column
-    @NonNull
+    //@NonNull
     String city;
 
     @Column
-    @NonNull
+    //@NonNull
     String country;
 
     @Column
-    @NotNull
+    //@NotNull
     String zipCode;
 
     @Column

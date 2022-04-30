@@ -24,6 +24,8 @@ public class HotelEntry {
 
     String contactNo;
 
+    String description;
+
     String emailId;
 
     String city;
