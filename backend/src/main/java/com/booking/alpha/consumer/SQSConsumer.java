@@ -2,7 +2,9 @@ package com.booking.alpha.consumer;
 
 import com.amazonaws.services.sqs.model.Message;
 import com.booking.alpha.configuration.SQSConfiguration;
+import com.booking.alpha.constant.BookingState;
 import com.booking.alpha.constant.ConsumerKeys;
+import com.booking.alpha.entry.ReservationEntry;
 import com.booking.alpha.service.ReservationService;
 import com.booking.alpha.utils.SQSUtils;
 import org.apache.commons.lang3.ObjectUtils;
@@ -51,7 +53,10 @@ public class SQSConsumer {
     Boolean process(Message message) {
         try{
             Long reservationId = Long.valueOf(message.getAttributes().get(ConsumerKeys.RESERVATION_ID_KEY));
-            reservationService.removeReservation(reservationId);
+            ReservationEntry reservationEntry = reservationService.findOneById(reservationId);
+            if(reservationEntry.getBookingState().equals(BookingState.PENDING)) {
+                reservationService.removeReservation(reservationId);
+            }
             return true;
         } catch (Throwable e) {
             return false;
