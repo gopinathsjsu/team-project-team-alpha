@@ -95,9 +95,7 @@ public class ReservationService {
         HotelEntry hotelEntry = hotelService.findOneById(roomToBook.getHotel_id());
         ReservationEntry reservationEntry = new ReservationEntry(null, bookingRequestEntry.getUserId(), roomToBook.getId(), startDate.getTime(), endDate.getTime(), BookingState.PENDING, hotelEntry.getServiceList());
         ReservationEntry reservationCompleted = convertToEntry(reservationRepository.save(convertToEntity(reservationEntry)));
-        HashMap<String, Object> messageAttributes = new HashMap<>();
-        messageAttributes.put(ConsumerKeys.RESERVATION_ID_KEY, reservationCompleted.getId());
-        sqsUtils.publishMessage( sqsConfiguration.getGetUnReservingQueueUrl(), messageAttributes, null);
+        publishForRemoval( reservationCompleted.getId());
         return reservationCompleted;
     }
 
@@ -109,5 +107,11 @@ public class ReservationService {
         }
         List<ReservationEntity> updatedEntities = reservationRepository.saveAll(reservationEntries.stream().map(this::convertToEntity).collect(Collectors.toList()));
         return updatedEntities.stream().map(this::convertToEntry).collect(Collectors.toList());
+    }
+
+    public void publishForRemoval( Long reservationId) {
+        HashMap<String, Object> messageAttributes = new HashMap<>();
+        messageAttributes.put(ConsumerKeys.RESERVATION_ID_KEY, reservationId);
+        sqsUtils.publishMessage( sqsConfiguration.getGetUnReservingQueueUrl(), messageAttributes, null);
     }
 }
