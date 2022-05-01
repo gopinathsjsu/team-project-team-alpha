@@ -1,3 +1,3 @@
-const backendServer = 'http://18.117.130.13:3001/uber-eats/api';
+const backendServer = 'http://localhost:8080';
 
 export default backendServer;

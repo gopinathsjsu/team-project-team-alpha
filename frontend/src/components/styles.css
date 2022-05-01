@@ -1,0 +1,23 @@
+.landingpage {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    height: 100vh;
+    width: 100vw;
+    text-align: center;
+}
+
+.customLandingPage {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    flex-direction: column;
+    height: 100vh;
+    width: 100vw;
+    text-align: center;
+}
+
+  .MuiFormControl-fullWidth {
+padding: 0 10px;
+  }
