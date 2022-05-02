@@ -4,6 +4,7 @@ import backendServer from "../../Config";
 import {
   GET_HOTEL_DETAILS,
   STORE_SEARCH_PARAMS,
+  SET_SELECTED_HOTEL
 
 } from "./types";
 
@@ -18,7 +19,7 @@ export const storeSearchParams =
 
 export const getHotelDetails =
   (searchData) => async (dispatch) => {
-    axios.post(`${backendServer}/v1/hotel/get-availability`, searchData)
+    axios.post(`${backendServer}/v1/hotel/get-availability`,searchData)
     .then((response) => {
       dispatch({
         type: GET_HOTEL_DETAILS,
@@ -31,3 +32,10 @@ export const getHotelDetails =
     });
 };
 
+export const setSelectedHotel =
+  (selectedHotel) => async (dispatch) => {
+    dispatch({
+      type: SET_SELECTED_HOTEL,
+      payload: selectedHotel
+    });
+};

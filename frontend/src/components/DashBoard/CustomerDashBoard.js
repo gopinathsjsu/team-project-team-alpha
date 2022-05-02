@@ -33,7 +33,7 @@ import landingPage from '../../images/landingPage.jpeg';
 import { NavbarDashBoard } from '../Navigation/NavbaDashBoard';
 import SearchHotels from './SearchHotels';
 import { useDispatch, useSelector } from 'react-redux';
-import { getHotelDetails } from '../../state/action-creators/hotelActions';
+import { getHotelDetails, setSelectedHotel } from '../../state/action-creators/hotelActions';
 
 
 
@@ -90,39 +90,8 @@ export default function CustomerDashBoard() {
      setCards(hotelDetails);
   },[hotelDetails]);
 
-  // var cards = [{
-  //   city: "San Jose",
-  //   contactNo: "6692927846",
-  //   country: "United States",
-  //   emailId: "marriot@gmail.com",
-  //   id: 0,
-  //   imageUrl: './images/trivago.jpg',
-  //   description: "The best place to stay when you are in silicon valley",
-  //   name: "Marriot",
-  //   zipCode: "95125"
-  // }, {
-  //   city: "San Jose",
-  //   contactNo: "6692927846",
-  //   country: "United States",
-  //   emailId: "marriot@gmail.com",
-  //   id: 0,
-  //   imageUrl: './images/trivago.jpg',
-  //   description: "The best place to stay when you are in silicon valley",
-  //   name: "Marriot",
-  //   zipCode: "95125"
-  // }, {
-  //   city: "San Jose",
-  //   contactNo: "6692927846",
-  //   country: "United States",
-  //   emailId: "marriot@gmail.com",
-  //   id: 0,
-  //   imageUrl: './images/trivago.jpg',
-  //   description: "The best place to stay when you are in silicon valley",
-  //   name: "Marriot",
-  //   zipCode: "95125"
-  // }]
-
   const onViewHotel = (card) => {
+    dispatch(setSelectedHotel(card.hotelEntry));
     navigate("/customerHotelRooms");
   }
 
@@ -180,43 +149,43 @@ export default function CustomerDashBoard() {
                 {(rowsPerPage > 0
                   ? cards.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                   : cards).map((card) => (
-                    <Grid item key={card.RestaurantId} xs={12}>
+                    <Grid item key={card.hotelEntry.id} xs={12}>
                       <Card
                         sx={{ display: 'flex', flexDirection: 'column' }}
                       >
                         <CardContent sx={{ flexGrow: 1 }}>
                           <Grid container spacing={1}>
                             <Grid item xs={2}>
-                              <img className={classes.img} alt="complex" src="../images/grid/trivago.jpg" />
+                              <img className={classes.img} alt="complex" src={card.hotelEntry.imageUrl} />
                             </Grid>
                             <Grid item xs={10} sm container>
                               <Grid item xs container direction="column" spacing={2}>
                                 <Grid item xs>
                                   <Typography gutterBottom variant="h5" component="h2">
-                                    {card.name}
+                                    {card.hotelEntry.name}
                                   </Typography>
                                   <Typography>
-                                    {card.description}
+                                    {card.hotelEntry.description}
                                   </Typography>
                                   <Typography>
                                     Phone :
                                     {' '}
-                                    {card.contactNo}
+                                    {card.hotelEntry.contactNo}
                                   </Typography>
                                   <Typography>
                                     Email :
                                     {' '}
-                                    {card.emailId}
+                                    {card.hotelEntry.emailId}
                                   </Typography>
                                   <Typography>
                                     Location :
                                     {' '}
-                                    {card.city}
+                                    {card.hotelEntry.city}
                                   </Typography>
                                   <Typography>
                                     Zip :
                                     {' '}
-                                    {card.zipCode}
+                                    {card.hotelEntry.zipCode}
                                   </Typography>
                                 </Grid>
                               </Grid>

@@ -31,6 +31,7 @@ import { TextField, MenuItem } from '@mui/material';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import { Navbar } from '../Navigation/Navbar';
 import RoomAmenitiesDialog from './RoomAmenitiesDialog';
+import { useSelector } from 'react-redux';
 
 const theme = createTheme();
 
@@ -59,11 +60,14 @@ export default function CustomerHotelRooms() {
   const [filterType, setFilterType] = useState('All');
   const [filterCategory, setFilterCategory] = useState('All');
   const [openAmenitiesDialog, setOpenAmenitiesDialog] = useState(false);
+  const selectedHotel = useSelector((state)=> state.hotels.selectedHotel);
 
 
   const onNewOrder = () => {
 
   };
+
+
 
   const onAddToCart = (dish) => {
     setOpenAmenitiesDialog(true);
@@ -168,36 +172,36 @@ export default function CustomerHotelRooms() {
                 <CardContent sx={{ flexGrow: 1 }}>
                   <Grid container spacing={1}>
                     <Grid item xs={2}>
-                      <img alt="complex" src="../images/grid/trivago.jpg" />
+                      <img alt="complex" src={selectedHotel.imageUrl} />
                     </Grid>
                     <Grid item xs={10} sm container>
                       <Grid item xs container direction="column" spacing={2}>
                         <Grid item xs>
                           <Typography gutterBottom variant="h5" component="h2">
-                            {currentHotelDetails.name}
+                            {selectedHotel.name}
                           </Typography>
                           <Typography>
-                            {currentHotelDetails.description}
+                            {selectedHotel.description}
                           </Typography>
                           <Typography>
                             Phone :
                             {' '}
-                            {currentHotelDetails.contactNo}
+                            {selectedHotel.contactNo}
                           </Typography>
                           <Typography>
                             Email :
                             {' '}
-                            {currentHotelDetails.emailId}
+                            {selectedHotel.emailId}
                           </Typography>
                           <Typography>
                             Location :
                             {' '}
-                            {currentHotelDetails.city}
+                            {selectedHotel.city}
                           </Typography>
                           <Typography>
                             Zip :
                             {' '}
-                            {currentHotelDetails.zipCode}
+                            {selectedHotel.zipCode}
                           </Typography>
                         </Grid>
                       </Grid>
