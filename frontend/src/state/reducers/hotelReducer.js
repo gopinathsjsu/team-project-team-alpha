@@ -1,11 +1,13 @@
 import {
   GET_HOTEL_DETAILS,
+    SET_SELECTED_HOTEL,
     STORE_SEARCH_PARAMS,
 } from '../action-creators/types';
 
 const initialState = {
     searchParams: {},
-    hotelDetails: []
+    hotelDetails: [],
+    selectedHotel: {}
   };
 
   const reducer = (state = initialState, action) => {
@@ -19,6 +21,11 @@ const initialState = {
         return {
           ...state,
           hotelDetails: action.payload
+        }
+      case SET_SELECTED_HOTEL:
+        return {
+          ...state,
+          selectedHotel: action.payload
         }
       default:
         return state;
