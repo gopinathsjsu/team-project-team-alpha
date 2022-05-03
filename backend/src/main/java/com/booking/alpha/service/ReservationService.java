@@ -3,22 +3,23 @@ package com.booking.alpha.service;
 import com.booking.alpha.configuration.SQSConfiguration;
 import com.booking.alpha.constant.BookingState;
 import com.booking.alpha.constant.ConsumerKeys;
+import com.booking.alpha.constant.HotelServiceType;
 import com.booking.alpha.entity.ReservationEntity;
-import com.booking.alpha.entry.BookingRequestEntry;
-import com.booking.alpha.entry.HotelEntry;
-import com.booking.alpha.entry.ReservationEntry;
-import com.booking.alpha.entry.RoomEntry;
+import com.booking.alpha.entry.*;
 import com.booking.alpha.respository.ReservationRepository;
 import com.booking.alpha.utils.AccountingUtils;
 import com.booking.alpha.utils.SQSUtils;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
 
 import java.text.ParseException;
-import java.util.Date;
+import java.util.Set;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.ArrayList;
 import java.util.stream.Collectors;
 
@@ -60,7 +61,7 @@ public class ReservationService {
     }
 
     public ReservationEntry findOneById( Long reservationId) {
-        return convertToEntry(reservationRepository.getById(reservationId));
+        return convertToEntry(reservationRepository.findById(reservationId).get());
     }
 
     public ReservationEntry removeReservation( Long reservationId) {
@@ -85,17 +86,30 @@ public class ReservationService {
         return reservationEntities.stream().map(this::convertToEntry).collect(Collectors.toList());
     }
 
-    public ReservationEntry reserve(BookingRequestEntry bookingRequestEntry) throws ParseException {
-        Date startDate = accountingUtils.getCheckInTime(bookingRequestEntry.getStartDate());
-        Date endDate = accountingUtils.getCheckOutTime(bookingRequestEntry.getEndDate());
-        RoomEntry roomToBook = roomService.findOneAvailable( bookingRequestEntry.getHotelId(), bookingRequestEntry.getRoomType(), startDate.getTime(), endDate.getTime());
+    @Transactional
+    public ReservationEntry reserve(BookingRequestEntry bookingRequestEntry) throws ParseException, JsonProcessingException {
+        Long roomId = bookingRequestEntry.getRoomId();
+        Long startDate = accountingUtils.getCheckInTime(bookingRequestEntry.getStartDate()).getTime();
+        Long endDate = accountingUtils.getCheckOutTime(bookingRequestEntry.getEndDate()).getTime();
+        Set<HotelServiceType> bookingRequestHotelServiceTypeSet = bookingRequestEntry.getServiceTypeSet();
+        RoomEntry roomEntryLocked = roomService.findOneByIdWithLock(roomId);
+        Long hotelId = roomEntryLocked.getHotelId();
+        RoomEntry roomToBook = roomService.findOneAvailable( roomId, startDate, endDate);
         if(ObjectUtils.isEmpty(roomToBook)) {
             return null;
         }
-        HotelEntry hotelEntry = hotelService.findOneById(roomToBook.getHotel_id());
-        ReservationEntry reservationEntry = new ReservationEntry(null, bookingRequestEntry.getUserId(), roomToBook.getId(), startDate.getTime(), endDate.getTime(), BookingState.PENDING, hotelEntry.getServiceList());
-        ReservationEntry reservationCompleted = convertToEntry(reservationRepository.save(convertToEntity(reservationEntry)));
-        publishForRemoval( reservationCompleted.getId());
+        HotelEntry hotelEntry = hotelService.findOneById(hotelId);
+        List<ServiceEntry> hotelEntryServiceList = hotelEntry.getServiceList();
+        Map<HotelServiceType, ServiceEntry> serviceTypeServiceEntryMap = hotelEntryServiceList.stream().collect(Collectors.toMap(ServiceEntry::getType, serviceEntry -> serviceEntry));
+        List<ServiceEntry> serviceEntriesToCreate = new ArrayList<>();
+        if(!ObjectUtils.isEmpty(bookingRequestEntry.getServiceTypeSet())) {
+            for(HotelServiceType hotelServiceType: bookingRequestHotelServiceTypeSet) {
+                serviceEntriesToCreate.add(serviceTypeServiceEntryMap.get(hotelServiceType));
+            }
+        }
+        ReservationEntry reservationEntryToCreate = new ReservationEntry(null, bookingRequestEntry.getUserId(), roomToBook.getId(), startDate, endDate, BookingState.PENDING, serviceEntriesToCreate);
+        ReservationEntry reservationCompleted = convertToEntry(reservationRepository.save(convertToEntity(reservationEntryToCreate)));
+        publishForRemoval( reservationCompleted);
         return reservationCompleted;
     }
 
@@ -109,9 +123,7 @@ public class ReservationService {
         return updatedEntities.stream().map(this::convertToEntry).collect(Collectors.toList());
     }
 
-    public void publishForRemoval( Long reservationId) {
-        HashMap<String, Object> messageAttributes = new HashMap<>();
-        messageAttributes.put(ConsumerKeys.RESERVATION_ID_KEY, reservationId);
-        sqsUtils.publishMessage( sqsConfiguration.getGetUnReservingQueueUrl(), messageAttributes, null);
+    public void publishForRemoval( ReservationEntry reservationEntry) throws JsonProcessingException {
+        sqsUtils.publishMessage( sqsConfiguration.getGetUnReservingQueueUrl(), null, reservationEntry);
     }
 }

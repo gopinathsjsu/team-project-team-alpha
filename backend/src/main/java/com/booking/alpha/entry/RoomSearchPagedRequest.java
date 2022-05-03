@@ -1,7 +1,5 @@
 package com.booking.alpha.entry;
 
-import com.booking.alpha.constant.HotelServiceType;
-import com.booking.alpha.constant.RoomType;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -10,23 +8,17 @@ import lombok.AllArgsConstructor;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 
-import java.util.Set;
-
 @Setter
 @Getter
 @ToString
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @AllArgsConstructor
 @NoArgsConstructor
-public class BookingRequestEntry {
+public class RoomSearchPagedRequest{
 
-    Long userId;
-
-    Long roomId;
+    Long hotelId;
 
     String startDate;
 
     String endDate;
-
-    Set<HotelServiceType> serviceTypeSet;
 }

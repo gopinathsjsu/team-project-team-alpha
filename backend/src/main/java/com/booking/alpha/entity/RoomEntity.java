@@ -37,7 +37,7 @@ public class RoomEntity {
 
     @Column
     @NonNull
-    Long hotel_id;
+    Long hotelId;
 
     @Column
     //@NonNull

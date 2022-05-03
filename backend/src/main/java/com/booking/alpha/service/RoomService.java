@@ -6,17 +6,23 @@ import com.booking.alpha.entity.HotelEntity;
 import com.booking.alpha.entity.RoomEntity;
 import com.booking.alpha.entry.HotelEntry;
 import com.booking.alpha.entry.RoomEntry;
+import com.booking.alpha.entry.RoomSearchPagedRequest;
 import com.booking.alpha.respository.HotelRepository;
 import com.booking.alpha.respository.RoomRepository;
+import com.booking.alpha.utils.AccountingUtils;
 import com.booking.alpha.utils.AccountingUtils;
 import com.booking.alpha.utils.S3Utils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.BeanUtils;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.text.ParseException;
+import java.util.*;
+import java.util.stream.Collectors;
 import javax.persistence.EntityManager;
 import java.io.File;
 import java.io.FileInputStream;
@@ -30,10 +36,14 @@ import java.util.List;
 public class RoomService {
 
     private final RoomRepository roomRepository;
+
     private final S3Utils s3Utils;
 
-    public RoomService(RoomRepository roomRepository, S3Utils s3Utils) {
+    private final AccountingUtils accountingUtils;
+
+    public RoomService(RoomRepository roomRepository, AccountingUtils accountingUtils, S3Utils s3Utils) {
         this.roomRepository = roomRepository;
+        this.accountingUtils = accountingUtils;
         this.s3Utils = s3Utils;
     }
 
@@ -49,11 +59,34 @@ public class RoomService {
         return roomEntry;
     }
 
-    public RoomEntry findOneAvailable(Long hotelId, RoomType roomType, Long startDate, Long endDate) {
-        RoomEntity roomEntity = roomRepository.findOneAvailable(hotelId, roomType.toString(),
-                new HashSet<String>(Arrays.asList(BookingState.CONFIRMED.toString(),
-                        BookingState.PENDING.toString())),
-                startDate, endDate);
+    public List<RoomEntry> findAllAvailable(RoomSearchPagedRequest roomSearchPagedRequest) throws ParseException {
+
+        Long startDate = accountingUtils.getCheckInTime(roomSearchPagedRequest.getStartDate()).getTime();
+        Long endDate = accountingUtils.getCheckOutTime(roomSearchPagedRequest.getEndDate()).getTime();
+
+        List<RoomEntity> roomEntities = roomRepository.findAllAvailable( new HashSet<>(Arrays.asList(roomSearchPagedRequest.getHotelId())),
+                new HashSet<String>(Arrays.asList(BookingState.CONFIRMED.toString(), BookingState.PENDING.toString())),
+                startDate,
+                endDate);
+        if(ObjectUtils.isEmpty(roomEntities)) {
+            return new ArrayList<>();
+        }
+        return roomEntities.stream().map(this::convertToEntry).collect(Collectors.toList());
+    }
+
+    /*
+    * DO NOT put transactional on this method
+    * */
+    public RoomEntry findOneByIdWithLock( Long roomId) {
+        return convertToEntry(roomRepository.findById(roomId).get());
+    }
+
+    public RoomEntry findOneAvailable( Long roomId, Long startDate, Long endDate) {
+        RoomEntity roomEntity = roomRepository.findOneAvailable(
+                roomId,
+                new HashSet<String>(Arrays.asList(BookingState.CONFIRMED.toString(), BookingState.PENDING.toString())),
+                startDate,
+                endDate);
         if(ObjectUtils.isEmpty(roomEntity)) {
             return null;
         }
@@ -123,7 +156,7 @@ public class RoomService {
 
 
     public List<RoomEntity> getAllRoomsOfAHotel(Long hotelId){
-        List<RoomEntity> rooms = roomRepository.getAllRoomsOfAHotel(hotelId);
+        List<RoomEntity> rooms = roomRepository.findByHotelIdIs(hotelId);
         return rooms;
     }
 

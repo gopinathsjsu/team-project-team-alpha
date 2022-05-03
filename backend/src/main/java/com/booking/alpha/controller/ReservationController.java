@@ -5,6 +5,7 @@ import com.booking.alpha.constant.RoomType;
 import com.booking.alpha.entry.BookingRequestEntry;
 import com.booking.alpha.entry.ReservationEntry;
 import com.booking.alpha.service.ReservationService;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,6 +21,11 @@ public class ReservationController {
 
     public ReservationController( ReservationService reservationService) {
         this.reservationService = reservationService;
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<ReservationEntry> get(@PathVariable("id") Long id) {
+        return new ResponseEntity<>(reservationService.findOneById(id), HttpStatus.OK);
     }
 
     @GetMapping("/user/{userId}")
@@ -38,7 +44,7 @@ public class ReservationController {
     }
 
     @PostMapping("/add-to-cart")
-    public ResponseEntity< ReservationEntry > reserveOne(@RequestBody BookingRequestEntry bookingRequestEntry) throws ParseException {
+    public ResponseEntity< ReservationEntry > reserveOne(@RequestBody BookingRequestEntry bookingRequestEntry) throws ParseException, JsonProcessingException {
         return new ResponseEntity<>( reservationService.reserve(bookingRequestEntry), HttpStatus.OK);
     }
 

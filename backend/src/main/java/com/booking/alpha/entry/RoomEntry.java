@@ -25,7 +25,7 @@ public class RoomEntry {
 
     Long id;
 
-    Long hotel_id;
+    Long hotelId;
 
     RoomType type;
 
