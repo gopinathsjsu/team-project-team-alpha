@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -39,6 +40,35 @@ public class RoomController {
     public  ResponseEntity<List<RoomEntity>> getAllRoomsOfAHotel(@PathVariable("hotel_id") Long hotel_id){
         List<RoomEntity> rooms = roomService.getAllRoomsOfAHotel(hotel_id);
         return new ResponseEntity<>(rooms, HttpStatus.OK);
+    }
+
+    @PostMapping("/{id}/upload-image")
+    public ResponseEntity<RoomEntry> uploadImage(@PathVariable("id") Long id, @RequestBody MultipartFile file){
+        RoomEntry roomEntry = roomService.uploadImage(file,id);
+        if(roomEntry != null){
+            return new ResponseEntity<>( roomEntry, HttpStatus.OK);
+        }
+        return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+    }
+
+
+    @PutMapping("/{id}/update")
+    public ResponseEntity<RoomEntry> updateHotel(@PathVariable("id") Long id, @RequestBody RoomEntry roomEntry){
+        RoomEntry updatedRoomEntry = roomService.updateRoom(id, roomEntry);
+        if(updatedRoomEntry != null){
+            return new ResponseEntity<>( updatedRoomEntry, HttpStatus.OK);
+        }
+        return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+    }
+
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<String> deleteRoom(@PathVariable("id") Long id){
+        Boolean deleted = roomService.deleteRoom(id);
+        if(deleted){
+            return new ResponseEntity<>( "Room with id: " + id + " deleted successfully", HttpStatus.OK);
+        }
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
 
