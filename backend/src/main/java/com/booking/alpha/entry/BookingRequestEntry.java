@@ -22,13 +22,11 @@ public class BookingRequestEntry {
 
     Long userId;
 
-    Long hotelId;
+    Long roomId;
 
     String startDate;
 
     String endDate;
-
-    RoomType roomType;
 
     Set<HotelServiceType> serviceTypeSet;
 }

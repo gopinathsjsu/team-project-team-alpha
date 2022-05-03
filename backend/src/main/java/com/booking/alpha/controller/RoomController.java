@@ -5,12 +5,14 @@ import com.booking.alpha.constant.RoomType;
 import com.booking.alpha.entity.RoomEntity;
 import com.booking.alpha.entry.HotelEntry;
 import com.booking.alpha.entry.RoomEntry;
+import com.booking.alpha.entry.RoomSearchPagedRequest;
 import com.booking.alpha.service.RoomService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -41,5 +43,8 @@ public class RoomController {
         return new ResponseEntity<>(rooms, HttpStatus.OK);
     }
 
-
+    @PostMapping("/get-available-rooms")
+    public ResponseEntity<List<RoomEntry>> getRoomsAvailable(@RequestBody RoomSearchPagedRequest roomSearchPagedRequest) throws ParseException {
+        return new ResponseEntity<>( roomService.findAllAvailable(roomSearchPagedRequest), HttpStatus.OK);
+    }
 }

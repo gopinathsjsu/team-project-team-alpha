@@ -3,22 +3,22 @@ package com.booking.alpha.service;
 import com.booking.alpha.configuration.SQSConfiguration;
 import com.booking.alpha.constant.BookingState;
 import com.booking.alpha.constant.ConsumerKeys;
+import com.booking.alpha.constant.HotelServiceType;
 import com.booking.alpha.entity.ReservationEntity;
-import com.booking.alpha.entry.BookingRequestEntry;
-import com.booking.alpha.entry.HotelEntry;
-import com.booking.alpha.entry.ReservationEntry;
-import com.booking.alpha.entry.RoomEntry;
+import com.booking.alpha.entry.*;
 import com.booking.alpha.respository.ReservationRepository;
 import com.booking.alpha.utils.AccountingUtils;
 import com.booking.alpha.utils.SQSUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
 
 import java.text.ParseException;
-import java.util.Date;
+import java.util.Set;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.ArrayList;
 import java.util.stream.Collectors;
 
@@ -85,16 +85,29 @@ public class ReservationService {
         return reservationEntities.stream().map(this::convertToEntry).collect(Collectors.toList());
     }
 
+    @Transactional
     public ReservationEntry reserve(BookingRequestEntry bookingRequestEntry) throws ParseException {
-        Date startDate = accountingUtils.getCheckInTime(bookingRequestEntry.getStartDate());
-        Date endDate = accountingUtils.getCheckOutTime(bookingRequestEntry.getEndDate());
-        RoomEntry roomToBook = roomService.findOneAvailable( bookingRequestEntry.getHotelId(), bookingRequestEntry.getRoomType(), startDate.getTime(), endDate.getTime());
+        Long roomId = bookingRequestEntry.getRoomId();
+        Long startDate = accountingUtils.getCheckInTime(bookingRequestEntry.getStartDate()).getTime();
+        Long endDate = accountingUtils.getCheckOutTime(bookingRequestEntry.getEndDate()).getTime();
+        Set<HotelServiceType> bookingRequestHotelServiceTypeSet = bookingRequestEntry.getServiceTypeSet();
+        RoomEntry roomEntryLocked = roomService.findOneByIdWithLock(roomId);
+        Long hotelId = roomEntryLocked.getHotelId();
+        RoomEntry roomToBook = roomService.findOneAvailable( roomId, startDate, endDate);
         if(ObjectUtils.isEmpty(roomToBook)) {
             return null;
         }
-        HotelEntry hotelEntry = hotelService.findOneById(roomToBook.getHotel_id());
-        ReservationEntry reservationEntry = new ReservationEntry(null, bookingRequestEntry.getUserId(), roomToBook.getId(), startDate.getTime(), endDate.getTime(), BookingState.PENDING, hotelEntry.getServiceList());
-        ReservationEntry reservationCompleted = convertToEntry(reservationRepository.save(convertToEntity(reservationEntry)));
+        HotelEntry hotelEntry = hotelService.findOneById(hotelId);
+        List<ServiceEntry> hotelEntryServiceList = hotelEntry.getServiceList();
+        Map<HotelServiceType, ServiceEntry> serviceTypeServiceEntryMap = hotelEntryServiceList.stream().collect(Collectors.toMap(ServiceEntry::getType, serviceEntry -> serviceEntry));
+        List<ServiceEntry> serviceEntriesToCreate = new ArrayList<>();
+        if(!ObjectUtils.isEmpty(bookingRequestEntry.getServiceTypeSet())) {
+            for(HotelServiceType hotelServiceType: bookingRequestHotelServiceTypeSet) {
+                serviceEntriesToCreate.add(serviceTypeServiceEntryMap.get(hotelServiceType));
+            }
+        }
+        ReservationEntry reservationEntryToCreate = new ReservationEntry(null, bookingRequestEntry.getUserId(), roomToBook.getId(), startDate, endDate, BookingState.PENDING, serviceEntriesToCreate);
+        ReservationEntry reservationCompleted = convertToEntry(reservationRepository.save(convertToEntity(reservationEntryToCreate)));
         publishForRemoval( reservationCompleted.getId());
         return reservationCompleted;
     }
