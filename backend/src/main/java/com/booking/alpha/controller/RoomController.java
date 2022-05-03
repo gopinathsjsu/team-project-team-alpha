@@ -10,6 +10,7 @@ import com.booking.alpha.service.RoomService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.text.ParseException;
@@ -37,7 +38,7 @@ public class RoomController {
         return new ResponseEntity<>( newRoomEntry, HttpStatus.CREATED);
     }
 
-    @GetMapping("/{hotel_id}")
+    @GetMapping("/hotel/{hotel_id}")
     public  ResponseEntity<List<RoomEntity>> getAllRoomsOfAHotel(@PathVariable("hotel_id") Long hotel_id){
         List<RoomEntity> rooms = roomService.getAllRoomsOfAHotel(hotel_id);
         return new ResponseEntity<>(rooms, HttpStatus.OK);

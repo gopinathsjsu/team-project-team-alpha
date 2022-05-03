@@ -57,7 +57,9 @@ public class RoomService {
         return roomEntities.stream().map(this::convertToEntry).collect(Collectors.toList());
     }
 
-    @Transactional
+    /*
+    * DO NOT put transactional on this method
+    * */
     public RoomEntry findOneByIdWithLock( Long roomId) {
         return convertToEntry(roomRepository.findById(roomId).get());
     }

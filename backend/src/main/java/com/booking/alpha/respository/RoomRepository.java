@@ -16,7 +16,6 @@ import java.util.Set;
 @Repository
 public interface RoomRepository extends JpaRepository<RoomEntity, Long> {
 
-    @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query(value = "  SELECT * FROM   room LEFT JOIN reservation ON room.id = reservation.room_id AND ( ( ( :startDate <= reservation.start_time ) AND ( reservation.start_time <= :endDate ) ) OR ( ( :startDate <= reservation.end_time ) AND ( reservation.end_time <= :endDate ) ) OR ( ( reservation.start_time <= :startDate ) AND ( :endDate <= reservation.end_time ) ) ) AND ( reservation.booking_state in :bookingStates ) WHERE room.id = :roomId AND reservation.room_id IS NULL limit 1", nativeQuery = true)
     public RoomEntity findOneAvailable(@Param("roomId") Long roomId, @Param("bookingStates") Set<String> bookingStates, @Param("startDate") Long startDate, @Param("endDate") Long endDate);
 

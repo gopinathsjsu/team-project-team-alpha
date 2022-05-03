@@ -9,6 +9,7 @@ import com.booking.alpha.entry.*;
 import com.booking.alpha.respository.ReservationRepository;
 import com.booking.alpha.utils.AccountingUtils;
 import com.booking.alpha.utils.SQSUtils;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -60,7 +61,7 @@ public class ReservationService {
     }
 
     public ReservationEntry findOneById( Long reservationId) {
-        return convertToEntry(reservationRepository.getById(reservationId));
+        return convertToEntry(reservationRepository.findById(reservationId).get());
     }
 
     public ReservationEntry removeReservation( Long reservationId) {
@@ -86,7 +87,7 @@ public class ReservationService {
     }
 
     @Transactional
-    public ReservationEntry reserve(BookingRequestEntry bookingRequestEntry) throws ParseException {
+    public ReservationEntry reserve(BookingRequestEntry bookingRequestEntry) throws ParseException, JsonProcessingException {
         Long roomId = bookingRequestEntry.getRoomId();
         Long startDate = accountingUtils.getCheckInTime(bookingRequestEntry.getStartDate()).getTime();
         Long endDate = accountingUtils.getCheckOutTime(bookingRequestEntry.getEndDate()).getTime();
@@ -108,7 +109,7 @@ public class ReservationService {
         }
         ReservationEntry reservationEntryToCreate = new ReservationEntry(null, bookingRequestEntry.getUserId(), roomToBook.getId(), startDate, endDate, BookingState.PENDING, serviceEntriesToCreate);
         ReservationEntry reservationCompleted = convertToEntry(reservationRepository.save(convertToEntity(reservationEntryToCreate)));
-        publishForRemoval( reservationCompleted.getId());
+        publishForRemoval( reservationCompleted);
         return reservationCompleted;
     }
 
@@ -122,9 +123,7 @@ public class ReservationService {
         return updatedEntities.stream().map(this::convertToEntry).collect(Collectors.toList());
     }
 
-    public void publishForRemoval( Long reservationId) {
-        HashMap<String, Object> messageAttributes = new HashMap<>();
-        messageAttributes.put(ConsumerKeys.RESERVATION_ID_KEY, reservationId);
-        sqsUtils.publishMessage( sqsConfiguration.getGetUnReservingQueueUrl(), messageAttributes, null);
+    public void publishForRemoval( ReservationEntry reservationEntry) throws JsonProcessingException {
+        sqsUtils.publishMessage( sqsConfiguration.getGetUnReservingQueueUrl(), null, reservationEntry);
     }
 }

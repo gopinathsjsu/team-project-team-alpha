@@ -7,9 +7,13 @@ import com.booking.alpha.constant.ConsumerKeys;
 import com.booking.alpha.entry.ReservationEntry;
 import com.booking.alpha.service.ReservationService;
 import com.booking.alpha.utils.SQSUtils;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.stereotype.Service;
 
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 
 @Service
@@ -21,9 +25,12 @@ public class SQSConsumer {
 
     private final ReservationService reservationService;
 
-    public SQSConsumer(SQSUtils sqsUtils, SQSConfiguration sqsConfiguration, ReservationService reservationService) {
+    private final ObjectMapper objectMapper;
+
+    public SQSConsumer(SQSUtils sqsUtils, ObjectMapper objectMapper, SQSConfiguration sqsConfiguration, ReservationService reservationService) {
 
         this.sqsUtils = sqsUtils;
+        this.objectMapper = objectMapper;
         this.queueUrl = sqsConfiguration.getGetUnReservingQueueUrl();
         this.reservationService = reservationService;
 
@@ -38,7 +45,7 @@ public class SQSConsumer {
 
     public void start() throws Throwable {
         while(true) {
-            List<Message> messages = sqsUtils.getMessages(queueUrl);
+            List<Message> messages = sqsUtils.getMessages(queueUrl, new HashSet<>(Arrays.asList(ConsumerKeys.RESERVATION_ID_KEY)));
             if(ObjectUtils.isEmpty(messages)) {
                 Thread.sleep(2000L);
             }
@@ -52,10 +59,9 @@ public class SQSConsumer {
 
     Boolean process(Message message) {
         try{
-            Long reservationId = Long.valueOf(message.getAttributes().get(ConsumerKeys.RESERVATION_ID_KEY));
-            ReservationEntry reservationEntry = reservationService.findOneById(reservationId);
+            ReservationEntry reservationEntry = objectMapper.readValue(message.getBody(), new TypeReference<ReservationEntry>() {});
             if(reservationEntry.getBookingState().equals(BookingState.PENDING)) {
-                reservationService.removeReservation(reservationId);
+                reservationService.removeReservation(reservationEntry.getId());
             }
             return true;
         } catch (Throwable e) {

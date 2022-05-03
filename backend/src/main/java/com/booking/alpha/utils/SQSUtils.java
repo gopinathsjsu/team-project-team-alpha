@@ -3,6 +3,7 @@ package com.booking.alpha.utils;
 
 import com.amazonaws.services.sqs.AmazonSQS;
 import com.amazonaws.services.sqs.model.*;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.json.simple.parser.ParseException;
@@ -12,6 +13,7 @@ import org.springframework.util.ObjectUtils;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /*
  * https://www.baeldung.com/aws-queues-java
@@ -31,30 +33,31 @@ public class SQSUtils {
         this.objectMapper = objectMapper;
     }
 
-    public List<Message> getMessages( String queueUrl) throws ParseException {
+    public List<Message> getMessages( String queueUrl, Set<String> attributeNames) throws ParseException {
         ReceiveMessageRequest messageRequest = new ReceiveMessageRequest(queueUrl)
                 .withWaitTimeSeconds(10)
+                .withMessageAttributeNames("All")
                 .withMaxNumberOfMessages(10);
         return amazonSQS.receiveMessage(messageRequest).getMessages();
     }
 
-    public SendMessageResult publishMessage(String queueUrl, HashMap<String, Object> attributes, Object message) {
+    public SendMessageResult publishMessage(String queueUrl, HashMap<String, Object> attributes, Object message) throws JsonProcessingException {
         if(ObjectUtils.isEmpty(attributes)) {
             attributes = new HashMap<>();
         }
         if(ObjectUtils.isEmpty(message)) {
             message = new HashMap<>();
         }
-        int DELAY_SECONDS = 600;
+        int DELAY_SECONDS = 1;
         Map<String, MessageAttributeValue> messageAttributeValueMap = new HashMap<>();
         for( String key: attributes.keySet()) {
             Object value = attributes.get(key);
             MessageAttributeValue attributeValue = new MessageAttributeValue()
-                    .withStringValue(objectMapper.convertValue(value, new TypeReference<String>() {}))
+                    .withStringValue(objectMapper.writeValueAsString(value))
                     .withDataType("String");
             messageAttributeValueMap.put(key, attributeValue);
         }
-        String messageBody = objectMapper.convertValue(message, new TypeReference<String>() {});
+        String messageBody = objectMapper.writeValueAsString(message);
         SendMessageRequest messageRequest = new SendMessageRequest()
                 .withQueueUrl(queueUrl)
                 .withMessageBody(messageBody)
