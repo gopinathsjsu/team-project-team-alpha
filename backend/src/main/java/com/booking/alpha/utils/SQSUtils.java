@@ -41,14 +41,13 @@ public class SQSUtils {
         return amazonSQS.receiveMessage(messageRequest).getMessages();
     }
 
-    public SendMessageResult publishMessage(String queueUrl, HashMap<String, Object> attributes, Object message) throws JsonProcessingException {
+    public SendMessageResult publishMessage(String queueUrl, HashMap<String, Object> attributes, Object message, int DELAY_SECONDS) throws JsonProcessingException {
         if(ObjectUtils.isEmpty(attributes)) {
             attributes = new HashMap<>();
         }
         if(ObjectUtils.isEmpty(message)) {
             message = new HashMap<>();
         }
-        int DELAY_SECONDS = 1;
         Map<String, MessageAttributeValue> messageAttributeValueMap = new HashMap<>();
         for( String key: attributes.keySet()) {
             Object value = attributes.get(key);

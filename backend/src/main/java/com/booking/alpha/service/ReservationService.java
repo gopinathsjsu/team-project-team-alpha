@@ -124,6 +124,6 @@ public class ReservationService {
     }
 
     public void publishForRemoval( ReservationEntry reservationEntry) throws JsonProcessingException {
-        sqsUtils.publishMessage( sqsConfiguration.getGetUnReservingQueueUrl(), null, reservationEntry);
+        sqsUtils.publishMessage( sqsConfiguration.getGetUnReservingQueueUrl(), null, reservationEntry, 600);
     }
 }
