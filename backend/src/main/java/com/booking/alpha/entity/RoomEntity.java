@@ -40,6 +40,28 @@ public class RoomEntity {
     Long hotelId;
 
     @Column
+    //@NonNull
+    String name;
+
+
+    @Column
+    //@NonNull
+    String description;
+
+    @Column
+    //@NonNull
+    Long maxOccupants;
+
+    @Column
+    //@NonNull
+    Long adults;
+
+    @Column
+    //@NonNull
+    Long children;
+
+
+    @Column
     @NonNull
     @Enumerated(EnumType.STRING)
     RoomType type;
@@ -47,4 +69,9 @@ public class RoomEntity {
     @Column
     @NonNull
     Long cost;
+
+    @Column
+    String imageUrl;
+
+
 }

@@ -12,6 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -31,7 +32,6 @@ public class RoomController {
         return new ResponseEntity<>(Arrays.asList(RoomType.values()), HttpStatus.OK);
     }
 
-
     @PostMapping
     public ResponseEntity<RoomEntry> addRoom(@RequestBody RoomEntry roomEntry) {
         RoomEntry newRoomEntry = roomService.addRoom(roomEntry);
@@ -48,4 +48,35 @@ public class RoomController {
     public ResponseEntity<List<RoomEntry>> getRoomsAvailable(@RequestBody RoomSearchPagedRequest roomSearchPagedRequest) throws ParseException {
         return new ResponseEntity<>( roomService.findAllAvailable(roomSearchPagedRequest), HttpStatus.OK);
     }
+
+    @PostMapping("/{id}/upload-image")
+    public ResponseEntity<RoomEntry> uploadImage(@PathVariable("id") Long id, @RequestBody MultipartFile file){
+        RoomEntry roomEntry = roomService.uploadImage(file,id);
+        if(roomEntry != null){
+            return new ResponseEntity<>( roomEntry, HttpStatus.OK);
+        }
+        return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+    }
+
+
+    @PutMapping("/{id}")
+    public ResponseEntity<RoomEntry> updateHotel(@PathVariable("id") Long id, @RequestBody RoomEntry roomEntry){
+        RoomEntry updatedRoomEntry = roomService.updateRoom(id, roomEntry);
+        if(updatedRoomEntry != null){
+            return new ResponseEntity<>( updatedRoomEntry, HttpStatus.OK);
+        }
+        return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+    }
+
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<String> deleteRoom(@PathVariable("id") Long id){
+        Boolean deleted = roomService.deleteRoom(id);
+        if(deleted){
+            return new ResponseEntity<>( "Room with id: " + id + " deleted successfully", HttpStatus.OK);
+        }
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
+
+
 }

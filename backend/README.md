@@ -445,34 +445,123 @@ Request Body<br>
 ```yaml
 {
   "hotel_id" : 4,
-  "type" : "SINGLE",
-  "cost":100
+  "type" : "DOUBLE",
+  "cost":120
 }
-```
-Response
-```yaml
-{
-  "id": 14,
-  "hotel_id": 4,
-  "type": "SINGLE",
-  "cost": 100
-}
+Response-
+  {
+    "id": 14,
+    "hotel_id": 4,
+    "type": "DOUBLE",
+    "cost": 120,
+    "name": null,
+    "description": null,
+    "maxOccupants": null,
+    "adults": null,
+    "children": null,
+    "imageUrl": null
+  }
+OR
+ Request- 
+  {
+    "hotel_id" : 4,
+    "type" : "SINGLE",
+    "cost":100,
+    "name" : "Sea Facing",
+    "description" : "300 Square feets, sea facing room",
+    "maxOccupants": 4,
+    "adults": 2,
+    "children": 2
+  }
+Response-
+  {
+    "id": 13,
+    "hotel_id": 4,
+    "type": "SINGLE",
+    "cost": 100,
+    "name": "Sea Facing",
+    "description": "300 Square feets, sea facing room",
+    "maxOccupants": 4,
+    "adults": 2,
+    "children": 2,
+    "imageUrl": null
+  }
 ```
 
-###  2. Get all Rooms of a hotel, GET - http://localhost:8080/v1/room/4
+###  2. Upload image of a room, POST - http://localhost:8080/v1/room/13/upload-image
+Request Body- form-data, key: file
+```yaml
+Response-
+  {
+    "id": 13,
+    "hotel_id": 4,
+    "type": "SINGLE",
+    "cost": 100,
+    "name": "Sea Facing",
+    "description": "300 Square feets, sea facing room",
+    "maxOccupants": 4,
+    "adults": 2,
+    "children": 2,
+    "imageUrl": "https://alpha-hotel-images.s3.us-east-2.amazonaws.com/1651555849007Git_Cheat.jpeg"
+  }
+```
+
+###  3. Update a room, PUT - http://localhost:8080/v1/room/13/update
+```yaml
+Req-
+  {
+"type": "SINGLE",
+"cost": 150,
+"name": "Sea Facing",
+"description": "300 Square feets, sea facing room",
+"maxOccupants": 4,
+"adults": 2,
+"children": 2
+}
+Res-
+  {
+    "id": 13,
+    "hotel_id": 4,
+    "type": "SINGLE",
+    "cost": 150,
+    "name": "Sea Facing",
+    "description": "300 Square feets, sea facing room",
+    "maxOccupants": 4,
+    "adults": 2,
+    "children": 2,
+    "imageUrl": "https://alpha-hotel-images.s3.us-east-2.amazonaws.com/1651555849007Git_Cheat.jpeg"
+  }
+```
+
+###  4. Get all Rooms of a hotel, GET - http://localhost:8080/v1/room/4
 ```yaml
 [
   {
     "id": 14,
     "hotel_id": 4,
-    "type": "SINGLE",
-    "cost": 100
+    "name": null,
+    "description": null,
+    "maxOccupants": null,
+    "adults": null,
+    "children": null,
+    "type": "DOUBLE",
+    "cost": 120,
+    "imageUrl": null
   },
   {
     "id": 13,
     "hotel_id": 4,
-    "type": "SUITE",
-    "cost": 100
+    "name": "Sea Facing",
+    "description": "300 Square feets, sea facing room",
+    "maxOccupants": 4,
+    "adults": 2,
+    "children": 2,
+    "type": "SINGLE",
+    "cost": 150,
+    "imageUrl": "https://alpha-hotel-images.s3.us-east-2.amazonaws.com/1651555849007Git_Cheat.jpeg"
   }
 ]
 ```
+###  5. Delete a Rooms of a hotel, DELETE - http://localhost:8080/v1/room/13
+res-
+Room with id: 13 deleted successfully
