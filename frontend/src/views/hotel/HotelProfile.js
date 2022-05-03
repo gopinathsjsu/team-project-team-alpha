@@ -24,7 +24,12 @@ import { useState } from 'react';
 import { Image } from 'react-bootstrap/esm';
 import {  createMuiTheme } from '@material-ui/core/styles';
 import { MenuItem } from '@mui/material';
-
+import FormLabel from '@mui/material/FormLabel';
+import FormControl from '@mui/material/FormControl';
+import FormGroup from '@mui/material/FormGroup';
+import FormControlLabel from '@mui/material/FormControlLabel';
+import FormHelperText from '@mui/material/FormHelperText';
+import Checkbox from '@mui/material/Checkbox';
 
 const theme = createTheme();
 const deliveryModes = [{
@@ -103,24 +108,33 @@ export default function HotelProfile() {
             });
 
     };
-    useEffect(async () => {
-        const restaurantId = localStorage.getItem('RestaurantId');
-        const response = await axios.get(`${backendServer}/restaurant/${restaurantId}`);
+    useEffect(  () => {
+        // const restaurantId = localStorage.getItem('RestaurantId');
+        // const response = await axios.get(`${backendServer}/v1/hotel/1`);
 
-        console.log(response)
-        const restaurant = response.data;
-        setName(restaurant.RestaurantName);
-        setPhone(restaurant.PhoneNumber);
-        setPincode(restaurant.PinCode);
-        setFrmHrs(restaurant.WorkHrsFrom);
-        setToHrs(restaurant.WorkHrsTo);
-        setCity(restaurant.City);
-        setDesc(restaurant.RestaurantDesc);
-        setCountry(restaurant.Country);
-        setState(restaurant.State);
-        setRestaurantId(restaurant.RestaurantId);
+        axios.get(`${backendServer}/v1/hotel/1`)
+        .then((response) => {
+            console.log(response)
+            const restaurant = response.data;
+        setName(restaurant.name);
+        setPhone(restaurant.contactNo);
+        setPincode(restaurant.zipCode);
+        
+        setCity(restaurant.city);
+       
+        setCountry(restaurant.country);
+       
+        setRestaurantId(restaurant.id);
         setImageUrl(restaurant.Image);
-        setMode(restaurant.DeliveryMode)
+        })
+        .catch((err) => {
+          alert(err);
+          return false;
+        });
+
+        //console.log(response)
+        
+        
     }, [])
 
     const onPhotoChange = (event) => {
@@ -137,7 +151,22 @@ export default function HotelProfile() {
         "margin-left": '45%'
     }
 
+    const [state1, setState1] = React.useState({
+        ContinentalBreakfast: false,
+        FitnessRoom: false,
+        PoolJaccuzi: false,
+        Parking: false,
+        Meals: false,
+      });
     
+      const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setState1({
+          ...state1,
+          [event.target.name]: event.target.checked,
+        });
+      };
+
+      const { ContinentalBreakfast, FitnessRoom, PoolJaccuzi, Parking, Meals  } = state1;
 
     return (
         <>
@@ -177,7 +206,7 @@ export default function HotelProfile() {
                                     />
                                 </Grid>
 
-                                <Grid item xs={12}>
+                                {/* <Grid item xs={12}>
                                     <TextField
                                         margin="none"
                                         required
@@ -193,7 +222,7 @@ export default function HotelProfile() {
                                         multiline
                                         minRows="2"
                                     />
-                                </Grid>
+                                </Grid> */}
                                 {/* <Grid item xs={12} sm={6}>
                                     <TextField
                                         margin="none"
@@ -260,7 +289,7 @@ export default function HotelProfile() {
                                 </Grid>
 
 
-                                <Grid item xs={12} sm={4}>
+                                {/* <Grid item xs={12} sm={4}>
                                     <TextField
                                         margin="none"
                                         required
@@ -274,7 +303,7 @@ export default function HotelProfile() {
                                         autoComplete="state"
                                         autoFocus
                                     />
-                                </Grid>
+                                </Grid> */}
 
                                 <Grid item xs={12} sm={4}>
                                     <TextField
@@ -345,6 +374,45 @@ export default function HotelProfile() {
                                     </TextField>
                                 </Grid> */}
                             </Grid>
+
+                            <Box sx={{ display: 'flex' }}>
+      <FormControl sx={{ m: 3 }} component="fieldset" variant="standard">
+        <FormLabel component="legend">Amenities Options</FormLabel>
+        <FormGroup>
+          <FormControlLabel
+            control={
+              <Checkbox checked={ContinentalBreakfast} onChange={handleChange} name="ContinentalBreakfast" />
+            }
+            label="Continental Breakfast"
+          />
+          <FormControlLabel
+            control={
+              <Checkbox checked={FitnessRoom} onChange={handleChange} name="FitnessRoom" />
+            }
+            label="FitnessRoom"
+          />
+          <FormControlLabel
+            control={
+              <Checkbox checked={Parking} onChange={handleChange} name="Parking" />
+            }
+            label="Daily Parking"
+          />
+          <FormControlLabel
+            control={
+              <Checkbox checked={PoolJaccuzi} onChange={handleChange} name="PoolJaccuzi" />
+            }
+            label="Pool & Jaccuzi"
+          />
+          <FormControlLabel
+            control={
+              <Checkbox checked={Meals} onChange={handleChange} name="Meals" />
+            }
+            label="Meals Included"
+          />
+        </FormGroup>
+        
+      </FormControl>
+      </Box>
                             <br />
                             <Button
                                 type="submit"

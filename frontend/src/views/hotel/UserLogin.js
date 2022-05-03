@@ -13,6 +13,20 @@ import bg from ".././../images/trivago.svg"
 
 
 
+import Avatar from '@mui/material/Avatar';
+
+import CssBaseline from '@mui/material/CssBaseline';
+import TextField from '@mui/material/TextField';
+import FormControlLabel from '@mui/material/FormControlLabel';
+import Checkbox from '@mui/material/Checkbox';
+import Link from '@mui/material/Link';
+import Grid from '@mui/material/Grid';
+import Box from '@mui/material/Box';
+import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
+import Typography from '@mui/material/Typography';
+import Container from '@mui/material/Container';
+import { createTheme, ThemeProvider } from '@mui/material/styles';
+import { makeStyles } from '@material-ui/core';
 
 
 
@@ -81,11 +95,13 @@ const UserLogin = () => {
     height: '100vh',
     backgroundImage: `url(${wavebg})`
   }
+  const theme = createTheme();
 
+ 
   return (
-    <>
+    <div style={stylebutton}>
       <Login />
-      <div className="Login" style={stylebutton}>
+      {/* <div className="Login" style={stylebutton}>
         <Form onSubmit={handleSubmit}>
           <img src={bg} width={'200'} height={'150'} style={styleimg} alt='' />
 
@@ -118,8 +134,69 @@ const UserLogin = () => {
           {alert.length > 0 && < Alert variant="danger" > {alert} </Alert>}
 
         </Form>
-      </div>
-    </>
+      </div> */}
+
+<ThemeProvider theme={theme}>
+      <Container  >
+      <img src={bg} width={'200'} height={'150'} style={styleimg} alt='' />
+      
+        <CssBaseline />
+        <Box
+          sx={{
+            marginTop: 8,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+          }}
+        >
+          {/* <Avatar sx={{ m: 1, bgcolor: 'secondary.main' }}>
+            <LockOutlinedIcon />
+          </Avatar>
+          <Typography component="h1" variant="h5">
+            Sign in
+          </Typography> */}
+          <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1 }}>
+            <TextField
+              margin="normal"
+              required
+              fullWidth
+              id="email"
+              label="Email Address"
+              name="email"
+              autoComplete="email"
+              autoFocus
+            />
+            <TextField
+              margin="normal"
+              required
+              fullWidth
+              name="password"
+              label="Password"
+              type="password"
+              id="password"
+              autoComplete="current-password"
+            />
+           <Button block size="lg" type="submit" onClick={() => login()} style={styleimg} disabled={!validateForm()}>
+            Login
+          </Button>
+            <Grid container>
+              <Grid item xs>
+                <Link href="#" variant="body2">
+                  Forgot password?
+                </Link>
+              </Grid>
+              <Grid item>
+                <Link href="/signup" variant="body2">
+                  {"Don't have an account? Sign Up"}
+                </Link>
+              </Grid>
+            </Grid>
+          </Box>
+        </Box>
+        {/* <Copyright sx={{ mt: 8, mb: 4 }} /> */}
+      </Container>
+    </ThemeProvider>
+    </div>
   )
 }
 
