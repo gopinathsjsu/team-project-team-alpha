@@ -476,7 +476,7 @@ OR
 Response-
   {
     "id": 13,
-    "hotel_id": 4,
+    "hotelId": 4,
     "type": "SINGLE",
     "cost": 100,
     "name": "Sea Facing",
@@ -494,7 +494,7 @@ Request Body- form-data, key: file
 Response-
   {
     "id": 13,
-    "hotel_id": 4,
+    "hotelId": 4,
     "type": "SINGLE",
     "cost": 100,
     "name": "Sea Facing",
@@ -506,7 +506,7 @@ Response-
   }
 ```
 
-###  3. Update a room, PUT - http://localhost:8080/v1/room/13/update
+###  3. Update a room, PUT - http://localhost:8080/v1/room/13
 ```yaml
 Req-
   {
@@ -521,7 +521,7 @@ Req-
 Res-
   {
     "id": 13,
-    "hotel_id": 4,
+    "hotelId": 4,
     "type": "SINGLE",
     "cost": 150,
     "name": "Sea Facing",
@@ -538,7 +538,7 @@ Res-
 [
   {
     "id": 14,
-    "hotel_id": 4,
+    "hotelId": 4,
     "name": null,
     "description": null,
     "maxOccupants": null,
@@ -550,7 +550,7 @@ Res-
   },
   {
     "id": 13,
-    "hotel_id": 4,
+    "hotelId": 4,
     "name": "Sea Facing",
     "description": "300 Square feets, sea facing room",
     "maxOccupants": 4,

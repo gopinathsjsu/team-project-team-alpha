@@ -113,7 +113,7 @@ public class RoomService {
             String url = s3Utils.getFileURL("alpha-hotel-images", fileName);
 
             file1.delete();
-            RoomEntry roomEntry = findOneById(id);
+            RoomEntry roomEntry = convertToEntry(roomRepository.getById(id));
             roomEntry.setImageUrl(url);
             RoomEntity roomEntity = convertToEntity(roomEntry);
             RoomEntity createdRoomEntity = roomRepository.save(roomEntity);
@@ -127,7 +127,7 @@ public class RoomService {
 
     public RoomEntry findOneById( Long id) {
         try {
-            RoomEntity roomEntity = roomRepository.findById( id).get();
+            RoomEntity roomEntity = roomRepository.findById(id).get();
             return convertToEntry(roomEntity);
         }catch (Exception exception){
             System.out.println("Exception in RoomEntry findOneById( Long id), msg : " + exception.getMessage());
@@ -135,9 +135,13 @@ public class RoomService {
         }
     }
 
-    public RoomEntry updateRoom(Long id, RoomEntry roomEntry){
+    public RoomEntry findRoom( Long id) {
+        return convertToEntry(roomRepository.getById(id));
+    }
+
+        public RoomEntry updateRoom(Long id, RoomEntry roomEntry){
         try {
-            RoomEntry oldRoomEntry = findOneById(id);
+            RoomEntry oldRoomEntry = convertToEntry(roomRepository.getById(id));
             oldRoomEntry.setType(roomEntry.getType());
             oldRoomEntry.setCost(roomEntry.getCost());
             oldRoomEntry.setName(roomEntry.getName());

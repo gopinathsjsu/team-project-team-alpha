@@ -32,6 +32,12 @@ public class RoomController {
         return new ResponseEntity<>(Arrays.asList(RoomType.values()), HttpStatus.OK);
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<RoomEntry> getRoom(@PathVariable("id") Long id) {
+        RoomEntry roomEntry = roomService.findRoom(id);
+        return new ResponseEntity<>( roomEntry, HttpStatus.OK);
+    }
+
     @PostMapping
     public ResponseEntity<RoomEntry> addRoom(@RequestBody RoomEntry roomEntry) {
         RoomEntry newRoomEntry = roomService.addRoom(roomEntry);
