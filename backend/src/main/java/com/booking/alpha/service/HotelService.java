@@ -101,8 +101,9 @@ public class HotelService {
 
         try(FileOutputStream outputStream = new FileOutputStream(file1)){
             outputStream.write(file.getBytes());
-            s3Utils.uploadFile("alpha-hotel-images","hotel-1", new FileInputStream(file1));
-            String url = s3Utils.getFileURL("alpha-hotel-images", fileName);
+            String folderName = String.format("hotel-%s",id);
+            s3Utils.uploadFile("alpha-hotel-images",folderName, new FileInputStream(file1));
+            String url = s3Utils.getFileURL("alpha-hotel-images", folderName);
 
             file1.delete();
             HotelEntry hotelEntry = findOneById(id);
