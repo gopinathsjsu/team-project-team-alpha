@@ -8,7 +8,7 @@ create table room (
     max_occupants bigint,
     adults bigint,
     children bigint,
-    image_url varchar(256),
+    image_url varchar(512),
     foreign key (hotel_id) references hotel(id)
 );
 

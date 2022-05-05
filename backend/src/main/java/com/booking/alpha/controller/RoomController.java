@@ -45,8 +45,8 @@ public class RoomController {
     }
 
     @GetMapping("/hotel/{hotel_id}")
-    public  ResponseEntity<List<RoomEntity>> getAllRoomsOfAHotel(@PathVariable("hotel_id") Long hotel_id){
-        List<RoomEntity> rooms = roomService.getAllRoomsOfAHotel(hotel_id);
+    public  ResponseEntity<List<RoomEntry>> getAllRoomsOfAHotel(@PathVariable("hotel_id") Long hotel_id){
+        List<RoomEntry> rooms = roomService.getAllRoomsOfAHotel(hotel_id);
         return new ResponseEntity<>(rooms, HttpStatus.OK);
     }
 

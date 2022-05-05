@@ -33,6 +33,9 @@ public class UserService {
     public UserEntry convertToEntry(UserEntity userEntity) {
         UserEntry userEntry = new UserEntry();
         BeanUtils.copyProperties( userEntity, userEntry);
+        String folderName = String.format("user-%s",userEntry.getId());
+        String url = s3Utils.getFileURL("alpha-hotel-images", folderName);
+        userEntry.setImageUrl(url);
         return userEntry;
     }
 
@@ -74,12 +77,16 @@ public class UserService {
 
         try(FileOutputStream outputStream = new FileOutputStream(file1)){
             outputStream.write(file.getBytes());
-            s3Utils.uploadFile("alpha-hotel-images","hotel-1", new FileInputStream(file1));
-            String url = s3Utils.getFileURL("alpha-hotel-images", fileName);
+//            s3Utils.uploadFile("alpha-hotel-images","hotel-1", new FileInputStream(file1));
+//            String url = s3Utils.getFileURL("alpha-hotel-images", fileName);
+
+            String folderName = String.format("user-%s",id);
+            s3Utils.uploadFile("alpha-hotel-images",folderName, new FileInputStream(file1));
+            String url = s3Utils.getFileURL("alpha-hotel-images", folderName);
 
             file1.delete();
             UserEntry userEntry = findOneById(id);
-            userEntry.setImageUrl(url);
+            // userEntry.setImageUrl(url);
             UserEntity userEntity = convertToEntity(userEntry);
             UserEntity createdUserEntity = userRepository.save(userEntity);
             return convertToEntry(createdUserEntity);
@@ -138,7 +145,7 @@ public class UserService {
             oldUserEntry.setEmailId(userEntry.getEmailId());
             oldUserEntry.setPassword(userEntry.getPassword());
             oldUserEntry.setRewardPoints(userEntry.getRewardPoints());
-            oldUserEntry.setImageUrl(userEntry.getImageUrl());
+            // oldUserEntry.setImageUrl(userEntry.getImageUrl());
             oldUserEntry.setId(userEntry.getId());
 
             UserEntity userEntity = convertToEntity(oldUserEntry);

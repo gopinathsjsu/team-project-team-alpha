@@ -55,6 +55,9 @@ public class HotelService {
     public HotelEntry convertToEntry(HotelEntity hotelEntity) {
         HotelEntry hotelEntry = new HotelEntry();
         BeanUtils.copyProperties( hotelEntity, hotelEntry);
+        String folderName = String.format("hotel-%s",hotelEntry.getId());
+        String url = s3Utils.getFileURL("alpha-hotel-images", folderName);
+        hotelEntry.setImageUrl(url);
         return hotelEntry;
     }
 
@@ -107,7 +110,7 @@ public class HotelService {
 
             file1.delete();
             HotelEntry hotelEntry = findOneById(id);
-            hotelEntry.setImageUrl(url);
+            // hotelEntry.setImageUrl(url);
             HotelEntity hotelEntity = convertToEntity(hotelEntry);
             HotelEntity createdHotelEntity = hotelRepository.save(hotelEntity);
             return convertToEntry(createdHotelEntity);
