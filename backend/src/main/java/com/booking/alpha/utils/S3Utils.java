@@ -13,6 +13,8 @@ import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Service;
 
 import java.io.InputStream;
+import java.util.Calendar;
+import java.util.Date;
 
 @Service
 @FieldDefaults(level= AccessLevel.PRIVATE)
@@ -30,6 +32,9 @@ public class S3Utils {
     }
 
     public String getFileURL(String bucketName, String fileName){
-        return (s3Client.getUrl(bucketName, fileName)).toString();
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(new Date());
+        calendar.add(Calendar.DATE, 6);
+        return s3Client.generatePresignedUrl( bucketName, fileName, calendar.getTime()).toString();
     }
 }
