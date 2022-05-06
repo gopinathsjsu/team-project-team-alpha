@@ -37,12 +37,7 @@ import { MenuItem } from '@mui/material';
 
 
 
-import FormLabel from '@mui/material/FormLabel';
-import FormControl from '@mui/material/FormControl';
-import FormGroup from '@mui/material/FormGroup';
-import FormControlLabel from '@mui/material/FormControlLabel';
-import FormHelperText from '@mui/material/FormHelperText';
-import Checkbox from '@mui/material/Checkbox';
+
 
 const theme = createTheme();
 
@@ -135,21 +130,21 @@ const AddRoom = () => {
 
     };
 
-    useEffect(async () => {
-        const dishId = sessionStorage.getItem('dishId');
+    // useEffect(async () => {
+    //     const dishId = sessionStorage.getItem('dishId');
 
-        if (dishId) {
-            const response = await axios.get(`${backendServer}/dishes/${dishId}`);
-            console.log("Dishes response", response)
-            const dish = response.data;
-            setName(dish.DishName);
-             setDesc(dish.DishDesc);
-             setCategory(dish.DishCategory);
-             setType(dish.DishType);
-             setPrice(dish.Price);
-             setImageUrl(dish.DishImage);
-         }
-    }, [])
+    //     if (dishId) {
+    //         const response = await axios.get(`${backendServer}/dishes/${dishId}`);
+    //         console.log("Dishes response", response)
+    //         const dish = response.data;
+    //         setName(dish.DishName);
+    //          setDesc(dish.DishDesc);
+    //          setCategory(dish.DishCategory);
+    //          setType(dish.DishType);
+    //          setPrice(dish.Price);
+    //          setImageUrl(dish.DishImage);
+    //      }
+    // }, [])
 
     const onPhotoChange = (event) => {
         if (event.target.files.length === 0)
@@ -180,22 +175,7 @@ const AddRoom = () => {
 
     //     }
     // }, [])
-    const [state, setState] = React.useState({
-        ContinentalBreakfast: false,
-        FitnessRoom: false,
-        PoolJaccuzi: false,
-        Parking: false,
-        Meals: false,
-      });
     
-      const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        setState({
-          ...state,
-          [event.target.name]: event.target.checked,
-        });
-      };
-
-      const { ContinentalBreakfast, FitnessRoom, PoolJaccuzi, Parking, Meals  } = state;
 
     return (
         <>
@@ -374,44 +354,7 @@ const AddRoom = () => {
                                     />
                                 </Grid>
 
-                                <Box sx={{ display: 'flex' }}>
-      <FormControl sx={{ m: 3 }} component="fieldset" variant="standard">
-        <FormLabel component="legend">Amenities Options</FormLabel>
-        <FormGroup>
-          <FormControlLabel
-            control={
-              <Checkbox checked={ContinentalBreakfast} onChange={handleChange} name="ContinentalBreakfast" />
-            }
-            label="Continental Breakfast"
-          />
-          <FormControlLabel
-            control={
-              <Checkbox checked={FitnessRoom} onChange={handleChange} name="FitnessRoom" />
-            }
-            label="FitnessRoom"
-          />
-          <FormControlLabel
-            control={
-              <Checkbox checked={Parking} onChange={handleChange} name="Parking" />
-            }
-            label="Daily Parking"
-          />
-          <FormControlLabel
-            control={
-              <Checkbox checked={PoolJaccuzi} onChange={handleChange} name="PoolJaccuzi" />
-            }
-            label="Pool & Jaccuzi"
-          />
-          <FormControlLabel
-            control={
-              <Checkbox checked={Meals} onChange={handleChange} name="Meals" />
-            }
-            label="Meals Included"
-          />
-        </FormGroup>
-        
-      </FormControl>
-      </Box>
+
                                 <Grid item xs={12}>
                                     <Button
                                         type="submit"

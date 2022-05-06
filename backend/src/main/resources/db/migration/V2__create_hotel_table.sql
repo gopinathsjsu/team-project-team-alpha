@@ -21,7 +21,6 @@ create table hotel(
                       country varchar(128),
                       zip_code varchar(128),
                       password varchar(256) not null,
-                      image_url varchar(256),
                       service_list json
 )engine=InnoDB;
 

@@ -55,6 +55,9 @@ public class HotelService {
     public HotelEntry convertToEntry(HotelEntity hotelEntity) {
         HotelEntry hotelEntry = new HotelEntry();
         BeanUtils.copyProperties( hotelEntity, hotelEntry);
+        String folderName = String.format("hotel-%s",hotelEntry.getId());
+        String url = s3Utils.getFileURL("alpha-hotel-images", folderName);
+        hotelEntry.setImageUrl(url);
         return hotelEntry;
     }
 
@@ -101,12 +104,13 @@ public class HotelService {
 
         try(FileOutputStream outputStream = new FileOutputStream(file1)){
             outputStream.write(file.getBytes());
-            s3Utils.uploadFile("alpha-hotel-images","hotel-1", new FileInputStream(file1));
-            String url = s3Utils.getFileURL("alpha-hotel-images", fileName);
+            String folderName = String.format("hotel-%s",id);
+            s3Utils.uploadFile("alpha-hotel-images",folderName, new FileInputStream(file1));
+            String url = s3Utils.getFileURL("alpha-hotel-images", folderName);
 
             file1.delete();
             HotelEntry hotelEntry = findOneById(id);
-            hotelEntry.setImageUrl(url);
+            // hotelEntry.setImageUrl(url);
             HotelEntity hotelEntity = convertToEntity(hotelEntry);
             HotelEntity createdHotelEntity = hotelRepository.save(hotelEntity);
             return convertToEntry(createdHotelEntity);

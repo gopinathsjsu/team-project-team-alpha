@@ -31,35 +31,12 @@ public class RoomEntity {
 
     @Id
     @Column
-    //@NonNull
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
 
     @Column
     @NonNull
     Long hotelId;
-
-    @Column
-    //@NonNull
-    String name;
-
-
-    @Column
-    //@NonNull
-    String description;
-
-    @Column
-    //@NonNull
-    Long maxOccupants;
-
-    @Column
-    //@NonNull
-    Long adults;
-
-    @Column
-    //@NonNull
-    Long children;
-
 
     @Column
     @NonNull
@@ -71,7 +48,17 @@ public class RoomEntity {
     Long cost;
 
     @Column
-    String imageUrl;
+    String name;
 
+    @Column
+    String description;
 
+    @Column
+    Long maxOccupants;
+
+    @Column
+    Long adults;
+
+    @Column
+    Long children;
 }

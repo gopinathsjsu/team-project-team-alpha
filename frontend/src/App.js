@@ -1,7 +1,7 @@
 import './App.css';
 import LandPage from "./views/Dashboard"
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
-import UserLogin from "./views/hotel/UserLogin"
+import HotelLogin from "./views/hotel/HotelLogin"
 import HotelRegister from "./views/hotel/HotelRegister";
 import HotelProfile from "./views/hotel/HotelProfile"
 import HotelDashboard from './views/hotel/HotelDashboard';
@@ -11,6 +11,7 @@ import CustomerHotelRooms from './components/DashBoard/CustomerHotelRooms';
 import LandingPage from './components/DashBoard/LandingPage';
 import CustomerProfile from './components/Profile/CustomerProfile';
 import ConfirmedBooking from './components/DashBoard/ConfirmedBooking';
+import ViewBooking from "./views/hotel/ViewBooking"
 
 const App = () => {
   return (
@@ -18,7 +19,7 @@ const App = () => {
       <BrowserRouter>
         <Routes>
           <Route path="/" exact element={<LandPage />}></Route>
-          <Route path="/UserLogin" exact element={<UserLogin />}></Route>
+          <Route path="/HotelLogin" exact element={<HotelLogin />}></Route>
           <Route path="/HotelRegister" exact element={<HotelRegister />}></Route>
           <Route path="/HotelProfile" exact element={<HotelProfile />}></Route>
           <Route path="/HotelDashboard" exact element={<HotelDashboard />}></Route>
@@ -28,6 +29,7 @@ const App = () => {
           <Route path="/customerHotelRooms" exact element={<CustomerHotelRooms />}></Route>
           <Route path="/customerProfile" exact element={<CustomerProfile />}></Route>
           <Route path="/customer/booking-confirmed" exact element={<ConfirmedBooking></ConfirmedBooking>}></Route>
+          <Route path="/ViewBooking" exact element={<ViewBooking />}></Route>
         </Routes>
       </BrowserRouter>
     </div>

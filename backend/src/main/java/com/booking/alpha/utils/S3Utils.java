@@ -12,7 +12,10 @@ import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.io.InputStream;
+import java.util.Calendar;
+import java.util.Date;
 
 @Service
 @FieldDefaults(level= AccessLevel.PRIVATE)
@@ -25,11 +28,16 @@ public class S3Utils {
         s3Client = AmazonS3ClientBuilder.standard().withCredentials(new AWSStaticCredentialsProvider(awsCredentials)).withRegion(Regions.US_EAST_2).build();
     }
 
-    public void uploadFile(String bucketName, String folder, InputStream inputStream) {
-        s3Client.putObject( bucketName, folder, inputStream, new ObjectMetadata());
+    public void uploadFile(String bucketName, String folder, InputStream inputStream) throws IOException {
+        ObjectMetadata objectMetadata = new ObjectMetadata();
+        objectMetadata.setContentLength(inputStream.available());
+        s3Client.putObject( bucketName, folder, inputStream, objectMetadata);
     }
 
     public String getFileURL(String bucketName, String fileName){
-        return (s3Client.getUrl(bucketName, fileName)).toString();
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(new Date());
+        calendar.add(Calendar.DATE, 6);
+        return s3Client.generatePresignedUrl( bucketName, fileName, calendar.getTime()).toString();
     }
 }

@@ -56,7 +56,18 @@ public class RoomService {
     RoomEntry convertToEntry( RoomEntity roomEntity) {
         RoomEntry roomEntry = new RoomEntry();
         BeanUtils.copyProperties( roomEntity, roomEntry);
+        String folderName = String.format("room-%s",roomEntry.getId());
+        String url = s3Utils.getFileURL("alpha-hotel-images", folderName);
+        roomEntry.setImageUrl(url);
         return roomEntry;
+    }
+
+    public List<RoomEntry> findAllById( Set<Long> ids) {
+        List<RoomEntity> roomEntities = roomRepository.findAllById(ids);
+        if(ObjectUtils.isEmpty(roomEntities)) {
+            return new ArrayList<>();
+        }
+        return roomEntities.stream().map(this::convertToEntry).collect(Collectors.toList());
     }
 
     public List<RoomEntry> findAllAvailable(RoomSearchPagedRequest roomSearchPagedRequest) throws ParseException {
@@ -101,7 +112,6 @@ public class RoomService {
     }
 
     public RoomEntry uploadImage(MultipartFile file, Long id){
-        //File file1 = new File(file.getOriginalFilename());
 
         Timestamp timestamp = new Timestamp(System.currentTimeMillis());
         String fileName = timestamp.getTime() + file.getOriginalFilename();
@@ -109,18 +119,21 @@ public class RoomService {
 
         try(FileOutputStream outputStream = new FileOutputStream(file1)){
             outputStream.write(file.getBytes());
-            s3Utils.uploadFile("alpha-hotel-images","hotel-1", new FileInputStream(file1));
-            String url = s3Utils.getFileURL("alpha-hotel-images", fileName);
+
+            String folderName = String.format("room-%s",id);
+            s3Utils.uploadFile("alpha-hotel-images",folderName, new FileInputStream(file1));
+            String url = s3Utils.getFileURL("alpha-hotel-images", folderName);
 
             file1.delete();
             RoomEntry roomEntry = convertToEntry(roomRepository.getById(id));
-            roomEntry.setImageUrl(url);
+            //roomEntry.setImageUrl(url);
             RoomEntity roomEntity = convertToEntity(roomEntry);
             RoomEntity createdRoomEntity = roomRepository.save(roomEntity);
             return convertToEntry(createdRoomEntity);
         }
         catch (Exception exception){
-            System.out.println("Exception in RoomEntry uploadImage(MultipartFile file, Long id), msg :  " + exception.getMessage());
+            exception.printStackTrace();
+            System.out.println("Exception in RoomEntry uploadImage(MultipartFile file, Long id), msg :  " );
             return null;
         }
     }
@@ -159,9 +172,17 @@ public class RoomService {
     }
 
 
-    public List<RoomEntity> getAllRoomsOfAHotel(Long hotelId){
+    public List<RoomEntry> getAllRoomsOfAHotel(Long hotelId){
         List<RoomEntity> rooms = roomRepository.findByHotelIdIs(hotelId);
-        return rooms;
+        List<RoomEntry> roomEntries = new ArrayList<>();
+        if(rooms.size() > 0){
+            for (RoomEntity roomEntity:rooms
+                 ) {
+                RoomEntry temp = convertToEntry(roomEntity);
+                roomEntries.add(temp);
+            }
+        }
+        return roomEntries;
     }
 
     public boolean deleteRoom(Long id){
