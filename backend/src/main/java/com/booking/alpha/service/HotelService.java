@@ -68,18 +68,15 @@ public class HotelService {
     }
 
     public HotelEntry findOneById( Long id) {
-        /*
-        System.out.println(" Looking up for Id "+id);
-        HotelEntity hotelEntity = hotelRepository.findById(id).get();
-        return convertToEntry(hotelEntity);
-         */
-        try {
-            HotelEntity hotelEntity = hotelRepository.findById( id).get();
-            return convertToEntry(hotelEntity);
-        }catch (Exception exception){
-            System.out.println("Exception in HotelEntry findOneById( Long id), msg : " + exception.getMessage());
-            return null;
+        return convertToEntry(hotelRepository.findById( id).get());
+    }
+
+    public List<HotelEntry> findAllByIds(Set<Long> ids) {
+        if(ObjectUtils.isEmpty(ids)) {
+            return new ArrayList<>();
         }
+        List<HotelEntity> hotelEntities = hotelRepository.findAllById(ids);
+        return hotelEntities.stream().map(this::convertToEntry).collect(Collectors.toList());
     }
 
     public HotelEntry create(HotelEntry hotelEntry) {

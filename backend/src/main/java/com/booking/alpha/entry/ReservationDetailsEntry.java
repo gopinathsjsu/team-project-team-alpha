@@ -21,6 +21,8 @@ public class ReservationDetailsEntry {
 
     Long userId;
 
+    HotelEntry hotelEntry;
+
     RoomEntry roomEntry;
 
     Long startTime;

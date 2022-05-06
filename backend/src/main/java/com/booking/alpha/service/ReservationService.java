@@ -80,10 +80,13 @@ public class ReservationService {
 
     public List<ReservationDetailsEntry> convertToDetails( List<ReservationEntry> reservationEntries) {
         List<RoomEntry> roomEntries = roomService.findAllById(reservationEntries.stream().map(ReservationEntry::getRoomId).collect(Collectors.toSet()));
+        List<HotelEntry> hotelEntries = hotelService.findAllByIds(roomEntries.stream().map(RoomEntry::getHotelId).collect(Collectors.toSet()));
+        Map<Long, HotelEntry> hotelIdMap = hotelEntries.stream().collect(Collectors.toMap(HotelEntry::getId, hotelEntry -> hotelEntry));
         Map<Long, RoomEntry> roomIdMap = roomEntries.stream().collect(Collectors.toMap(RoomEntry::getId, roomEntry -> roomEntry));
         return reservationEntries.stream()
                 .map(reservationEntry -> new ReservationDetailsEntry(
                         reservationEntry.getUserId(),
+                        hotelIdMap.get(roomIdMap.get(reservationEntry.getRoomId()).getHotelId()),
                         roomIdMap.get(reservationEntry.getRoomId()),
                         reservationEntry.getStartTime(),
                         reservationEntry.getEndTime()))
