@@ -24,16 +24,16 @@ const HotelRegister = () => {
 
 
     const Register = () => {
-        axios.post(`${backendServer}/RegisterUser/Restaurant`,
-            { RestaurantName: RestaurantName, useremail: email, userpassword: password }
+        axios.post(`${backendServer}/v1/hotel/register`,
+            { name: RestaurantName, emailId: email, password: password }
         ).then((response) => {
             console.log(response)
             // dispatch(signed(RestaurantName, email));
-            localStorage.setItem("RestaurantId",  response.data.Restaurantid)
-            history.push('/RestaurantDashboard')
+            localStorage.setItem("HotelID",  response.data.id)
+            history('/HotelDashboard')
         })
         .catch((error) => {
-                console.log("catch block")
+                console.log(error)
                 setAlert("Email Already Exists")
             })
     }
