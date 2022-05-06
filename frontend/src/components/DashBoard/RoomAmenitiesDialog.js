@@ -11,6 +11,9 @@ import FormControlLabel from '@mui/material/FormControlLabel';
 import FormGroup from '@mui/material/FormGroup';
 import Checkbox from '@mui/material/Checkbox';
 import { useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { addToCart, setSelectedAmenities, setSelectedHotel } from '../../state/action-creators/hotelActions';
+import { SwapVertOutlined } from '@material-ui/icons';
 
 const options = [
   'Daily Continental Breakfast',
@@ -25,20 +28,36 @@ export default function RoomAmenitiesDialog(props) {
   const [value, setValue] = React.useState(valueProp);
   const radioGroupRef = React.useRef(null);
   const [state, setState] = useState({
-    breakfast: false,
-    fitness: false,
-    swimming: false,
-    parking: false,
-    allMeals: false
+    CONTINENTAL_BREAKFAST: false,
+    FITNESS_ROOM:false,
+    SWIMMING_POOL: false,
+    DAILY_PARKING: false,
+    ALL_MEALS_INCLUDED: false
   });
 
-  const {breakfast, fitness, swimming, parking, allMeals } = state;
+  const {CONTINENTAL_BREAKFAST, FITNESS_ROOM, SWIMMING_POOL, DAILY_PARKING, ALL_MEALS_INCLUDED } = state;
+  const selectedHotel = useSelector((state)=> state.hotels.selectedHotel);
+  const selectedRoom = useSelector((state)=> state.hotels.selectedRoom);
+  const cart = useSelector((state)=> state.hotels.cart);
+  const searchData = useSelector((state) => state.hotels.searchParams);
+  let endDate =  searchData.value[1]?searchData.value[1].toISOString().split('T')[0]: '';
+  let startDate = searchData.value[0]?searchData.value[0].toISOString().split('T')[0]: '';
+  const [serviceCostMap, setServiceCostMap] = useState({});
+  const dispatch = useDispatch();
 
   React.useEffect(() => {
+    if(selectedHotel){
+      var service = selectedHotel.serviceList;
+      var serviceMap = {}
+      for(var i in service){
+        serviceMap[service[i].type] = service[i].cost;
+      }
+      setServiceCostMap(serviceMap);
+    }
     if (!open) {
       setValue(valueProp);
     }
-  }, [valueProp, open]);
+  }, [valueProp, open]);  
 
   const handleEntering = () => {
     if (radioGroupRef.current != null) {
@@ -47,10 +66,34 @@ export default function RoomAmenitiesDialog(props) {
   };
 
   const handleCancel = () => {
+    setState({});
     onClose();
   };
 
   const handleConfirm = () => {
+    let service = {}
+    if(CONTINENTAL_BREAKFAST){
+      service.CONTINENTAL_BREAKFAST = serviceCostMap["CONTINENTAL_BREAKFAST"];
+    }
+    if(FITNESS_ROOM){
+      service.FITNESS_ROOM = serviceCostMap["FITNESS_ROOM"];
+    }
+    if(SWIMMING_POOL){
+      service.SWIMMING_POOL = serviceCostMap["SWIMMING_POOL"];
+    }
+    if(DAILY_PARKING){
+      service.DAILY_PARKING = serviceCostMap["DAILY_PARKING"];
+    }
+    if(ALL_MEALS_INCLUDED){
+      service.ALL_MEALS_INCLUDED = serviceCostMap["ALL_MEALS_INCLUDED"];
+    }
+    dispatch(setSelectedAmenities(service));
+    let item = {
+      room: selectedRoom,
+      amenities: service
+    }
+    let userId = "4"
+    dispatch(addToCart(item,cart,startDate,endDate, userId))
     setState({});
     onClose(value);
   };
@@ -76,31 +119,31 @@ export default function RoomAmenitiesDialog(props) {
       <FormGroup>
           <FormControlLabel
             control={
-              <Checkbox checked={breakfast} onChange={onCheckBoxSelected} name="breakfast" />
+              <Checkbox checked={CONTINENTAL_BREAKFAST} onChange={onCheckBoxSelected} name="CONTINENTAL_BREAKFAST" />
             }
             label="Daily Continental Breakfast"
           />
           <FormControlLabel
             control={
-              <Checkbox checked={fitness} onChange={onCheckBoxSelected} name="fitness" />
+              <Checkbox checked={FITNESS_ROOM} onChange={onCheckBoxSelected} name="FITNESS_ROOM" />
             }
             label="Access to fitness room"
           />
             <FormControlLabel
             control={
-              <Checkbox checked={swimming} onChange={onCheckBoxSelected} name="swimming" />
+              <Checkbox checked={SWIMMING_POOL} onChange={onCheckBoxSelected} name="SWIMMING_POOL" />
             }
             label="Access to Swimming Pool/Jacuzzi"
           />
           <FormControlLabel
             control={
-              <Checkbox checked={parking} onChange={onCheckBoxSelected} name="parking" />
+              <Checkbox checked={DAILY_PARKING} onChange={onCheckBoxSelected} name="DAILY_PARKING" />
             }
             label="Daily Parking"
           />
         <FormControlLabel
             control={
-              <Checkbox checked={allMeals} onChange={onCheckBoxSelected} name="allMeals" />
+              <Checkbox checked={ALL_MEALS_INCLUDED} onChange={onCheckBoxSelected} name="ALL_MEALS_INCLUDED" />
             }
             label="All meals included"
           />

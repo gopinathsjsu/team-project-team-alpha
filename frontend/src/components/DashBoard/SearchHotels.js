@@ -10,6 +10,8 @@ import axios from 'axios';
 import backendServer from '../../Config';
 import { storeSearchParams } from '../../state/action-creators/hotelActions';
 import { useDispatch } from 'react-redux';
+import { useSelector } from 'react-redux';
+import { useEffect } from 'react';
 
 
 
@@ -52,14 +54,23 @@ const SearchHotels = () => {
   const classes = useStyles();
   const navigate = useNavigate();
   const [value, setValue] = useState([null,null]);
-  const [city, setCity] = useState();
+  const [city, setCity] = useState('');
   const dispatch = useDispatch();
+  const search = useSelector((state) => state.hotels.searchParams);
+
+  useEffect(() => {
+    if(search.value){
+      setValue(search.value);
+    }
+    if(search.city){
+      setCity(search.city);
+    }
+  });
 
   const onGo = () => {
     const searchData = {
       city: city,
-      endDate:  value[1]?value[1].toISOString().split('T')[0]: '',
-      startDate: value[0]?value[0].toISOString().split('T')[0]: ''
+      value: value
     }
     dispatch(storeSearchParams(searchData));
   }
@@ -70,7 +81,7 @@ const SearchHotels = () => {
           <Box >
             <Grid container spacing={2}>
               <Grid item xs={5}>
-                <AutoComplete setValue={setCity} />
+                <AutoComplete value={city} setValue={setCity} />
               </Grid>
               <Grid item xs={6}>
                 <BasicDateRangePicker value={value} setValue={setValue} />

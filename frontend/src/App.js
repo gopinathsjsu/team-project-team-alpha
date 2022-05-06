@@ -10,6 +10,7 @@ import CustomerDashBoard from './components/DashBoard/CustomerDashBoard';
 import CustomerHotelRooms from './components/DashBoard/CustomerHotelRooms';
 import LandingPage from './components/DashBoard/LandingPage';
 import CustomerProfile from './components/Profile/CustomerProfile';
+import ConfirmedBooking from './components/DashBoard/ConfirmedBooking';
 import ViewBooking from "./views/hotel/ViewBooking"
 
 const App = () => {
@@ -27,6 +28,7 @@ const App = () => {
           <Route path="/customerDashboard" exact element={<CustomerDashBoard />}></Route>
           <Route path="/customerHotelRooms" exact element={<CustomerHotelRooms />}></Route>
           <Route path="/customerProfile" exact element={<CustomerProfile />}></Route>
+          <Route path="/customer/booking-confirmed" exact element={<ConfirmedBooking></ConfirmedBooking>}></Route>
           <Route path="/ViewBooking" exact element={<ViewBooking />}></Route>
         </Routes>
       </BrowserRouter>

@@ -31,7 +31,10 @@ import { TextField, MenuItem } from '@mui/material';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import { Navbar } from '../Navigation/Navbar';
 import RoomAmenitiesDialog from './RoomAmenitiesDialog';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
+import { useEffect } from 'react';
+import { getHotelRoomDetails, setSelectedRoom } from '../../state/action-creators/hotelActions';
+import { NavbarDashBoard } from '../Navigation/NavbarDashBoard';
 
 const theme = createTheme();
 
@@ -55,21 +58,32 @@ export default function CustomerHotelRooms() {
   const [initialLoad, setInitialLoad] = useState([]);
   const [tempCart, setTempCart] = useState([]);
   const history = useNavigate();
+  const dispatch = useDispatch();
   const [multipleOrderDialog, setMultipleOrderDialog] = useState(false);
   // const [currentHotelDetails, setcurrentHotelDetails] = useState([]);
   const [filterType, setFilterType] = useState('All');
   const [filterCategory, setFilterCategory] = useState('All');
   const [openAmenitiesDialog, setOpenAmenitiesDialog] = useState(false);
   const selectedHotel = useSelector((state)=> state.hotels.selectedHotel);
-
+  const cards = useSelector((state)=>state.hotels.hotelRooms);
+  const searchData = useSelector((state) => state.hotels.searchParams);
+  let endDate =  searchData.value[1]?searchData.value[1].toISOString().split('T')[0]: '';
+  let startDate = searchData.value[0]?searchData.value[0].toISOString().split('T')[0]: '';
 
   const onNewOrder = () => {
 
   };
 
+  useEffect(() => {
+    
+    
+    dispatch(getHotelRoomDetails(selectedHotel.id, startDate, endDate));
+ },[]);
 
 
-  const onAddToCart = (dish) => {
+
+  const onAddToCart = (card) => {
+    dispatch(setSelectedRoom(card));
     setOpenAmenitiesDialog(true);
   };
 
@@ -89,71 +103,13 @@ export default function CustomerHotelRooms() {
 
   };
 
-  var currentHotelDetails = {
-    city: "San Jose",
-    contactNo: "6692927846",
-    country: "United States",
-    emailId: "marriot@gmail.com",
-    id: 0,
-    imageUrl: './images/trivago.jpg',
-    description: "The best place to stay when you are in silicon valley",
-    name: "Marriot",
-    zipCode: "95125"
-  };
-
-  var cards = [{
-    roomId: "12",
-    hotelId: "2331",
-    name: "Suit",
-    type: "<Suit or double or single>",
-    imageUrl: "<imageUrl>",
-    price: 251,
-    description: "The perfect room for a couple",
-    maxNoOfOccupants: 4,
-    noOfAdults: 2,
-    noOfChildren: 2
-  }, {
-    roomId: "12",
-    hotelId: "2331",
-    name: "Suit",
-    type: "<Suit or double or single>",
-    imageUrl: "<imageUrl>",
-    price: 251,
-    description: "The perfect room for a couple",
-    maxNoOfOccupants: 4,
-    noOfAdults: 2,
-    noOfChildren: 2
-  }, {
-    roomId: "12",
-    hotelId: "2331",
-    name: "Suit",
-    type: "<Suit or double or single>",
-    imageUrl: "<imageUrl>",
-    price: 251,
-    description: "The perfect room for a couple",
-    maxNoOfOccupants: 4,
-    noOfAdults: 2,
-    noOfChildren: 2
-  }, {
-    roomId: "12",
-    hotelId: "2331",
-    name: "Suit",
-    type: "<Suit or double or single>",
-    imageUrl: "<imageUrl>",
-    price: 251,
-    description: "The perfect room for a couple",
-    maxNoOfOccupants: 4,
-    noOfAdults: 2,
-    noOfChildren: 2
-  }]
-
   const onCloseAmenitiesDialog = () => {
     setOpenAmenitiesDialog(false);
   }
 
   return (
     <>
-      <Navbar />
+      <NavbarDashBoard />
       <ThemeProvider theme={theme}>
         <CssBaseline />
         <main>
@@ -214,7 +170,7 @@ export default function CustomerHotelRooms() {
           <Container sx={{ py: 8 }} maxWidth="md">
             <Grid container spacing={4}>
               {cards.map((card) => (
-                <Grid item key={card._id} xs={6} sm={3} md={4}>
+                <Grid item key={card.id} xs={6} sm={3} md={4}>
                   <Card
                     sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}
                   >
@@ -224,7 +180,7 @@ export default function CustomerHotelRooms() {
                         // 16:9
                         pt: '0.25%',
                       }}
-                      image={card.ImageUrl}
+                      image={card.imageUrl}
                       alt="random"
                     />
                     <CardContent sx={{ flexGrow: 1 }}>

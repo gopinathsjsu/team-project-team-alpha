@@ -30,7 +30,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import { Navbar } from '../../views/Navbar';
 import { ColorButton4 } from '../Commons';
 import landingPage from '../../images/landingPage.jpeg';
-import { NavbarDashBoard } from '../Navigation/NavbaDashBoard';
+import { NavbarDashBoard } from '../Navigation/NavbarDashBoard';
 import SearchHotels from './SearchHotels';
 import { useDispatch, useSelector } from 'react-redux';
 import { getHotelDetails, setSelectedHotel } from '../../state/action-creators/hotelActions';
@@ -80,8 +80,14 @@ export default function CustomerDashBoard() {
   };
 
   useEffect(() => {
-    console.log("in",searchData);
-    dispatch(getHotelDetails(searchData));
+    if(searchData.city){
+      let payload = {
+        city: searchData.city,
+        endDate:  searchData.value[1]?searchData.value[1].toISOString().split('T')[0]: '',
+        startDate: searchData.value[0]?searchData.value[0].toISOString().split('T')[0]: ''
+      }
+      dispatch(getHotelDetails(payload));
+    }
   },[searchData]);
 
 
@@ -136,6 +142,7 @@ export default function CustomerDashBoard() {
             </div>
 
             <Container sx={{ py: 8 }} maxWidth="md">
+              {cards.length>0 && (
               <Grid container spacing={4}>
                 <TablePagination
                   rowsPerPageOptions={[2, 5, 10]}
@@ -205,6 +212,7 @@ export default function CustomerDashBoard() {
 
                   ))}
               </Grid>
+              )}
             </Container>
           </main>
         </ThemeProvider>
