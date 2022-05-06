@@ -30,7 +30,7 @@ import { makeStyles } from '@material-ui/core';
 
 
 
-const UserLogin = () => {
+const HotelLogin = () => {
   const history = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -39,16 +39,16 @@ const UserLogin = () => {
   // const dispatch = useDispatch();
 
   const login = () => {
-    axios.post(`${backendServer}/LandingPage`,
-      { useremail: email, userpassword: password }
+    axios.post(`${backendServer}/v1/hotel/login`,
+      { emailId: email, password: password }
     ).then((response) => {
-      localStorage.setItem("CustomerID", response.data[0].CustomerId)
+      localStorage.setItem("HotelID", response.data.id)
       console.log(response)
-      sessionStorage.setItem('country',response.data.Country);
-      sessionStorage.setItem('city',response.data.City);
+      //sessionStorage.setItem('country',response.data.Country);
+      //sessionStorage.setItem('city',response.data.City);
 
       // dispatch(logged(response.data[0].CustomerName, response.data[0].EmailId ));
-      history.push('/RestaurantView')
+      history.go('/HotelDashboard')
     })
       .catch((error) => {
         setAlert("Invalid User Name or Password")
@@ -59,9 +59,9 @@ const UserLogin = () => {
 
   console.log(email)
 
-  useEffect(async () => {
-    sessionStorage.setItem('currentUser', email);
-  }, [email]);
+  // useEffect(async () => {
+  //   sessionStorage.setItem('currentUser', email);
+  // }, [email]);
 
   const value = useState(async () => {
     localStorage.getItem('currentUser')
@@ -161,6 +161,8 @@ const UserLogin = () => {
               required
               fullWidth
               id="email"
+              value={email}
+              onChange={(e) => {setEmail(e.target.value); }}
               label="Email Address"
               name="email"
               autoComplete="email"
@@ -174,11 +176,17 @@ const UserLogin = () => {
               label="Password"
               type="password"
               id="password"
+              value={password}
+              onChange={(e) => { setPassword(e.target.value); }}
               autoComplete="current-password"
             />
-           <Button block size="lg" type="submit" onClick={() => login()} style={styleimg} disabled={!validateForm()}>
+           <Button block size="lg" type="submit" onClick={() => login()} style={styleimg} > 
+           {/* disabled={!validateForm()} */}
             Login
           </Button>
+
+          <br></br>
+          {alert.length > 0 && < Alert variant="danger" > {alert} </Alert>}
             <Grid container>
               <Grid item xs>
                 <Link href="#" variant="body2">
@@ -200,4 +208,4 @@ const UserLogin = () => {
   )
 }
 
-export default UserLogin;
+export default HotelLogin;

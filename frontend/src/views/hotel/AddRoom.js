@@ -130,21 +130,21 @@ const AddRoom = () => {
 
     };
 
-    useEffect(async () => {
-        const dishId = sessionStorage.getItem('dishId');
+    // useEffect(async () => {
+    //     const dishId = sessionStorage.getItem('dishId');
 
-        if (dishId) {
-            const response = await axios.get(`${backendServer}/dishes/${dishId}`);
-            console.log("Dishes response", response)
-            const dish = response.data;
-            setName(dish.DishName);
-             setDesc(dish.DishDesc);
-             setCategory(dish.DishCategory);
-             setType(dish.DishType);
-             setPrice(dish.Price);
-             setImageUrl(dish.DishImage);
-         }
-    }, [])
+    //     if (dishId) {
+    //         const response = await axios.get(`${backendServer}/dishes/${dishId}`);
+    //         console.log("Dishes response", response)
+    //         const dish = response.data;
+    //         setName(dish.DishName);
+    //          setDesc(dish.DishDesc);
+    //          setCategory(dish.DishCategory);
+    //          setType(dish.DishType);
+    //          setPrice(dish.Price);
+    //          setImageUrl(dish.DishImage);
+    //      }
+    // }, [])
 
     const onPhotoChange = (event) => {
         if (event.target.files.length === 0)

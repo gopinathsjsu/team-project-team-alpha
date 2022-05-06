@@ -10,7 +10,7 @@ import logo from '../images/uber-eats.svg';
 import newlogo from '../images/UberEATS.png';
 import AccountCircle from '@material-ui/icons/AccountCircle';
 import { Link as RouterLink } from 'react-router-dom';
-import LandingPage from "../views/hotel/UserLogin"
+import LandingPage from "./hotel/HotelLogin"
 
 import { DropdownMenu } from 'react-bootstrap-dropdown-menu';
 

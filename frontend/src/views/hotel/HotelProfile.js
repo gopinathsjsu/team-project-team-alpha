@@ -54,7 +54,7 @@ export default function HotelProfile() {
 //   }
 
     const [image, setImage] = useState('');
-    const [imageUrl, setImageUrl] = useState('');
+    const [imageUrl1, setImageUrl1] = useState('');
     const [name, setName] = useState('');
     const [state, setState] = useState('');
     const [country, setCountry] = useState('');
@@ -67,7 +67,14 @@ export default function HotelProfile() {
     const [restaurantId, setRestaurantId] = useState('');
     const [mode, setMode] = useState('');
 
-    
+    let [continentalPrice, setcontinentalPrice] = useState('');
+    let [fitnessPrice, setfitnessPrice] = useState('');
+    let [parkingPrice, setparkingPrice] = useState('');
+    let [poolPrice, setpoolPrice] = useState('');
+    let [mealsPrice, setmealsPrice] = useState('');
+
+    const HotelID = localStorage.getItem('HotelID');
+
     const handleSubmit = async (event) => {
         event.preventDefault();
         console.log(event.currentTarget);
@@ -75,33 +82,98 @@ export default function HotelProfile() {
         var url;
         if (image) {
             let imageData = new FormData()
-            imageData.append('image', image)
-            let response = await axios.post(`${backendServer}/image/dish`, imageData);
+            imageData.append('file', image)
+            // var header = imageData.header.get('Content-Length')
+            console.log(imageData);
+            let response = await axios.post(`${backendServer}/v1/hotel/${HotelID}/upload-image`, imageData);
       console.log("imageResponse",response.data.imageUrl)
       url = response.data.imageUrl
-      setImageUrl(url);
+      setImageUrl1(url);
         }
 
-        console.log(imageUrl)
+        console.log(imageUrl1)
+        console.log(ContinentalBreakfast)
+        if(ContinentalBreakfast == false){
+            continentalPrice = 0;
+        }
+        else{
+            continentalPrice = continentalPrice
+        }
 
+        if(FitnessRoom == false){
+            fitnessPrice = 0;
+        }
+        else{
+            fitnessPrice = fitnessPrice
+        }
+        
+        if(Parking == false){
+            parkingPrice = 0;
+        }
+        else{
+            parkingPrice = parkingPrice
+        }
+        
+
+        if(PoolJaccuzi == false){
+            poolPrice = 0;
+        }
+        else{
+            poolPrice = poolPrice
+        }
+        
+
+        if(Meals == false){
+            mealsPrice = 0;
+        }
+        else{
+            mealsPrice = mealsPrice
+        }
+        
+
+        let amenities  = [
+            {
+            "cost": continentalPrice,
+            "type" : "CONTINENTAL_BREAKFAST"
+            },
+            {
+                "cost": fitnessPrice,
+                "type" : "FITNESS_ROOM"
+                },
+                {
+                    "cost": parkingPrice,
+                    "type" : "DAILY_PARKING"
+                    },
+                    {
+                        "cost": poolPrice,
+                        "type" : "SWIMMING_POOL"
+                        },
+                        {
+                            "cost": mealsPrice,
+                            "type" : "ALL_MEALS_INCLUDED"
+                            },
+        ]
+
+        console.log(amenities)
         let payload = {
-            restaurantId: restaurantId,
+            id: HotelID,
             name: data.get('name'),
-            desc: data.get('desc'),
+            // desc: data.get('desc'),
             country: data.get('country'),
-            state: data.get('state'),
-            pincode: data.get('pincode'),
+            // state: data.get('state'),
+            zipCode: data.get('pincode'),
             city: data.get('city'),
-            fromHrs: data.get('fromHrs'),
-            toHrs: data.get('toHrs'),
-            phone: data.get('phone'),
-            mode:data.get('mode'),
-            imageUrl: url
+            // fromHrs: data.get('fromHrs'),
+            // toHrs: data.get('toHrs'),
+            contactNo: data.get('phone'),
+            // mode:data.get('mode'),
+            imageUrl: url,
+            serviceList: amenities
         }
         console.log(payload)
-        axios.post(`${backendServer}/restaurant/${restaurantId}`, payload)
+        axios.put(`${backendServer}/v1/hotel/${HotelID}/update`, payload)
             .then(response => {
-                history.push("/RestaurantDashBoard")
+                history("/HotelDashboard")
             })
             .catch(err => {
                 console.log("Error");
@@ -109,10 +181,10 @@ export default function HotelProfile() {
 
     };
     useEffect(  () => {
-        // const restaurantId = localStorage.getItem('RestaurantId');
+        const restaurantId = localStorage.getItem('HotelID');
         // const response = await axios.get(`${backendServer}/v1/hotel/1`);
 
-        axios.get(`${backendServer}/v1/hotel/1`)
+        axios.get(`${backendServer}/v1/hotel/${restaurantId}`)
         .then((response) => {
             console.log(response)
             const restaurant = response.data;
@@ -125,7 +197,7 @@ export default function HotelProfile() {
         setCountry(restaurant.country);
        
         setRestaurantId(restaurant.id);
-        setImageUrl(restaurant.Image);
+        setImageUrl1(restaurant.imageUrl);
         })
         .catch((err) => {
           alert(err);
@@ -140,7 +212,7 @@ export default function HotelProfile() {
     const onPhotoChange = (event) => {
         const file = event.target.files[0];
         setImage(file);
-        setImageUrl(URL.createObjectURL(file));
+        setImageUrl1(URL.createObjectURL(file));
     }
 
     const fileStyle = {
@@ -151,7 +223,7 @@ export default function HotelProfile() {
         "margin-left": '45%'
     }
 
-    const [state1, setState1] = React.useState({
+    let [state1, setState1] = React.useState({
         ContinentalBreakfast: false,
         FitnessRoom: false,
         PoolJaccuzi: false,
@@ -159,14 +231,14 @@ export default function HotelProfile() {
         Meals: false,
       });
     
-      const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+      let handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setState1({
           ...state1,
           [event.target.name]: event.target.checked,
         });
       };
 
-      const { ContinentalBreakfast, FitnessRoom, PoolJaccuzi, Parking, Meals  } = state1;
+      let { ContinentalBreakfast, FitnessRoom, PoolJaccuzi, Parking, Meals  } = state1;
 
     return (
         <>
@@ -179,7 +251,7 @@ export default function HotelProfile() {
                             <Grid container spacing={2} >
                                 <Grid style={imageStyle} item xs={12} sm={6} alignItems="center">
                                     <Avatar
-                                        src={imageUrl}
+                                        src={imageUrl1}
                                         sx={{ width: 50, height: 50 }}
                                     />
                                     <label htmlFor="image">
@@ -385,30 +457,54 @@ export default function HotelProfile() {
             }
             label="Continental Breakfast"
           />
+          {ContinentalBreakfast ?(
+          <TextField id="outlined-basic" label="Price" variant="outlined"  onChange={(e) => setcontinentalPrice(e.target.value)} />
+        ) : (<></>)}
+
           <FormControlLabel
             control={
-              <Checkbox checked={FitnessRoom} onChange={handleChange} name="FitnessRoom" />
+              <Checkbox checked={FitnessRoom} onChange={handleChange} name="FitnessRoom"   />
             }
             label="FitnessRoom"
           />
+          {FitnessRoom ?(
+          <TextField id="outlined-basic" label="Price" variant="outlined" onChange={(e) => setfitnessPrice(e.target.value)} />
+        ) : (<></>)}
+
+
           <FormControlLabel
             control={
               <Checkbox checked={Parking} onChange={handleChange} name="Parking" />
             }
             label="Daily Parking"
           />
+          {Parking ?(
+          <TextField id="outlined-basic" label="Price" variant="outlined" onChange={(e) => setparkingPrice(e.target.value)}/>
+        ) : (<></>)}
+
+
           <FormControlLabel
             control={
               <Checkbox checked={PoolJaccuzi} onChange={handleChange} name="PoolJaccuzi" />
             }
             label="Pool & Jaccuzi"
           />
+          {PoolJaccuzi ?(
+          <TextField id="outlined-basic" label="Price" variant="outlined" onChange={(e) => setpoolPrice(e.target.value)}/>
+        ) : (<></>)}
+
+
           <FormControlLabel
             control={
               <Checkbox checked={Meals} onChange={handleChange} name="Meals" />
             }
             label="Meals Included"
           />
+          {Meals ?(
+          <TextField id="outlined-basic" label="Price" variant="outlined" onChange={(e) => setmealsPrice(e.target.value)} />
+        ) : (<></>)}
+
+
         </FormGroup>
         
       </FormControl>
