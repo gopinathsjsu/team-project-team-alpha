@@ -39,15 +39,12 @@ public class HotelEntity {
     Long id;
 
     @Column
-    //@NonNull
     String name;
 
     @Column
-    //@NonNull
     String contactNo;
 
     @Column
-    //@NonNull
     String description;
 
     @Column
@@ -55,23 +52,17 @@ public class HotelEntity {
     String emailId;
 
     @Column
-    //@NonNull
     String city;
 
     @Column
-    //@NonNull
     String country;
 
     @Column
-    //@NotNull
     String zipCode;
 
     @Column
     @NonNull
     String password;
-
-    @Column
-    String imageUrl;
 
     @Type(type = "json")
     @Column(columnDefinition = "json")
