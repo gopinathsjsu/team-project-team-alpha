@@ -24,7 +24,8 @@ import { styled, alpha } from '@mui/material/styles';
 import InputBase from '@mui/material/InputBase';
 import FaceIcon from '@mui/icons-material/Face';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
-
+import { Badge } from '@mui/material';
+import { useSelector } from 'react-redux';
 import MenuItem from '@material-ui/core/MenuItem';
 import bg from "../../images/trivago.svg"
 import { TextField } from '@material-ui/core';
@@ -108,6 +109,11 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
   },
 }));
 
+const getNumberOfItemsInCart = () => {
+  // const noOfItems = cart.reduce((quantity, item) => quantity + item.Quantity, 0);
+  // return noOfItems;
+};
+
 
 const routepage = [
   {
@@ -150,7 +156,8 @@ const stylebg = {
 
 export const Navbar = (props) => {
   const classes = useStyles();
-
+  const cart = useSelector((state) => state.cart.items);
+  const [openCart, setOpenCart] = useState(false);
   const [state, setState] = useState({
     left: false
   })
@@ -159,6 +166,15 @@ export const Navbar = (props) => {
   const toggleSlider = (slider, open) => () => {
     setState({ ...state, [slider]: open });
   };
+
+  const onViewCart = () => {
+    if (cart.length) {
+      setOpenCart(true);
+    } else {
+      alert('Please add items to your cart');
+    }
+  };
+
 
   const sideList = slider => (
     <Box component='div' style={stylebg}
@@ -216,6 +232,11 @@ export const Navbar = (props) => {
           <Typography variant="h2" className={classes.title}>
             <a href="/"><img src={bg} width={'160'} height={'80'} alt='' /> </a>
           </Typography>
+          <IconButton aria-label="view cart" onClick={onViewCart}>
+              <Badge badgeContent={getNumberOfItemsInCart()} color="primary">
+                  <ShoppingCartIcon />
+              </Badge>
+          </IconButton>
         <a href="/UserProfile"> <AccountCircle ></AccountCircle></a>
         </Toolbar>
       </AppBar>

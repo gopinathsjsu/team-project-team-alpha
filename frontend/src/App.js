@@ -10,6 +10,8 @@ import CustomerDashBoard from './components/DashBoard/CustomerDashBoard';
 import CustomerHotelRooms from './components/DashBoard/CustomerHotelRooms';
 import LandingPage from './components/DashBoard/LandingPage';
 import CustomerProfile from './components/Profile/CustomerProfile';
+import ConfirmedBooking from './components/DashBoard/ConfirmedBooking';
+
 const App = () => {
   return (
     <div >
@@ -25,6 +27,7 @@ const App = () => {
           <Route path="/customerDashboard" exact element={<CustomerDashBoard />}></Route>
           <Route path="/customerHotelRooms" exact element={<CustomerHotelRooms />}></Route>
           <Route path="/customerProfile" exact element={<CustomerProfile />}></Route>
+          <Route path="/customer/booking-confirmed" exact element={<ConfirmedBooking></ConfirmedBooking>}></Route>
         </Routes>
       </BrowserRouter>
     </div>

@@ -9,6 +9,7 @@ export default function AutoComplete(props) {
         console.log(newValue);
         props.setValue(newValue);
       }}
+      inputValue={props.value}
       onChange={(e,newValue) => {
         console.log(newValue);
         props.setValue(newValue);

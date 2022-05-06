@@ -18,16 +18,27 @@ import {
   Home
 } from '@material-ui/icons';
 import DehazeIcon from '@material-ui/icons/Dehaze';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import MobileeRightMenuSlider from '@material-ui/core/Drawer';
 import { styled, alpha } from '@mui/material/styles';
 import InputBase from '@mui/material/InputBase';
 import FaceIcon from '@mui/icons-material/Face';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
-
+import { Badge } from '@mui/material';
 import MenuItem from '@material-ui/core/MenuItem';
 import bg from "../../images/trivago.svg"
 import { TextField } from '@material-ui/core';
+import { useDispatch, useSelector } from 'react-redux';
+import Dialog from '@material-ui/core/Dialog';
+import DialogActions from '@material-ui/core/DialogActions';
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogContentText from '@material-ui/core/DialogContentText';
+import DialogTitle from '@material-ui/core/DialogTitle';
+import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
+import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
+import Button from '@material-ui/core/Button';
+import { confirmCart } from '../../state/action-creators/hotelActions';
+
 
 
 const useStyles = makeStyles((theme) => ({
@@ -154,6 +165,13 @@ export const NavbarDashBoard = (props) => {
   const [state, setState] = useState({
     left: false
   })
+  const [openCart, setOpenCart] = useState(false);
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const userId = "1";
+
+
+  const cart = useSelector((state) => state.hotels.cart);
 
 
   const toggleSlider = (slider, open) => () => {
@@ -180,26 +198,37 @@ export const NavbarDashBoard = (props) => {
     </Box>
   );
 
-  const handleChange = name => event => {
-
+  const onViewCart = () => {
+    if (cart.length) {
+      setOpenCart(true);
+    } else {
+      alert('Please add items to your cart');
+    }
+  };
+  const getNumberOfItemsInCart = () => {
+    return cart.length;
   };
 
-  const roomTypes = [{
-    key: 'all',
-    value: 'All',
-  }, {
-    key: 'single',
-    value: 'Single Room',
-  }, {
-    key: 'double',
-    value: 'Double Room',
-  }, {
-    key: 'Suit',
-    value: 'Suite',
-  }];
+  const getTotalPrice = () => {
+    let price = 0.00;
+    for(let item in cart){
+      price = price + item.cost;
+      for(let amenity in cart.amenities){
+        price = price + cart.amenities[amenity];
+      }
+    }
+    return price?price:0.00;
+  };
 
+
+  const onCheckOut = () => {
+    let userId = 4;
+    dispatch(confirmCart(userId));
+    navigate('/customer/booking-confirmed');
+  };
 
   return (
+    <>
     <div className={classes.root}>
       <AppBar position="static">
         <Toolbar>
@@ -216,10 +245,53 @@ export const NavbarDashBoard = (props) => {
           <Typography variant="h2" className={classes.title}>
             <a href="/"><img src={bg} width={'160'} height={'80'} alt='' /> </a>
           </Typography>
+          <IconButton aria-label="view cart" onClick={onViewCart}>
+              <Badge badgeContent={getNumberOfItemsInCart()} color="primary">
+                  <ShoppingCartIcon />
+              </Badge>
+          </IconButton>
           <a href="/UserProfile"> <AccountCircle ></AccountCircle></a>
         </Toolbar>
       </AppBar>
     </div>
+    <div>
+   <Dialog open={openCart} aria-labelledby="form-dialog-title">
+          <DialogTitle id="form-dialog-title">Order Summary</DialogTitle>
+          <DialogContent>
+            <DialogContentText>
+              Here's what your cart looks like
+            </DialogContentText>
+            <List disablePadding>
+              {cart.map((item) => (
+                <ListItem key={item.room.id} sx={{ py: 0, px: 0 }}>
+                  <ListItemText primary={item.room.name} />
+                  <ListItemText primary={item.room.type} />
+                  <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
+                    $
+                    {item.room.cost?item.room.cost:0}
+                  </Typography>
+                </ListItem>
+              ))}
+              <ListItem sx={{ py: 1, px: 0 }}>
+                <ListItemText primary="Total" />
+                <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
+                  $
+                  {getTotalPrice().toFixed(2)}
+                </Typography>
+              </ListItem>
+            </List>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => onCheckOut()} variant="contained" color="primary">
+              Confirm Booking
+            </Button>
+            <Button onClick={() => setOpenCart(false)} variant="contained" color="primary">
+              Close
+            </Button>
+          </DialogActions>
+        </Dialog>
+    </div>
+    </>
   );
 }
 

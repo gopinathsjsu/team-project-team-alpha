@@ -1,13 +1,23 @@
 import {
   GET_HOTEL_DETAILS,
+    GET_HOTEL_ROOMS,
     SET_SELECTED_HOTEL,
     STORE_SEARCH_PARAMS,
+    SET_SELECTED_ROOM,
+    SET_SELECTED_AMENITIES,
+    SET_SELECTED_CART,
+    ADD_TO_CART,
+    CONFIRM_CART
 } from '../action-creators/types';
 
 const initialState = {
     searchParams: {},
     hotelDetails: [],
-    selectedHotel: {}
+    selectedHotel: {},
+    hotelRooms: [],
+    selectedAmenities:{},
+    selectedRoom:{},
+    cart:[]
   };
 
   const reducer = (state = initialState, action) => {
@@ -26,6 +36,26 @@ const initialState = {
         return {
           ...state,
           selectedHotel: action.payload
+        }
+      case GET_HOTEL_ROOMS:
+        return {
+          ...state,
+          hotelRooms: action.payload
+        }
+      case SET_SELECTED_AMENITIES:
+        return {
+          ...state,
+          selectedAmenities: action.payload
+        }
+      case SET_SELECTED_ROOM:
+        return {
+          ...state,
+          selectedRoom: action.payload
+        }
+      case ADD_TO_CART:
+        return {
+          ...state,
+          cart: action.payload
         }
       default:
         return state;
