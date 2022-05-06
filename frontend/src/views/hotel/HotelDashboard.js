@@ -69,25 +69,39 @@ function HotelDashboard() {
 
 
 
- 
+ const HotelID =localStorage.getItem("HotelID");
 
-  useEffect(() => {
-    setFilteredPosts(cards.filter((cards) => cards.DishName === searchValue));
-  }, [cards, searchValue]);
+  // useEffect(() => {
+  //   setFilteredPosts(cards.filter((cards) => cards.DishName === searchValue));
+  // }, [cards, searchValue]);
 
-  console.log("Hello filetered posts", filteredPosts);
+  // console.log("Hello filetered posts", filteredPosts);
 
-  useEffect(async () => {
+  useEffect( () => {
     const restaurantId = localStorage.getItem('RestaurantId');
     console.log("use effect");
 
-    const response = await axios.get(`${backendServer}/Restaurant/dishes/${restaurantId}`);
+   axios.get(`${backendServer}/v1/room/hotel/${HotelID}`)
+        .then((response) => {
+            console.log(response)
+            setCards(response.data);
+       
+        })
+        .catch((err) => {
+          alert(err);
+          return false;
+        })
+     
+        return () => {
+          console.log("This will be logged on unmount");
+        }
+    //const response = await axios.get(`${backendServer}/v1/room/hotel/${HotelID}`);
 
-    setCards(response.data);
-    console.log("Hello cards", cards)
+   // setCards(response.data);
+   // console.log("Hello cards", cards)
 
     //  setRes1(response.data);
-    setCardSearch(response.data);
+    //setCardSearch(response.data);
 
     //getRes1({res1: response.data})
     //const data = await response.json();
@@ -185,13 +199,22 @@ function HotelDashboard() {
                     />
                     <CardContent sx={{ flexGrow: 1 }}>
                       <Typography gutterBottom variant="h5" component="h2">
-                        {card.DishName}
+                        {card.name}
                       </Typography>
                       <Typography>
-                        {card.DishDesc}
+                        {card.description}
                       </Typography>
                       <Typography>
-                        {"$"}{card.Price}
+                        {"Cost: $"}{card.cost}
+                      </Typography>
+                      <Typography>
+                        {"Max Occupants: "}{card.maxOccupants}
+                      </Typography>
+                      <Typography>
+                      {"No Of Adults: "}{card.adults}
+                      </Typography>
+                      <Typography>
+                      {"No Of Children: "}{card.children}
                       </Typography>
                     </CardContent>
                     <CardActions>

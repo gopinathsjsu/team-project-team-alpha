@@ -10,7 +10,7 @@ import logo from '../images/uber-eats.svg';
 import newlogo from '../images/UberEATS.png';
 import AccountCircle from '@material-ui/icons/AccountCircle';
 import { Link as RouterLink } from 'react-router-dom';
-import UserLogin from './hotel/UserLogin';
+import UserLogin from './hotel/HotelLogin';
 import bg from "../images/trivago.svg"
 import {
     ListItemIcon,
@@ -90,7 +90,7 @@ const menuItems = [
     {
         listIcon: <Home />,
         listText: 'Sign in for Business Account',
-        listPath: '/RestaurantLogin'
+        listPath: '/HotelLogin'
     },
 ]
 const styleimg = {
