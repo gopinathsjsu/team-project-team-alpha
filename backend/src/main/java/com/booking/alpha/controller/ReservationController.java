@@ -3,6 +3,7 @@ package com.booking.alpha.controller;
 import com.booking.alpha.constant.BookingState;
 import com.booking.alpha.constant.RoomType;
 import com.booking.alpha.entry.BookingRequestEntry;
+import com.booking.alpha.entry.ReservationDetailsEntry;
 import com.booking.alpha.entry.ReservationEntry;
 import com.booking.alpha.service.ReservationService;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -29,8 +30,8 @@ public class ReservationController {
     }
 
     @GetMapping("/user/{userId}")
-    ResponseEntity<List<ReservationEntry>> getReservationForUser(@PathVariable("userId") Long userId) {
-        return new ResponseEntity<>( reservationService.getReservationsForUser(userId, BookingState.CONFIRMED), HttpStatus.OK);
+    ResponseEntity<List<ReservationDetailsEntry>> getReservationForUser(@PathVariable("userId") Long userId) {
+        return new ResponseEntity<>( reservationService.getConfirmedReservations(userId), HttpStatus.OK);
     }
 
     @GetMapping("/hotel/{hotelId}")

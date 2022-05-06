@@ -78,6 +78,23 @@ public class ReservationService {
         return reservationEntities.stream().map(this::convertToEntry).collect(Collectors.toList());
     }
 
+    public List<ReservationDetailsEntry> convertToDetails( List<ReservationEntry> reservationEntries) {
+        List<RoomEntry> roomEntries = roomService.findAllById(reservationEntries.stream().map(ReservationEntry::getRoomId).collect(Collectors.toSet()));
+        Map<Long, RoomEntry> roomIdMap = roomEntries.stream().collect(Collectors.toMap(RoomEntry::getId, roomEntry -> roomEntry));
+        return reservationEntries.stream()
+                .map(reservationEntry -> new ReservationDetailsEntry(
+                        reservationEntry.getUserId(),
+                        roomIdMap.get(reservationEntry.getRoomId()),
+                        reservationEntry.getStartTime(),
+                        reservationEntry.getEndTime()))
+                .collect(Collectors.toList());
+    }
+
+    public List<ReservationDetailsEntry> getConfirmedReservations( Long userId) {
+        List<ReservationEntry> reservationEntries = getReservationsForUser( userId, BookingState.CONFIRMED);
+        return convertToDetails(reservationEntries);
+    }
+
     public List<ReservationEntry> getReservationForHotel( Long hotelId) {
         List<ReservationEntity> reservationEntities = reservationRepository.getAllByHotelIdAndBookingState(hotelId, BookingState.CONFIRMED.toString());
         if(reservationEntities.isEmpty()) {
