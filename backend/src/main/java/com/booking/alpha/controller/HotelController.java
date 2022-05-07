@@ -25,16 +25,6 @@ public class HotelController {
         this.hotelService = hotelService;
     }
 
-//    @Autowired
-//    S3Utils s3Utils;
-
-//    @GetMapping("/ok")
-//    public ResponseEntity<String> get() throws Exception{
-//        File file = new File("/Users/mayankverma/Semester-2/CMPE-202/photos/hotel-3.jpeg");
-//        s3Utils.uploadFile("alpha-hotel-images","hotel-1", new FileInputStream(file));
-//        return new ResponseEntity<>("HelloWorld", HttpStatus.OK);
-//    }
-
     @GetMapping("/{id}")
     public ResponseEntity<HotelEntry> findOneById( @PathVariable("id") Long id) {
         HotelEntry hotelEntry = hotelService.findOneById(id);
@@ -42,13 +32,6 @@ public class HotelController {
             return new ResponseEntity<>( hotelEntry, HttpStatus.OK);
         }
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        //return new ResponseEntity<>( hotelService.findOneById(id), HttpStatus.OK);
-    }
-
-    @PostMapping(value = "/upload-img")
-    public ResponseEntity<Void> uploadImage(@RequestBody MultipartFile file) throws Exception {
-        System.out.println(" ACCEPTED Request ");
-        return new ResponseEntity<>( HttpStatus.ACCEPTED);
     }
 
     @PostMapping("/register")
