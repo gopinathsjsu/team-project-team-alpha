@@ -19,7 +19,7 @@ import java.util.List;
 @NoArgsConstructor
 public class ReservationDetailsEntry {
 
-    Long userId;
+    UserEntry userEntry;
 
     HotelEntry hotelEntry;
 

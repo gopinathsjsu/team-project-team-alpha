@@ -12,10 +12,15 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.util.ObjectUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.*;
 import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -68,6 +73,13 @@ public class UserService {
         }
     }
 
+    public List<UserEntry> findAllById(Set<Long> ids) {
+        if(ObjectUtils.isEmpty(ids)) {
+            return new ArrayList<>();
+        }
+        return userRepository.findAllById(ids).stream().map(this::convertToEntry).collect(Collectors.toList());
+    }
+
     public UserEntry uploadImage(MultipartFile file, Long id){
         //File file1 = new File(file.getOriginalFilename());
 
@@ -77,8 +89,6 @@ public class UserService {
 
         try(FileOutputStream outputStream = new FileOutputStream(file1)){
             outputStream.write(file.getBytes());
-//            s3Utils.uploadFile("alpha-hotel-images","hotel-1", new FileInputStream(file1));
-//            String url = s3Utils.getFileURL("alpha-hotel-images", fileName);
 
             String folderName = String.format("user-%s",id);
             s3Utils.uploadFile("alpha-hotel-images",folderName, new FileInputStream(file1));
@@ -86,7 +96,6 @@ public class UserService {
 
             file1.delete();
             UserEntry userEntry = findOneById(id);
-            // userEntry.setImageUrl(url);
             UserEntity userEntity = convertToEntity(userEntry);
             UserEntity createdUserEntity = userRepository.save(userEntity);
             return convertToEntry(createdUserEntity);
@@ -145,7 +154,6 @@ public class UserService {
             oldUserEntry.setEmailId(userEntry.getEmailId());
             oldUserEntry.setPassword(userEntry.getPassword());
             oldUserEntry.setRewardPoints(userEntry.getRewardPoints());
-            // oldUserEntry.setImageUrl(userEntry.getImageUrl());
             oldUserEntry.setId(userEntry.getId());
 
             UserEntity userEntity = convertToEntity(oldUserEntry);
