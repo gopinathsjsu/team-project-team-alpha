@@ -115,7 +115,8 @@ public class RoomService {
         try{
             String folderName = String.format("room-%s",id);
             s3Utils.uploadFile("alpha-hotel-images",folderName, file.getInputStream());
-            return findOneById(id);
+            RoomEntity roomEntity = roomRepository.getById(id);
+            return convertToEntry(roomEntity);
         }
         catch (Exception exception){
             exception.printStackTrace();
