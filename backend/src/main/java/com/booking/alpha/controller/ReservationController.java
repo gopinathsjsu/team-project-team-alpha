@@ -29,19 +29,24 @@ public class ReservationController {
         return new ResponseEntity<>(reservationService.findOneById(id), HttpStatus.OK);
     }
 
+    @PatchMapping("/{id}")
+    public ResponseEntity<ReservationEntry> patchUpdate(@PathVariable("id") Long id, @RequestBody ReservationEntry reservationEntry) {
+        return new ResponseEntity( reservationService.patchUpdate( id, reservationEntry), HttpStatus.OK);
+    }
+
     @GetMapping("/user/{userId}")
     ResponseEntity<List<ReservationDetailsEntry>> getReservationForUser(@PathVariable("userId") Long userId) {
-        return new ResponseEntity<>( reservationService.getConfirmedReservations(userId), HttpStatus.OK);
+        return new ResponseEntity<>( reservationService.getReservationDetails(userId, BookingState.CONFIRMED), HttpStatus.OK);
     }
 
     @GetMapping("/hotel/{hotelId}")
-    ResponseEntity<List<ReservationEntry>> getReservationForHotel(@PathVariable("hotelId") Long hotelId) {
+    ResponseEntity<List<ReservationDetailsEntry>> getReservationForHotel(@PathVariable("hotelId") Long hotelId) {
         return new ResponseEntity<>( reservationService.getReservationForHotel(hotelId), HttpStatus.OK);
     }
 
     @GetMapping("/user-cart/{userId}")
-    ResponseEntity<List<ReservationEntry>> getUserCart(@PathVariable("userId") Long userId) {
-        return new ResponseEntity<>( reservationService.getReservationsForUser(userId, BookingState.PENDING), HttpStatus.OK);
+    ResponseEntity<List<ReservationDetailsEntry>> getUserCart(@PathVariable("userId") Long userId) {
+        return new ResponseEntity<>( reservationService.getReservationDetails(userId, BookingState.PENDING), HttpStatus.OK);
     }
 
     @PostMapping("/add-to-cart")
