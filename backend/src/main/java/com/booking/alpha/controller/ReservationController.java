@@ -29,6 +29,11 @@ public class ReservationController {
         return new ResponseEntity<>(reservationService.findOneById(id), HttpStatus.OK);
     }
 
+    @PatchMapping("/{id}")
+    public ResponseEntity<ReservationEntry> patchUpdate(@PathVariable("id") Long id, @RequestBody ReservationEntry reservationEntry) {
+        return new ResponseEntity( reservationService.patchUpdate( id, reservationEntry), HttpStatus.OK);
+    }
+
     @GetMapping("/user/{userId}")
     ResponseEntity<List<ReservationDetailsEntry>> getReservationForUser(@PathVariable("userId") Long userId) {
         return new ResponseEntity<>( reservationService.getReservationDetails(userId, BookingState.CONFIRMED), HttpStatus.OK);

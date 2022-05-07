@@ -68,6 +68,15 @@ public class ReservationService {
         return convertToEntry(reservationRepository.findById(reservationId).get());
     }
 
+    public ReservationEntry patchUpdate( Long id, ReservationEntry reservationEntry) {
+        ReservationEntry existingEntry = findOneById(id);
+        if(!ObjectUtils.isEmpty(reservationEntry.getServiceList())) {
+            existingEntry.setServiceList(reservationEntry.getServiceList());
+        }
+        ReservationEntry updatedEntry = convertToEntry(reservationRepository.save(convertToEntity(existingEntry)));
+        return updatedEntry;
+    }
+
     public ReservationEntry removeReservation( Long reservationId) {
         ReservationEntry reservationEntry = findOneById(reservationId);
         reservationEntry.setBookingState(BookingState.EXPIRED);
