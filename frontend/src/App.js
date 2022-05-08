@@ -12,6 +12,7 @@ import LandingPage from './components/DashBoard/LandingPage';
 import CustomerProfile from './components/Profile/CustomerProfile';
 import ConfirmedBooking from './components/DashBoard/ConfirmedBooking';
 import ViewBooking from "./views/hotel/ViewBooking"
+import CustomerOrder from './components/DashBoard/CustomerOrder';
 
 const App = () => {
   return (
@@ -29,6 +30,7 @@ const App = () => {
           <Route path="/customerHotelRooms" exact element={<CustomerHotelRooms />}></Route>
           <Route path="/customerProfile" exact element={<CustomerProfile />}></Route>
           <Route path="/customer/booking-confirmed" exact element={<ConfirmedBooking></ConfirmedBooking>}></Route>
+          <Route path="/customer/bookings" exact element={<CustomerOrder></CustomerOrder>}></Route>
           <Route path="/ViewBooking" exact element={<ViewBooking />}></Route>
         </Routes>
       </BrowserRouter>

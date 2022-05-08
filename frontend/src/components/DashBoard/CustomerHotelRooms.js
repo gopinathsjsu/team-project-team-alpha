@@ -33,6 +33,7 @@ import { Navbar } from '../Navigation/Navbar';
 import RoomAmenitiesDialog from './RoomAmenitiesDialog';
 import { useDispatch, useSelector } from 'react-redux';
 import { useEffect } from 'react';
+import { makeStyles } from '@material-ui/core/styles';
 import { getHotelRoomDetails, setSelectedRoom } from '../../state/action-creators/hotelActions';
 import { NavbarDashBoard } from '../Navigation/NavbarDashBoard';
 
@@ -52,9 +53,29 @@ const roomTypes = [{
   value: 'Suite',
 }];
 
+const useStyles = makeStyles((theme) => ({
+  root: {
+    flexGrow: 1,
+  },
+  paper: {
+    padding: theme.spacing(2),
+    margin: 'auto',
+    maxWidth: 500,
+  },
+  image: {
+    width: 128,
+    height: 128,
+  },
+  img: {
+    margin: 'auto',
+    display: 'block',
+    maxWidth: '100%',
+    maxHeight: '100%',
+  },
+}));
 
 export default function CustomerHotelRooms() {
-  // const [cards, setCards] = useState([]);
+  const classes = useStyles();
   const [initialLoad, setInitialLoad] = useState([]);
   const [tempCart, setTempCart] = useState([]);
   const history = useNavigate();
@@ -75,8 +96,6 @@ export default function CustomerHotelRooms() {
   };
 
   useEffect(() => {
-    
-    
     dispatch(getHotelRoomDetails(selectedHotel.id, startDate, endDate));
  },[]);
 
@@ -88,18 +107,6 @@ export default function CustomerHotelRooms() {
   };
 
   const onRemoveFromCart = (dish) => {
-
-  };
-
-  const onSearch = (type, searchTerm) => {
-
-  };
-
-  const onSearchDishType = (searchTerm) => {
-
-  };
-
-  const onSearchCategory = (searchTerm) => {
 
   };
 
@@ -128,7 +135,7 @@ export default function CustomerHotelRooms() {
                 <CardContent sx={{ flexGrow: 1 }}>
                   <Grid container spacing={1}>
                     <Grid item xs={2}>
-                      <img alt="complex" src={selectedHotel.imageUrl} />
+                      <img className={classes.img} alt="complex" src={selectedHotel.imageUrl} />
                     </Grid>
                     <Grid item xs={10} sm container>
                       <Grid item xs container direction="column" spacing={2}>
@@ -191,8 +198,7 @@ export default function CustomerHotelRooms() {
                         {card.description}
                       </Typography>
                       <Typography>
-                        $
-                        {card.price}
+                        Price: ${card.cost}
                       </Typography>
                       <Typography>
                         Type:
@@ -202,12 +208,12 @@ export default function CustomerHotelRooms() {
                       <Typography>
                         No of Adults allowed:
                         {' '}
-                        {card.noOfAdults}
+                        {card.adults}
                       </Typography>
                       <Typography>
                         No of children allowed:
                         {' '}
-                        {card.noOfChildren}
+                        {card.children}
                       </Typography>
                     </CardContent>
                     <CardActions>

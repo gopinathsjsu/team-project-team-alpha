@@ -7,7 +7,8 @@ import {
     SET_SELECTED_AMENITIES,
     SET_SELECTED_CART,
     ADD_TO_CART,
-    CONFIRM_CART
+    CONFIRM_CART,
+    SET_BOOKINGS
 } from '../action-creators/types';
 
 const initialState = {
@@ -17,7 +18,8 @@ const initialState = {
     hotelRooms: [],
     selectedAmenities:{},
     selectedRoom:{},
-    cart:[]
+    cart:[],
+    bookings:[]
   };
 
   const reducer = (state = initialState, action) => {
@@ -56,6 +58,11 @@ const initialState = {
         return {
           ...state,
           cart: action.payload
+        }
+      case SET_BOOKINGS:
+        return {
+          ...state,
+          bookings: action.payload
         }
       default:
         return state;

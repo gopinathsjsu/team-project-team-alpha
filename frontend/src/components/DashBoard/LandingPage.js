@@ -2,8 +2,8 @@ import React from 'react';
 import SearchHotels from './SearchHotels';
 import '../styles.css';
 import { LicenseInfo } from '@mui/x-license-pro';
-import { Navbar } from '../Navigation/Navbar';
 import landingPage from '../../images/landingPage9.jpeg';
+import { NavbarDashBoard } from '../Navigation/NavbarDashBoard';
 
 
 LicenseInfo.setLicenseKey(
@@ -18,7 +18,7 @@ const Home = () => {
       backgroundRepeat: "no-repeat",
       backgroundSize: "cover"
     }}>
-      <Navbar />
+      <NavbarDashBoard />
       <div className='landingpage'>
         <SearchHotels />
       </div>

@@ -24,13 +24,12 @@ import DialogContent from '@material-ui/core/DialogContent';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import MenuItem from '@mui/material/MenuItem';
 import { TextField } from '@mui/material';
-import { useHistory } from 'react-router-dom';
-import { useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
 import TablePagination from '@material-ui/core/TablePagination';
-import Receipt from './Reciept';
 // eslint-disable-next-line import/no-named-as-default
-import backendServer from '../../Config';
 import { NavbarDashBoard } from '../Navigation/NavbarDashBoard';
+import { viewOrders } from '../../state/action-creators/hotelActions';
 
 const theme = createTheme();
 
@@ -40,7 +39,7 @@ const statuses = [
     value: 'All Orders',
   },
   {
-    key: 'recieved',
+    key: 'cancelled',
     value: 'Order Recieved',
   },
   {
@@ -69,23 +68,18 @@ const statuses = [
 
 const CustomerOrder = () => {
   const [initialLoad, setInitialLoad] = useState([]);
-  const [cards, setCards] = useState([]);
   const [currentCard, setCurrentCard] = useState([]);
   const [openOrder, setOpenOrder] = useState(false);
-  const [status, setStatus] = useState('All Orders');
-  const history = useHistory();
-  const customer = useSelector((state) => state.login.user);
+  const navigate = useNavigate();
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
+  const cards = useSelector((state) => state.hotels.bookings);
+  const [status, setStatus] = useState('All Orders');
+  const dispatch = useDispatch();
+
 
   const onStatusChange = (event) => {
-    setStatus(event.target.value);
-    if (event.target.value === 'All Orders') {
-      setCards(initialLoad);
-    } else if (event.target.value !== '') {
-      const sfilter = initialLoad.filter((item) => item.OrderStatus != null && item.OrderStatus === event.target.value);
-      setCards(sfilter);
-    }
+  
   };
 
   const handleChangePage = (event, newPage) => {
@@ -97,35 +91,17 @@ const CustomerOrder = () => {
     setPage(0);
   };
 
-  useEffect(async () => {
-    if (!customer.CustomerId) history.push('/');
-    const token = sessionStorage.getItem('token');
-    if (token) {
-      axios.defaults.headers.common.Authorization = token;
-    }
-    const customerId = customer.CustomerId;
-    const response = await axios.get(`${backendServer}/orders/customer/${customerId}`);
-    setCards(response.data);
-    setInitialLoad(response.data);
+  useEffect(() => {
+    let userId = "4";
+    dispatch(viewOrders(userId));
   }, []);
 
   const onCancelOrder = (currentCard) => {
-    axios.post(`${backendServer}/orders/${currentCard.OrderId}/status`, { OrderStatus: 'Order Cancelled' })
-      .then(() => {
-        const idx = cards.findIndex((item) => item.OrderId === currentCard.OrderId);
-        const newCards = [...cards];
-        newCards[idx].OrderStatus = 'Order Cancelled';
-        setCards(newCards);
-      })
-      .catch(() => {
-        // eslint-disable-next-line no-alert
-        alert('error while updating status');
-      });
+    
   };
 
   const onView = (card) => {
-    setCurrentCard(card);
-    setOpenOrder(true);
+   
   };
 
   return (
@@ -150,10 +126,10 @@ const CustomerOrder = () => {
                 color="text.primary"
                 gutterBottom
               >
-                Your Orders!
+                Your Bookings!
               </Typography>
               <Typography variant="h5" align="center" color="text.secondary" paragraph>
-                Here's what you have ordered...
+                Here's what you have booked...
               </Typography>
               <Stack
                 sx={{ pt: 4 }}
@@ -206,19 +182,19 @@ const CustomerOrder = () => {
                         <Grid>
                           <Grid item xs={12} sm={4}>
                             <Typography gutterBottom variant="h5" component="h2">
-                              {card.RestaurantName}
+                              {card.roomEntry.name}
                             </Typography>
                             <Typography>
-                              Ordered on :
-                              {card.CreatedAt}
+                              Booking from :
+                              {card.startTime}
                             </Typography>
                             <Typography>
-                              Order Status :
-                              {card.OrderStatus}
+                              Booking to :
+                              {card.endTime}
                             </Typography>
                             <Typography>
-                              Order Type :
-                              {card.DeliveryType}
+                              Room Type :
+                              {card.roomEntry.type}
                             </Typography>
                             {/* <IconButton label="View Reciept" onClick={() => onView(card)} aria-label="view restaurant">
                               <ReceiptIcon />
@@ -242,7 +218,7 @@ const CustomerOrder = () => {
             <Dialog open={openOrder} aria-labelledby="form-dialog-title">
               <DialogTitle id="form-dialog-title">Order Reciept</DialogTitle>
               <DialogContent>
-                <Receipt order={currentCard} />
+                {/* <Receipt order={currentCard} /> */}
               </DialogContent>
               <DialogActions>
                 <Button variant="contained" onClick={() => setOpenOrder(false)} color="primary">
