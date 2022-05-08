@@ -112,24 +112,11 @@ public class RoomService {
     }
 
     public RoomEntry uploadImage(MultipartFile file, Long id){
-
-        Timestamp timestamp = new Timestamp(System.currentTimeMillis());
-        String fileName = timestamp.getTime() + file.getOriginalFilename();
-        File file1 = new File(fileName);
-
-        try(FileOutputStream outputStream = new FileOutputStream(file1)){
-            outputStream.write(file.getBytes());
-
+        try{
             String folderName = String.format("room-%s",id);
-            s3Utils.uploadFile("alpha-hotel-images",folderName, new FileInputStream(file1));
-            String url = s3Utils.getFileURL("alpha-hotel-images", folderName);
-
-            file1.delete();
-            RoomEntry roomEntry = convertToEntry(roomRepository.getById(id));
-            //roomEntry.setImageUrl(url);
-            RoomEntity roomEntity = convertToEntity(roomEntry);
-            RoomEntity createdRoomEntity = roomRepository.save(roomEntity);
-            return convertToEntry(createdRoomEntity);
+            s3Utils.uploadFile("alpha-hotel-images",folderName, file.getInputStream());
+            RoomEntity roomEntity = roomRepository.getById(id);
+            return convertToEntry(roomEntity);
         }
         catch (Exception exception){
             exception.printStackTrace();

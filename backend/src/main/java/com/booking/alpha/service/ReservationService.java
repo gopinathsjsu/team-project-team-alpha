@@ -38,14 +38,18 @@ public class ReservationService {
 
     private final SQSConfiguration sqsConfiguration;
 
+    private final UserService userService;
+
     public ReservationService( ReservationRepository reservationRepository, AccountingUtils accountingUtils,
-            RoomService roomService, HotelService hotelService, SQSUtils sqsUtils, SQSConfiguration sqsConfiguration) {
+            RoomService roomService, HotelService hotelService, SQSUtils sqsUtils,
+            SQSConfiguration sqsConfiguration, UserService userService) {
         this.reservationRepository = reservationRepository;
         this.accountingUtils = accountingUtils;
         this.roomService = roomService;
         this.hotelService = hotelService;
         this.sqsUtils = sqsUtils;
         this.sqsConfiguration = sqsConfiguration;
+        this.userService = userService;
     }
 
     public ReservationEntry convertToEntry(ReservationEntity reservationEntity) {
@@ -64,6 +68,15 @@ public class ReservationService {
         return convertToEntry(reservationRepository.findById(reservationId).get());
     }
 
+    public ReservationEntry patchUpdate( Long id, ReservationEntry reservationEntry) {
+        ReservationEntry existingEntry = findOneById(id);
+        if(!ObjectUtils.isEmpty(reservationEntry.getServiceList())) {
+            existingEntry.setServiceList(reservationEntry.getServiceList());
+        }
+        ReservationEntry updatedEntry = convertToEntry(reservationRepository.save(convertToEntity(existingEntry)));
+        return updatedEntry;
+    }
+
     public ReservationEntry removeReservation( Long reservationId) {
         ReservationEntry reservationEntry = findOneById(reservationId);
         reservationEntry.setBookingState(BookingState.EXPIRED);
@@ -79,28 +92,38 @@ public class ReservationService {
     }
 
     public List<ReservationDetailsEntry> convertToDetails( List<ReservationEntry> reservationEntries) {
+        if(ObjectUtils.isEmpty(reservationEntries)) {
+            return new ArrayList<>();
+        }
         List<RoomEntry> roomEntries = roomService.findAllById(reservationEntries.stream().map(ReservationEntry::getRoomId).collect(Collectors.toSet()));
+        List<HotelEntry> hotelEntries = hotelService.findAllByIds(roomEntries.stream().map(RoomEntry::getHotelId).collect(Collectors.toSet()));
+        List<UserEntry> userEntries = userService.findAllById(reservationEntries.stream().map(ReservationEntry::getUserId).collect(Collectors.toSet()));
+        Map<Long, HotelEntry> hotelIdMap = hotelEntries.stream().collect(Collectors.toMap(HotelEntry::getId, hotelEntry -> hotelEntry));
         Map<Long, RoomEntry> roomIdMap = roomEntries.stream().collect(Collectors.toMap(RoomEntry::getId, roomEntry -> roomEntry));
+        Map<Long, UserEntry> userIdMap = userEntries.stream().collect(Collectors.toMap(UserEntry::getId, userEntry -> userEntry));
         return reservationEntries.stream()
                 .map(reservationEntry -> new ReservationDetailsEntry(
-                        reservationEntry.getUserId(),
+                        reservationEntry.getId(),
+                        userIdMap.get(reservationEntry.getUserId()),
+                        hotelIdMap.get(roomIdMap.get(reservationEntry.getRoomId()).getHotelId()),
                         roomIdMap.get(reservationEntry.getRoomId()),
                         reservationEntry.getStartTime(),
                         reservationEntry.getEndTime()))
                 .collect(Collectors.toList());
     }
 
-    public List<ReservationDetailsEntry> getConfirmedReservations( Long userId) {
-        List<ReservationEntry> reservationEntries = getReservationsForUser( userId, BookingState.CONFIRMED);
+    public List<ReservationDetailsEntry> getReservationDetails( Long userId, BookingState state) {
+        List<ReservationEntry> reservationEntries = getReservationsForUser( userId, state);
         return convertToDetails(reservationEntries);
     }
 
-    public List<ReservationEntry> getReservationForHotel( Long hotelId) {
+    public List<ReservationDetailsEntry> getReservationForHotel( Long hotelId) {
         List<ReservationEntity> reservationEntities = reservationRepository.getAllByHotelIdAndBookingState(hotelId, BookingState.CONFIRMED.toString());
         if(reservationEntities.isEmpty()) {
             return new ArrayList<>();
         }
-        return reservationEntities.stream().map(this::convertToEntry).collect(Collectors.toList());
+        List<ReservationEntry> reservationEntries = reservationEntities.stream().map(this::convertToEntry).collect(Collectors.toList());
+        return convertToDetails(reservationEntries);
     }
 
     @Transactional
