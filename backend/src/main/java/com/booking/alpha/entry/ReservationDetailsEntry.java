@@ -19,6 +19,8 @@ import java.util.List;
 @NoArgsConstructor
 public class ReservationDetailsEntry {
 
+    Long reservationId;
+
     UserEntry userEntry;
 
     HotelEntry hotelEntry;

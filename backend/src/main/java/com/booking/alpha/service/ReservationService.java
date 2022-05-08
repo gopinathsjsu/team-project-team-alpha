@@ -103,6 +103,7 @@ public class ReservationService {
         Map<Long, UserEntry> userIdMap = userEntries.stream().collect(Collectors.toMap(UserEntry::getId, userEntry -> userEntry));
         return reservationEntries.stream()
                 .map(reservationEntry -> new ReservationDetailsEntry(
+                        reservationEntry.getId(),
                         userIdMap.get(reservationEntry.getUserId()),
                         hotelIdMap.get(roomIdMap.get(reservationEntry.getRoomId()).getHotelId()),
                         roomIdMap.get(reservationEntry.getRoomId()),
