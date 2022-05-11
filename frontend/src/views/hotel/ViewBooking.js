@@ -190,10 +190,23 @@ const ViewBooking = () => {
         },
       }));
 
-    const viewCustomer = (ID) =>{
-        
-        sessionStorage.setItem("TempCustomerId", ID)
-        history.push("/RestaurantCustomerView")
+      const [bookState, setBookState] = useState(false);
+
+    const cancelOrder = async (event, ID) =>{
+        event.preventDefault();
+        // const data = new FormData(e.currentTarget);
+       // sessionStorage.setItem("TempCustomerId", ID)
+        axios.post(`${backendServer}/v1/reservation/remove-from-cart/${ID}`)
+       .then((response) =>{
+        console.log("cancelled orders", response.data)
+       setBookState(true);
+        // setOrderResponse(response.data)
+        // setValue(response.data)
+       })
+       .catch((err) =>{
+           return false;
+       })
+        //history("/RestaurantCustomerView")
     }
 
     return (
@@ -217,11 +230,14 @@ const ViewBooking = () => {
         <TableHead>
           <TableRow>
             <StyledTableCell>Customer ID</StyledTableCell>
+            <StyledTableCell>Customer Name</StyledTableCell>
             <StyledTableCell align="center">Room No.</StyledTableCell>
             <StyledTableCell align="center">Start Time</StyledTableCell>
-            <StyledTableCell align="center">End Amount</StyledTableCell>
+            <StyledTableCell align="center">End Date</StyledTableCell>
+            <StyledTableCell align="center">Total Cost</StyledTableCell>
+            <StyledTableCell align="center">Reward Points</StyledTableCell>
             <StyledTableCell align="center">Booking Status</StyledTableCell>
-            <StyledTableCell align="center">Edit Order Status</StyledTableCell>
+            <StyledTableCell align="center">Edit Booking Status</StyledTableCell>
           </TableRow>
         </TableHead>
         <TableBody>
@@ -231,12 +247,21 @@ const ViewBooking = () => {
               sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
             >
               <TableCell component="th" scope="row">
-              <Avatar align="center" alt="Remy Sharp"  >{row.room_id}</Avatar>
+              <Avatar align="center" alt="Remy Sharp"  >{row.userEntry.id}</Avatar>
               </TableCell>
-              <TableCell align="center"><Button onClick={() => viewCustomer(row.CustomerId)}>View</Button></TableCell>
-              <TableCell align="center">{row.start_time}</TableCell>
-              <TableCell align="center">{row.end}</TableCell>
-              <TableCell align="center">{row.booking_state}</TableCell>
+              <TableCell align="center">{row.userEntry.name}</TableCell>
+              <TableCell align="center">{row.roomEntry.id}</TableCell>
+              <TableCell align="center">{row.startTime}</TableCell>
+              <TableCell align="center">{row.endTime}</TableCell>
+              <TableCell align="center">{row.roomEntry.cost}</TableCell>
+              <TableCell align="center">{row.userEntry.rewardPoints}</TableCell>
+            {bookState ?
+            ( <TableCell align="center">Cancelled</TableCell>):
+            ( <TableCell align="center">Confirmed</TableCell>)}
+               
+              
+              <TableCell align="center"><Button onClick={(event) => {cancelOrder(event,row.reservationId)}} type="button"><span>Cancel Reservation</span></Button></TableCell>
+
               {/* <TableCell align="center"> 
               <Button onClick={handleClickOpen(row.OrderId)}>Edit Order</Button>
                             <Dialog disableEscapeKeyDown open={open} onClose={handleClose}>

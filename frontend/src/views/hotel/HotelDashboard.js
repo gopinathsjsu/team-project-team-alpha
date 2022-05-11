@@ -19,12 +19,21 @@ import { createTheme, ThemeProvider } from '@mui/material/styles';
 import axios from 'axios';
 import backendServer from '../../Config'
 import SearchIcon from '@mui/icons-material/Search';
-import {Navbar} from '../Navbar';
+import { Navbar } from '../Navbar';
 import { NearMeTwoTone } from '@material-ui/icons';
 import props from 'prop-types';
 import { useNavigate } from 'react-router-dom';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import EditIcon from '@mui/icons-material/Edit';
+import CardHeader from '@mui/material/CardHeader';
+
+import IconButton, { IconButtonProps } from '@mui/material/IconButton';
+
+import { blue } from '@mui/material/colors';
+import Avatar from '@mui/material/Avatar';
+
+
+import MoreVertIcon from '@mui/icons-material/MoreVert';
 
 const theme = createTheme();
 
@@ -69,7 +78,7 @@ function HotelDashboard() {
 
 
 
- const HotelID =localStorage.getItem("HotelID");
+  const HotelID = localStorage.getItem("HotelID");
 
   // useEffect(() => {
   //   setFilteredPosts(cards.filter((cards) => cards.DishName === searchValue));
@@ -77,28 +86,29 @@ function HotelDashboard() {
 
   // console.log("Hello filetered posts", filteredPosts);
 
-  useEffect( () => {
+  useEffect(() => {
     const restaurantId = localStorage.getItem('RestaurantId');
     console.log("use effect");
 
-   axios.get(`${backendServer}/v1/room/hotel/${HotelID}`)
-        .then((response) => {
-            console.log(response)
-            setCards(response.data);
-       
-        })
-        .catch((err) => {
-          alert(err);
-          return false;
-        })
-     
-        return () => {
-          console.log("This will be logged on unmount");
-        }
+    axios.get(`${backendServer}/v1/room/hotel/${HotelID}`)
+      .then((response) => {
+        console.log(response)
+        setCards(response.data);
+
+      })
+      .catch((err) => {
+        alert(err);
+        return false;
+      })
+
+    return () => {
+      console.log("This will be logged on unmount");
+    }
+
     //const response = await axios.get(`${backendServer}/v1/room/hotel/${HotelID}`);
 
-   // setCards(response.data);
-   // console.log("Hello cards", cards)
+    // setCards(response.data);
+    // console.log("Hello cards", cards)
 
     //  setRes1(response.data);
     //setCardSearch(response.data);
@@ -113,27 +123,27 @@ function HotelDashboard() {
     //  getImageUrl(response.data[2].Image)
   }, []);
 
- 
+
   const onAddDishes = (event) => {
-    sessionStorage.removeItem("dishId");
-   
-    history.push("/AddDish")
-    
+    sessionStorage.removeItem("RoomID");
+
+    history("/AddRoom")
+
   }
 
-  const EditDish = (EditDishId)=>{
+  const EditDish = (EditDishId) => {
 
-    sessionStorage.setItem("dishId", EditDishId);
-    
+    sessionStorage.setItem("EditRoomID", EditDishId);
+
     console.log("Dish id is here", EditDishId)
     // if(EditDishId != ''){
-    history.push("/AddDish")
+    history("/AddRoom")
     // }
-   
+
   };
 
-  const ViewOrders = () =>{
-    history.push("/RestaurantOrder")
+  const ViewOrders = () => {
+    history("/ViewBooking")
   }
 
   return (
@@ -188,20 +198,37 @@ function HotelDashboard() {
                 <Grid item key={card.DishId} xs={6} sm={3} md={4}>
                   <Card
                     sx={{ height: '100%', display: 'block', flexDirection: 'column' }}>
+
+                    <CardHeader
+                    
+                      avatar={
+                        
+                        <Avatar sx={{ bgcolor: blue[500] }} aria-label="recipe"  src={card.imageUrl}>
+                          
+                         
+                        </Avatar>
+                      }
+                      fontWeight="fontWeightBold"
+                      titleTypographyProps={{variant:'h5' }}
+                      title={card.name}
+                      
+                    />
+
                     <CardMedia
                       component="img"
-                      sx={{
-                        // 16:9
-                        pt: '00.25%',
-                      }}
-                      image={card.DishImage}
+                      // sx={{
+                      //   // 16:9
+                      //   pt: '00.25%',
+                      // }}
+                      height="180"
+                      image={card.imageUrl}
                       alt="random" style={styleimg}
                     />
                     <CardContent sx={{ flexGrow: 1 }}>
-                      <Typography gutterBottom variant="h5" component="h2">
+                      {/* <Typography gutterBottom variant="h5" component="h2">
                         {card.name}
-                      </Typography>
-                      <Typography>
+                      </Typography> */}
+                      <Typography variant="h6">
                         {card.description}
                       </Typography>
                       <Typography>
@@ -211,14 +238,14 @@ function HotelDashboard() {
                         {"Max Occupants: "}{card.maxOccupants}
                       </Typography>
                       <Typography>
-                      {"No Of Adults: "}{card.adults}
+                        {"No Of Adults: "}{card.adults}
                       </Typography>
                       <Typography>
-                      {"No Of Children: "}{card.children}
+                        {"No Of Children: "}{card.children}
                       </Typography>
                     </CardContent>
                     <CardActions>
-                      <Button size="small" onClick={() => EditDish(card.DishId)}><EditIcon></EditIcon>Edit</Button>
+                      <Button size="small" onClick={() => EditDish(card.id)}><EditIcon></EditIcon>Edit</Button>
                       {/* onClick={() => goToDetails(name)} */}
                       {/* <Button size="small">Edit</Button> */}
                     </CardActions>
