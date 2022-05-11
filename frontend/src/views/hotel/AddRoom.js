@@ -43,14 +43,14 @@ const theme = createTheme();
 
 
 const dishTypes = [{
-    key: "Suite",
-    value: "Suite"
+    key: "SUITE",
+    value: "SUITE"
 }, {
-    key: "Double",
-    value: "Double"
+    key: "DOUBLE",
+    value: "DOUBLE"
 }, {
-    key: "Single",
-    value: "Single"
+    key: "SINGLE",
+    value: "SINGLE"
 }];
 
 const dishcategory = [{
@@ -78,6 +78,10 @@ const AddRoom = () => {
     const [category, setCategory] = useState('');
     const [price, setPrice] = useState('');
     const [type, setType] = useState('');
+    const [maxOccupants, setMaxOccupants] = useState('');
+    
+    const [noOfAdults, setnoOfAdults] = useState('');
+    const [noOfChildren, setnoOfChildren] = useState('');
 
     const [image1, getImage1] = useState('');
     const [imageUrl1, getImageUrl1] = useState('');
@@ -86,65 +90,130 @@ const AddRoom = () => {
     const [category1, getCategory1] = useState('');
     const [price1, getPrice1] = useState('');
     const [type1, getType1] = useState('');
+    const [maxOccupants1, getMaxOccupants] = useState('');
+    const [minOccupants1, getMinOccupants] = useState('');
+    const [noOfAdults1, getnoOfAdults] = useState('');
+    const [noOfChildren1, getnoOfChildren] = useState('');
+
 
     const handleSubmit = async (event) => {
         event.preventDefault();
         console.log(event.currentTarget);
         const data = new FormData(event.currentTarget);
-        let url;
-        if (image) {
-            let imageData = new FormData()
-            imageData.append('image', image)
-            let response = await axios.post(`${backendServer}/image/dish`, imageData);
-            url = response.data.imageUrl
-            setImageUrl(url);
-        }
+        
 
-        const restaurantId = localStorage.getItem('RestaurantId');
+        const EditRoomID = sessionStorage.getItem("EditRoomID")
+        const HotelID = localStorage.getItem('HotelID');
         //const dishid = localStorage.getItem('editDish');
-        const dishId = sessionStorage.getItem('dishId');
+        const RoomID = sessionStorage.getItem('RoomID');
            
 
+        
         let payload = {
-            dishId: dishId,
-            restaurantId: restaurantId,
-            dishdesc: data.get('desc'),
-            category: data.get('category'),
-            price: data.get('price'),
+          
+            hotelId: HotelID,
+            description: data.get('desc'),
+            //category: data.get('category'),
+            cost: data.get('price'),
             name: data.get('name'),
             type: data.get('type'),
-            imageUrl: url || imageUrl
+            maxOccupants: data.get('maxOccupants'),
+            adults: data.get('noOfAdults'),
+            children: data.get('noOfChildren')
+
+           
+        }
+        if(EditRoomID != null ){
+            console.log("edit room payload", payload)
+
+            axios.put(`${backendServer}/v1/room/${EditRoomID}`, payload)
+                .then(response => {
+                    console.log(response)
+                    let url;
+       if (image) {
+            console.log("Dishes response hello" ,image)
+            let imageData = new FormData()
+            imageData.append('file', image)
+            axios.post(`${backendServer}/v1/room/${response.data.id}/upload-image`, imageData)
+            .then((response) =>{
+                url = response.data.imageUrl
+                console.log("Dishes response hello")
+                // setImageUrl(url);
+            })
+            .catch((err) =>{
+                return false;
+            })
+        }
+        sessionStorage.removeItem("EditRoomID");
+                    history("/HotelDashboard")
+                })
+                .catch(err => {
+                    console.log(err);
+                });
         }
 
-        console.log("dishes payload", payload)
+        else{
+        console.log("room payload", payload)
 
-        axios.post(`${backendServer}/restaurant/Add/dishes`, payload)
+        axios.post(`${backendServer}/v1/room`, payload)
             .then(response => {
                 console.log(response)
-                
-                history.push("/RestaurantDashboard")
+                let url;
+
+                if (image) {
+                    console.log("Dishes response hello" ,image)
+                    let imageData = new FormData()
+                    imageData.append('file', image)
+                    axios.post(`${backendServer}/v1/room/${response.data.id}/upload-image`, imageData)
+                    .then((response) =>{
+                        url = response.data.imageUrl
+                        console.log("Dishes response hello")
+                        // setImageUrl(url);
+                    })
+                    .catch((err) =>{
+                        return false;
+                    })
+                }
+                sessionStorage.removeItem("RoomID");
+                history("/HotelDashboard")
             })
             .catch(err => {
                 console.log(err);
             });
+        }
+        
 
     };
 
-    // useEffect(async () => {
-    //     const dishId = sessionStorage.getItem('dishId');
+    useEffect( () => {
+        const RoomID = sessionStorage.getItem('EditRoomID');
 
-    //     if (dishId) {
-    //         const response = await axios.get(`${backendServer}/dishes/${dishId}`);
-    //         console.log("Dishes response", response)
-    //         const dish = response.data;
-    //         setName(dish.DishName);
-    //          setDesc(dish.DishDesc);
-    //          setCategory(dish.DishCategory);
-    //          setType(dish.DishType);
-    //          setPrice(dish.Price);
-    //          setImageUrl(dish.DishImage);
-    //      }
-    // }, [])
+        
+            
+       // }
+
+        if (RoomID) {
+            axios.get(`${backendServer}/v1/room/${RoomID}`)
+            .then((response) =>{
+            console.log("Dishes response", response)
+            const dish = response.data;
+            setName(dish.name);
+             setDesc(dish.description);
+             
+             setType(dish.type);
+             setPrice(dish.cost);
+             setMaxOccupants(dish.maxOccupants);
+             setnoOfAdults(dish.adults);
+             setnoOfChildren(dish.children)
+             setImageUrl(dish.imageUrl);
+         })
+         .catch((err) =>{
+             return false;
+         })
+        }
+
+        
+    }, [])
 
     const onPhotoChange = (event) => {
         if (event.target.files.length === 0)
@@ -316,10 +385,11 @@ const AddRoom = () => {
                                         fullWidth
                                         id="maxOccupants"
                                         label="Max Occupants"
-                                        name="name"
+                                        name="maxOccupants"
                                         autoComplete="name"
                                         type="number"
-                                        onChange={(e) => setName(e.target.value)}
+                                        value={maxOccupants}
+                                        onChange={(e) => setMaxOccupants(e.target.value)}
                                         autoFocus
                                     />
                                 </Grid>
@@ -331,10 +401,11 @@ const AddRoom = () => {
                                         fullWidth
                                         id="noOfAdults"
                                         label="Number Of Adults"
-                                        name="name"
+                                        name="noOfAdults"
                                         autoComplete="name"
                                         type="number"
-                                        onChange={(e) => setName(e.target.value)}
+                                        value={noOfAdults}
+                                        onChange={(e) => setnoOfAdults(e.target.value)}
                                         autoFocus
                                     />
                                 </Grid>
@@ -344,12 +415,13 @@ const AddRoom = () => {
                                         margin="none"
                                         required
                                         fullWidth
-                                        id="noOfChilder"
+                                        id="noOfChildren"
                                         label="Number Of Children"
-                                        name="name"
+                                        name="noOfChildren"
                                         autoComplete="name"
                                         type="number"
-                                        onChange={(e) => setName(e.target.value)}
+                                        value={noOfChildren}
+                                        onChange={(e) => setnoOfChildren(e.target.value)}
                                         autoFocus
                                     />
                                 </Grid>
