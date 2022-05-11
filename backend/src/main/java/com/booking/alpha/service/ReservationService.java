@@ -16,11 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
 
 import java.text.ParseException;
-import java.util.Set;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.ArrayList;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -77,10 +73,10 @@ public class ReservationService {
         return updatedEntry;
     }
 
-    public ReservationEntry removeReservation( Long reservationId) {
+    public ReservationDetailsEntry removeReservation( Long reservationId) {
         ReservationEntry reservationEntry = findOneById(reservationId);
         reservationEntry.setBookingState(BookingState.EXPIRED);
-        return convertToEntry(reservationRepository.save(convertToEntity(reservationEntry)));
+        return convertToDetails(Collections.singletonList(convertToEntry(reservationRepository.save(convertToEntity(reservationEntry))))).get(0);
     }
 
     public List<ReservationEntry> getReservationsForUser( Long userId, BookingState bookingState) {
@@ -108,7 +104,8 @@ public class ReservationService {
                         hotelIdMap.get(roomIdMap.get(reservationEntry.getRoomId()).getHotelId()),
                         roomIdMap.get(reservationEntry.getRoomId()),
                         reservationEntry.getStartTime(),
-                        reservationEntry.getEndTime()))
+                        reservationEntry.getEndTime(),
+                        reservationEntry.getServiceList()))
                 .collect(Collectors.toList());
     }
 
@@ -127,7 +124,7 @@ public class ReservationService {
     }
 
     @Transactional
-    public ReservationEntry reserve(BookingRequestEntry bookingRequestEntry) throws ParseException, JsonProcessingException {
+    public ReservationDetailsEntry reserve(BookingRequestEntry bookingRequestEntry) throws ParseException, JsonProcessingException {
         Long roomId = bookingRequestEntry.getRoomId();
         Long startDate = accountingUtils.getCheckInTime(bookingRequestEntry.getStartDate()).getTime();
         Long endDate = accountingUtils.getCheckOutTime(bookingRequestEntry.getEndDate()).getTime();
@@ -150,17 +147,18 @@ public class ReservationService {
         ReservationEntry reservationEntryToCreate = new ReservationEntry(null, bookingRequestEntry.getUserId(), roomToBook.getId(), startDate, endDate, BookingState.PENDING, serviceEntriesToCreate);
         ReservationEntry reservationCompleted = convertToEntry(reservationRepository.save(convertToEntity(reservationEntryToCreate)));
         publishForRemoval( reservationCompleted);
-        return reservationCompleted;
+        return convertToDetails(Collections.singletonList(reservationCompleted)).get(0);
     }
 
-    public List<ReservationEntry> makeBooking( Long userId) {
+    public List<ReservationDetailsEntry> makeBooking( Long userId) {
         List<ReservationEntity> reservationEntities = reservationRepository.getAllByUserIdAndAndBookingStateIs(userId, BookingState.PENDING);
         List<ReservationEntry> reservationEntries = reservationEntities.stream().map(this::convertToEntry).collect(Collectors.toList());
         for(ReservationEntry reservationEntry: reservationEntries) {
             reservationEntry.setBookingState(BookingState.CONFIRMED);
         }
         List<ReservationEntity> updatedEntities = reservationRepository.saveAll(reservationEntries.stream().map(this::convertToEntity).collect(Collectors.toList()));
-        return updatedEntities.stream().map(this::convertToEntry).collect(Collectors.toList());
+        List<ReservationEntry> updatedEntries = updatedEntities.stream().map(this::convertToEntry).collect(Collectors.toList());
+        return convertToDetails(updatedEntries);
     }
 
     public void publishForRemoval( ReservationEntry reservationEntry) throws JsonProcessingException {

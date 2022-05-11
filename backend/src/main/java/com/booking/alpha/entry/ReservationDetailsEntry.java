@@ -30,4 +30,6 @@ public class ReservationDetailsEntry {
     Long startTime;
 
     Long endTime;
+
+    List<ServiceEntry> serviceEntryList;
 }
