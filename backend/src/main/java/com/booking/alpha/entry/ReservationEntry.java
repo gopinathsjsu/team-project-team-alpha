@@ -21,6 +21,8 @@ public class ReservationEntry {
 
     Long id;
 
+    Long transactionId;
+
     Long userId;
 
     Long roomId;

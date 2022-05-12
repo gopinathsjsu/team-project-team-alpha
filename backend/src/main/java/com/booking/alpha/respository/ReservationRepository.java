@@ -14,7 +14,9 @@ import java.util.Set;
 @Repository
 public interface ReservationRepository extends JpaRepository<ReservationEntity, Long> {
 
-    public List<ReservationEntity> getAllByUserIdAndAndBookingStateIs(Long userId, BookingState bookingState);
+    public List<ReservationEntity> getAllByUserIdAndAndBookingStateIn(Long userId, Set<BookingState> bookingStates);
+
+    public ReservationEntity findFirstByUserIdAndBookingStateIn( Long userId, Set<BookingState> bookingStates);
 
     @Query(value = " SELECT * FROM   reservation JOIN room ON reservation.room_id = room.id AND room.hotel_id = :hotelId AND reservation.booking_state = :bookingState ", nativeQuery = true)
     public List<ReservationEntity> getAllByHotelIdAndBookingState(@Param("hotelId") Long hotelId, @Param("bookingState") String bookingState);

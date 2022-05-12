@@ -26,4 +26,12 @@ public class AccountingUtils {
         dateFormat.setTimeZone(timeZone);
         return new DateTime(dateFormat.parse(endDate)).withZone(DateTimeZone.forTimeZone(timeZone)).withTimeAtStartOfDay().plusHours(12).plusMillis(-1).toDate();
     }
+
+    public String convertToString( Long currentTime) {
+        Date date = new Date(currentTime);
+        TimeZone timeZone = TimeZone.getTimeZone("GMT-7");
+        DateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
+        dateFormat.setTimeZone(timeZone);
+        return dateFormat.format(date);
+    }
 }

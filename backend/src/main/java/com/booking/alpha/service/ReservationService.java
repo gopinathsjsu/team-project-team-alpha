@@ -17,7 +17,7 @@ import org.springframework.util.ObjectUtils;
 
 import java.text.ParseException;
 import java.util.Set;
-import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.ArrayList;
@@ -74,22 +74,30 @@ public class ReservationService {
         if(!ObjectUtils.isEmpty(reservationEntry.getServiceList())) {
             existingEntry.setServiceList(reservationEntry.getServiceList());
         }
+        if(!ObjectUtils.isEmpty(reservationEntry.getTransactionId())) {
+            existingEntry.setTransactionId(reservationEntry.getTransactionId());
+        }
+        if(!ObjectUtils.isEmpty(reservationEntry.getBookingState())) {
+            existingEntry.setBookingState(reservationEntry.getBookingState());
+        }
         ReservationEntry updatedEntry = convertToEntry(reservationRepository.save(convertToEntity(existingEntry)));
         return updatedEntry;
     }
 
-    public ReservationDetailsEntry removeReservation( Long reservationId) {
-        ReservationEntry reservationEntry = findOneById(reservationId);
-        reservationEntry.setBookingState(BookingState.EXPIRED);
-        return convertToDetails(Collections.singletonList(convertToEntry(reservationRepository.save(convertToEntity(reservationEntry))))).get(0);
-    }
-
-    public List<ReservationEntry> getReservationsForUser( Long userId, BookingState bookingState) {
-        List<ReservationEntity> reservationEntities = reservationRepository.getAllByUserIdAndAndBookingStateIs(userId, bookingState);
+    public List<ReservationEntry> getReservationsForUser( Long userId, Set<BookingState> bookingStates) {
+        List<ReservationEntity> reservationEntities = reservationRepository.getAllByUserIdAndAndBookingStateIn(userId, bookingStates);
         if(reservationEntities.isEmpty()) {
             return new ArrayList<>();
         }
         return reservationEntities.stream().map(this::convertToEntry).collect(Collectors.toList());
+    }
+
+    public ReservationEntry getAnyReservationForUser( Long user, Set<BookingState> bookingStates) {
+        ReservationEntity reservationEntity = reservationRepository.findFirstByUserIdAndBookingStateIn( user, bookingStates);
+        if(ObjectUtils.isEmpty(reservationEntity)) {
+            return null;
+        }
+        return convertToEntry(reservationEntity);
     }
 
     public List<ReservationDetailsEntry> convertToDetails( List<ReservationEntry> reservationEntries) {
@@ -108,14 +116,14 @@ public class ReservationService {
                         userIdMap.get(reservationEntry.getUserId()),
                         hotelIdMap.get(roomIdMap.get(reservationEntry.getRoomId()).getHotelId()),
                         roomIdMap.get(reservationEntry.getRoomId()),
-                        reservationEntry.getStartTime(),
-                        reservationEntry.getEndTime(),
+                        accountingUtils.convertToString(reservationEntry.getStartTime()),
+                        accountingUtils.convertToString(reservationEntry.getEndTime()),
                         reservationEntry.getServiceList()))
                 .collect(Collectors.toList());
     }
 
-    public List<ReservationDetailsEntry> getReservationDetails( Long userId, BookingState state) {
-        List<ReservationEntry> reservationEntries = getReservationsForUser( userId, state);
+    public List<ReservationDetailsEntry> getReservationDetails( Long userId, Set<BookingState> bookingStates) {
+        List<ReservationEntry> reservationEntries = getReservationsForUser( userId, bookingStates);
         return convertToDetails(reservationEntries);
     }
 
@@ -130,6 +138,7 @@ public class ReservationService {
 
     @Transactional
     public ReservationDetailsEntry reserve(BookingRequestEntry bookingRequestEntry) throws ParseException, JsonProcessingException {
+        Long userId = bookingRequestEntry.getUserId();
         Long roomId = bookingRequestEntry.getRoomId();
         Long startDate = accountingUtils.getCheckInTime(bookingRequestEntry.getStartDate()).getTime();
         Long endDate = accountingUtils.getCheckOutTime(bookingRequestEntry.getEndDate()).getTime();
@@ -149,14 +158,24 @@ public class ReservationService {
                 serviceEntriesToCreate.add(serviceTypeServiceEntryMap.get(hotelServiceType));
             }
         }
-        ReservationEntry reservationEntryToCreate = new ReservationEntry(null, bookingRequestEntry.getUserId(), roomToBook.getId(), startDate, endDate, BookingState.PENDING, serviceEntriesToCreate);
+        ReservationEntry reservationEntryToCreate = new ReservationEntry(null, null, bookingRequestEntry.getUserId(), roomToBook.getId(), startDate, endDate, BookingState.PENDING, serviceEntriesToCreate);
+        ReservationEntry existingReservation = getAnyReservationForUser( userId, new HashSet<>(Collections.singletonList(BookingState.PENDING)));
+        if(!ObjectUtils.isEmpty(existingReservation)) {
+            reservationEntryToCreate.setTransactionId(existingReservation.getTransactionId());
+        }
         ReservationEntry reservationCompleted = convertToEntry(reservationRepository.save(convertToEntity(reservationEntryToCreate)));
+        if(ObjectUtils.isEmpty(existingReservation)) {
+            reservationCompleted.setTransactionId(reservationCompleted.getId());
+            reservationCompleted = patchUpdate( reservationCompleted.getId(), reservationCompleted);
+        }
         publishForRemoval( reservationCompleted);
         return convertToDetails(Collections.singletonList(reservationCompleted)).get(0);
     }
 
     public List<ReservationDetailsEntry> makeBooking( Long userId) {
-        List<ReservationEntity> reservationEntities = reservationRepository.getAllByUserIdAndAndBookingStateIs(userId, BookingState.PENDING);
+        List<ReservationEntity> reservationEntities = reservationRepository.getAllByUserIdAndAndBookingStateIn(
+                userId,
+                new HashSet<>(Collections.singletonList(BookingState.PENDING)));
         List<ReservationEntry> reservationEntries = reservationEntities.stream().map(this::convertToEntry).collect(Collectors.toList());
         for(ReservationEntry reservationEntry: reservationEntries) {
             reservationEntry.setBookingState(BookingState.CONFIRMED);

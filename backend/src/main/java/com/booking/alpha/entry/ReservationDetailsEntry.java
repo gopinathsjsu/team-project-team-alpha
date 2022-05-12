@@ -27,9 +27,9 @@ public class ReservationDetailsEntry {
 
     RoomEntry roomEntry;
 
-    Long startTime;
+    String startTime;
 
-    Long endTime;
+    String endTime;
 
     List<ServiceEntry> serviceEntryList;
 }

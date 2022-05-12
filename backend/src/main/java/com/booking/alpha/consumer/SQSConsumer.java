@@ -60,8 +60,9 @@ public class SQSConsumer {
     Boolean process(Message message) {
         try{
             ReservationEntry reservationEntry = objectMapper.readValue(message.getBody(), new TypeReference<ReservationEntry>() {});
-            if(reservationEntry.getBookingState().equals(BookingState.PENDING)) {
-                reservationService.removeReservation(reservationEntry.getId());
+            ReservationEntry reservationEntryExisting  = reservationService.findOneById(reservationEntry.getId());
+            if(reservationEntryExisting.getBookingState().equals(BookingState.PENDING)) {
+                reservationService.patchUpdate( reservationEntryExisting.getId(), new ReservationEntry( null, null, null, null, null, null, BookingState.EXPIRED, null));
             }
             return true;
         } catch (Throwable e) {

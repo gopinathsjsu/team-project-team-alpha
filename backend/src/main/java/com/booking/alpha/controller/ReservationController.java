@@ -12,7 +12,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.text.ParseException;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Arrays;
 
 @RequestMapping("/v1/reservation")
 @RestController
@@ -36,7 +39,7 @@ public class ReservationController {
 
     @GetMapping("/user/{userId}")
     ResponseEntity<List<ReservationDetailsEntry>> getReservationForUser(@PathVariable("userId") Long userId) {
-        return new ResponseEntity<>( reservationService.getReservationDetails(userId, BookingState.CONFIRMED), HttpStatus.OK);
+        return new ResponseEntity<>( reservationService.getReservationDetails(userId, new HashSet<>(Arrays.asList(BookingState.CONFIRMED, BookingState.PENDING))), HttpStatus.OK);
     }
 
     @GetMapping("/hotel/{hotelId}")
@@ -46,7 +49,7 @@ public class ReservationController {
 
     @GetMapping("/user-cart/{userId}")
     ResponseEntity<List<ReservationDetailsEntry>> getUserCart(@PathVariable("userId") Long userId) {
-        return new ResponseEntity<>( reservationService.getReservationDetails(userId, BookingState.PENDING), HttpStatus.OK);
+        return new ResponseEntity<>( reservationService.getReservationDetails(userId, new HashSet<>(Arrays.asList(BookingState.PENDING))), HttpStatus.OK);
     }
 
     @PostMapping("/add-to-cart")
@@ -61,6 +64,7 @@ public class ReservationController {
 
     @PostMapping("/remove-from-cart/{id}")
     public ResponseEntity<ReservationDetailsEntry> unreserve(@PathVariable("id") Long reservationId) {
-        return new ResponseEntity<>( reservationService.removeReservation(reservationId), HttpStatus.OK);
+        ReservationEntry updatedReservationEntry = reservationService.patchUpdate(reservationId, new ReservationEntry( null, null, null, null, null, null, BookingState.CANCELLED, null));
+        return new ResponseEntity<>( reservationService.convertToDetails(Collections.singletonList(updatedReservationEntry)).get(0), HttpStatus.OK);
     }
 }
