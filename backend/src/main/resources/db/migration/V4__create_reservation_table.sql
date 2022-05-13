@@ -1,5 +1,6 @@
 create table reservation (
     id bigint primary key auto_increment,
+    transaction_id bigint,
     user_id bigint,
     room_id bigint,
     start_time bigint,

@@ -19,6 +19,8 @@ import java.util.List;
 @NoArgsConstructor
 public class ReservationDetailsEntry {
 
+    Long transactionId;
+
     Long reservationId;
 
     UserEntry userEntry;
@@ -27,9 +29,13 @@ public class ReservationDetailsEntry {
 
     RoomEntry roomEntry;
 
-    Long startTime;
+    String startTime;
 
-    Long endTime;
+    String endTime;
+
+    Long duration;
+
+    Long totalCost;
 
     List<ServiceEntry> serviceEntryList;
 }
