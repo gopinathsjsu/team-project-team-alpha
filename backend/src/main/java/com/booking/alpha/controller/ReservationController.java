@@ -50,17 +50,17 @@ public class ReservationController {
     }
 
     @PostMapping("/add-to-cart")
-    public ResponseEntity< ReservationEntry > reserveOne(@RequestBody BookingRequestEntry bookingRequestEntry) throws ParseException, JsonProcessingException {
+    public ResponseEntity<ReservationDetailsEntry> reserveOne(@RequestBody BookingRequestEntry bookingRequestEntry) throws ParseException, JsonProcessingException {
         return new ResponseEntity<>( reservationService.reserve(bookingRequestEntry), HttpStatus.OK);
     }
 
     @PostMapping("/book/{userId}")
-    public ResponseEntity<List<ReservationEntry>> makeBooking(@PathVariable("userId") Long userId) {
+    public ResponseEntity<List<ReservationDetailsEntry>> makeBooking(@PathVariable("userId") Long userId) {
         return new ResponseEntity<>( reservationService.makeBooking(userId), HttpStatus.OK);
     }
 
     @PostMapping("/remove-from-cart/{id}")
-    public ResponseEntity<ReservationEntry> unreserve(@PathVariable("id") Long reservationId) {
+    public ResponseEntity<ReservationDetailsEntry> unreserve(@PathVariable("id") Long reservationId) {
         return new ResponseEntity<>( reservationService.removeReservation(reservationId), HttpStatus.OK);
     }
 }

@@ -30,8 +30,31 @@ import TablePagination from '@material-ui/core/TablePagination';
 // eslint-disable-next-line import/no-named-as-default
 import { NavbarDashBoard } from '../Navigation/NavbarDashBoard';
 import { viewOrders } from '../../state/action-creators/hotelActions';
+import { makeStyles } from '@material-ui/core';
+import Review from './Review';
 
 const theme = createTheme();
+
+const useStyles = makeStyles((theme) => ({
+  root: {
+    flexGrow: 1,
+  },
+  paper: {
+    padding: theme.spacing(2),
+    margin: 'auto',
+    maxWidth: 500,
+  },
+  image: {
+    width: 128,
+    height: 128,
+  },
+  img: {
+    margin: 'auto',
+    display: 'block',
+    maxWidth: '100%',
+    maxHeight: '100%',
+  },
+}));
 
 const statuses = [
   {
@@ -75,11 +98,13 @@ const CustomerOrder = () => {
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const cards = useSelector((state) => state.hotels.bookings);
   const [status, setStatus] = useState('All Orders');
+  const [bookings, setBookings] = useState([]);
   const dispatch = useDispatch();
+  const classes = useStyles()
 
 
   const onStatusChange = (event) => {
-  
+
   };
 
   const handleChangePage = (event, newPage) => {
@@ -92,21 +117,71 @@ const CustomerOrder = () => {
   };
 
   useEffect(() => {
-    let userId = "4";
+    let userId = "1";
     dispatch(viewOrders(userId));
+    let bookingsByPeriod = {};
+    cards.forEach((booking) => {
+      const period = booking.startTime + "#" + booking.endTime;
+      if (bookingsByPeriod[period]) {
+        bookingsByPeriod[period].push(booking);
+      } else {
+        bookingsByPeriod[period] = [booking];
+      }
+    })
+    // console.log(bookingsByPeriod);
   }, []);
 
+  useEffect(() => {
+    let bookingsByPeriod = {};
+    cards.forEach((booking) => {
+      const period = booking.startTime + "#" + booking.endTime;
+      const hotelId = booking.hotelEntry.id;
+      if (!bookingsByPeriod[period]) {
+        bookingsByPeriod[period] = [];
+      }
+      if (!bookingsByPeriod[period][hotelId]) {
+        bookingsByPeriod[period][hotelId] = [];
+      }
+      bookingsByPeriod[period][hotelId].push(booking);
+    })
+    let bookings = [];
+    for (let i in bookingsByPeriod) {
+      bookings = [...bookings, ...bookingsByPeriod[i]];
+    }
+    bookings = bookings.filter(e => e)
+    let order = [];
+    for (let i = 0; i < bookings.length; i++) {
+      let newOrder = {};
+      newOrder.hotelEntry = bookings[i][0].hotelEntry;
+      let start = new Date(bookings[i][0].startTime);
+      let end = new Date(bookings[i][0].startTime);
+      newOrder.startTime = start.toString();
+      newOrder.endTime = end.toString();
+      newOrder.userEntry = bookings[i][0].userEntry;
+      newOrder.roomEntry = [];
+      for (let j = 0; j < bookings[i].length; j++) {
+        newOrder.roomEntry.push(bookings[i][j].roomEntry);
+      }
+      order.push(newOrder);
+    }
+    console.log(order);
+    setBookings(order);
+  }, [cards]);
+
   const onCancelOrder = (currentCard) => {
-    
+    setOpenOrder(false);
   };
 
   const onView = (card) => {
-   
+    setCurrentCard(card);
+    setOpenOrder(true);
   };
+
+
 
   return (
     <>
-      <NavbarDashBoard/>
+      <NavbarDashBoard />
       <ThemeProvider theme={theme}>
         <CssBaseline />
         <main>
@@ -166,7 +241,7 @@ const CustomerOrder = () => {
             <TablePagination
               rowsPerPageOptions={[2, 5, 10]}
               component="div"
-              count={cards.length}
+              count={bookings.length}
               rowsPerPage={rowsPerPage}
               page={page}
               onChangePage={handleChangePage}
@@ -174,27 +249,24 @@ const CustomerOrder = () => {
             />
             <Grid container spacing={1}>
               {(rowsPerPage > 0
-                ? cards.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                : cards).map((card) => (
-                  <Grid item key={card.OrderId} xs={12}>
+                ? bookings.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                : bookings).map((card) => (
+                  <Grid item key={card.roomEntry.id} xs={12}>
                     <Card>
                       <CardContent>
                         <Grid>
-                          <Grid item xs={12} sm={4}>
+                          <Grid item xs={2}>
+                            <img className={classes.img} alt="complex" src={card.hotelEntry.imageUrl} />
+                          </Grid>
+                          <Grid item xs={12} sm={12}>
                             <Typography gutterBottom variant="h5" component="h2">
-                              {card.roomEntry.name}
+                              {card.hotelEntry.name}
                             </Typography>
                             <Typography>
-                              Booking from :
-                              {card.startTime}
+                              Booking from: {card.startTime}
                             </Typography>
                             <Typography>
-                              Booking to :
-                              {card.endTime}
-                            </Typography>
-                            <Typography>
-                              Room Type :
-                              {card.roomEntry.type}
+                              Booking to: {card.endTime}
                             </Typography>
                             {/* <IconButton label="View Reciept" onClick={() => onView(card)} aria-label="view restaurant">
                               <ReceiptIcon />
@@ -203,7 +275,7 @@ const CustomerOrder = () => {
                           <Grid item xs={12} sm={6}>
                             <Button variant="text" onClick={() => onView(card)}>View Reciept</Button>
                             {card.OrderStatus === 'Order Recieved' && (
-                            <Button variant="text" onClick={() => onCancelOrder(card)}>Cancel Order</Button>
+                              <Button variant="text" onClick={() => onCancelOrder(card)}>Cancel Order</Button>
                             )}
                           </Grid>
                         </Grid>
@@ -211,14 +283,14 @@ const CustomerOrder = () => {
                       <CardActions />
                     </Card>
                   </Grid>
-              ))}
+                ))}
             </Grid>
           </Container>
           <div>
             <Dialog open={openOrder} aria-labelledby="form-dialog-title">
               <DialogTitle id="form-dialog-title">Order Reciept</DialogTitle>
               <DialogContent>
-                {/* <Receipt order={currentCard} /> */}
+                <Review order={currentCard} />
               </DialogContent>
               <DialogActions>
                 <Button variant="contained" onClick={() => setOpenOrder(false)} color="primary">

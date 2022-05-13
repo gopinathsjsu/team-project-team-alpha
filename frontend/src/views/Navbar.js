@@ -156,13 +156,13 @@ const routepage = [
   }
 ]
 
-// function logout1()  {
-//   console.log("clicked logout")
+function logout1()  {
+  console.log("clicked logout")
 
-//   useDispatch.dispatch(logout('', ''));
+  // useDispatch.dispatch(logout('', ''));
 
 
-// }
+}
 
 const menuItems = [
   {
@@ -173,7 +173,7 @@ const menuItems = [
   {
     listIcon: <Home />,
     listText: 'Bookings',
-    listPath: '/HotelBooking'
+    listPath: '/ViewBooking'
   },
   {
     listIcon: <ShoppingCartIcon />,
@@ -185,11 +185,11 @@ const menuItems = [
   //   listText: 'Favourites',
   //   listPath: '/Favourites'
   // },
-  // {
-  //   listIcon: <LogoutIcon onClick={logout1} />,
-  //   listText: 'Logout',
-  //   listPath: '/'
-  // }
+  {
+    listIcon: <LogoutIcon onClick={logout1} />,
+    listText: 'Logout',
+    listPath: '/'
+  }
 ]
 
 
