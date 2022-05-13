@@ -1,11 +1,13 @@
 package com.booking.alpha.service;
 
+import com.booking.alpha.constant.BillingType;
 import com.booking.alpha.constant.BookingState;
 import com.booking.alpha.constant.RoomType;
 import com.booking.alpha.entity.HotelEntity;
 import com.booking.alpha.entry.*;
 import com.booking.alpha.respository.HotelRepository;
 import com.booking.alpha.utils.AccountingUtils;
+import com.booking.alpha.utils.BillingEvaluatorFactory;
 import com.booking.alpha.utils.S3Utils;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -43,13 +45,16 @@ public class HotelService {
 
     private final ObjectMapper objectMapper;
 
+    private final BillingEvaluatorFactory billingEvaluatorFactory;
+
     public HotelService(HotelRepository hotelRepository, AccountingUtils accountingUtils, S3Utils s3Utils,
-                        EntityManager entityManager, ObjectMapper objectMapper) {
+                        EntityManager entityManager, ObjectMapper objectMapper, BillingEvaluatorFactory billingEvaluatorFactory) {
         this.hotelRepository = hotelRepository;
         this.accountingUtils = accountingUtils;
         this.s3Utils = s3Utils;
         this.entityManager = entityManager;
         this.objectMapper = objectMapper;
+        this.billingEvaluatorFactory = billingEvaluatorFactory;
     }
 
     public HotelEntry convertToEntry(HotelEntity hotelEntity) {
@@ -188,6 +193,10 @@ public class HotelService {
         }
         Map< Long, List<HotelAvailabilityMappingEntry>> hotelAvailabilityMap = hotelAvailabilityMappingEntries.stream().collect(Collectors.groupingBy(HotelAvailabilityMappingEntry::getHotelId));
         List<HotelEntry> hotelEntries = findByIds(new HashSet<>(hotelAvailabilityMap.keySet()));
+        Date startDate = accountingUtils.getCheckInTime(hotelSearchPagedRequest.getStartDate());
+        Date endDate = accountingUtils.getCheckInTime(hotelSearchPagedRequest.getEndDate());
+        BillingType billingType = billingEvaluatorFactory.getBillingType( startDate.getTime(), endDate.getTime());
+        billingEvaluatorFactory.getBillingEvaluator(billingType).normaliseHotels(hotelEntries);
         Map<Long, HotelEntry> hotelEntryMap = hotelEntries.stream().collect(Collectors.toMap(HotelEntry::getId,hotelEntry -> hotelEntry));
         List<HotelAvailabilityEntry> hotelAvailabilityEntries = new ArrayList<>();
         for(Long hotelId: hotelAvailabilityMap.keySet()) {
