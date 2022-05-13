@@ -2,9 +2,8 @@ package com.booking.alpha.consumer;
 
 import com.amazonaws.services.sqs.model.Message;
 import com.booking.alpha.configuration.SQSConfiguration;
-import com.booking.alpha.constant.BookingState;
 import com.booking.alpha.constant.ConsumerKeys;
-import com.booking.alpha.entry.ReservationEntry;
+import com.booking.alpha.entry.UnreservingMessageEntry;
 import com.booking.alpha.service.ReservationService;
 import com.booking.alpha.utils.SQSUtils;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -59,11 +58,8 @@ public class SQSConsumer {
 
     Boolean process(Message message) {
         try{
-            ReservationEntry reservationEntry = objectMapper.readValue(message.getBody(), new TypeReference<ReservationEntry>() {});
-            ReservationEntry reservationEntryExisting  = reservationService.findOneById(reservationEntry.getId());
-            if(reservationEntryExisting.getBookingState().equals(BookingState.PENDING)) {
-                reservationService.patchUpdate( reservationEntryExisting.getId(), new ReservationEntry( null, null, null, null, null, null, BookingState.EXPIRED, null));
-            }
+            UnreservingMessageEntry unreservingMessageEntry = objectMapper.readValue(message.getBody(), new TypeReference<UnreservingMessageEntry>() {});
+            reservationService.expireBooking(unreservingMessageEntry);
             return true;
         } catch (Throwable e) {
             return false;

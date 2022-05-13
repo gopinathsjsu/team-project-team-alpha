@@ -120,7 +120,7 @@ public class UserService {
         }
     }
 
-    public UserEntry updateRewards(Long reward, Long id){
+    public UserEntry updateRewards( Long id, Long reward){
         try {
             UserEntry userEntry = findOneById(id);
             userEntry.setRewardPoints(userEntry.getRewardPoints() + reward);

@@ -84,6 +84,17 @@ public class ReservationService {
         return updatedEntry;
     }
 
+    @Transactional
+    public void expireBooking( UnreservingMessageEntry unreservingMessageEntry) {
+        ReservationEntry reservationEntryExisting  = findOneById(unreservingMessageEntry.getReservationId());
+        if(reservationEntryExisting.getBookingState().equals(BookingState.PENDING)) {
+            patchUpdate( reservationEntryExisting.getId(), new ReservationEntry( null, null, null, null, null, null, BookingState.EXPIRED, null));
+        }
+        if(reservationEntryExisting.getBookingState().equals(BookingState.PENDING) || reservationEntryExisting.getBookingState().equals(BookingState.CANCELLED)) {
+            userService.updateRewards( reservationEntryExisting.getUserId(), unreservingMessageEntry.getCustomLoyaltyCredit());
+        }
+    }
+
     public List<ReservationEntry> getReservationsForUser( Long userId, Set<BookingState> bookingStates) {
         List<ReservationEntity> reservationEntities = reservationRepository.getAllByUserIdAndAndBookingStateIn(userId, bookingStates);
         if(reservationEntities.isEmpty()) {
@@ -111,15 +122,23 @@ public class ReservationService {
         Map<Long, RoomEntry> roomIdMap = roomEntries.stream().collect(Collectors.toMap(RoomEntry::getId, roomEntry -> roomEntry));
         Map<Long, UserEntry> userIdMap = userEntries.stream().collect(Collectors.toMap(UserEntry::getId, userEntry -> userEntry));
         return reservationEntries.stream()
-                .map(reservationEntry -> new ReservationDetailsEntry(
+                .map(reservationEntry ->{
+                    Long roomId = reservationEntry.getRoomId();
+                    Long hotelId = roomIdMap.get(roomId).getHotelId();
+                    Long duration = accountingUtils.getDurationInDays(reservationEntry.getStartTime(), reservationEntry.getEndTime());
+                    Long totalCost = accountingUtils.getTotalCost(roomIdMap.get(roomId), hotelIdMap.get(hotelId).getServiceList())*duration;
+                    return new ReservationDetailsEntry(
+                        reservationEntry.getTransactionId(),
                         reservationEntry.getId(),
                         userIdMap.get(reservationEntry.getUserId()),
-                        hotelIdMap.get(roomIdMap.get(reservationEntry.getRoomId()).getHotelId()),
-                        roomIdMap.get(reservationEntry.getRoomId()),
+                        hotelIdMap.get(hotelId),
+                        roomIdMap.get(roomId),
                         accountingUtils.convertToString(reservationEntry.getStartTime()),
                         accountingUtils.convertToString(reservationEntry.getEndTime()),
-                        reservationEntry.getServiceList()))
-                .collect(Collectors.toList());
+                        duration,
+                        totalCost,
+                        reservationEntry.getServiceList());
+                }).collect(Collectors.toList());
     }
 
     public List<ReservationDetailsEntry> getReservationDetails( Long userId, Set<BookingState> bookingStates) {
@@ -142,6 +161,13 @@ public class ReservationService {
         Long roomId = bookingRequestEntry.getRoomId();
         Long startDate = accountingUtils.getCheckInTime(bookingRequestEntry.getStartDate()).getTime();
         Long endDate = accountingUtils.getCheckOutTime(bookingRequestEntry.getEndDate()).getTime();
+        UserEntry userEntry = userService.findOneById(userId);
+        if(ObjectUtils.isEmpty(bookingRequestEntry.getCustomLoyaltyCredit())) {
+            bookingRequestEntry.setCustomLoyaltyCredit(0L);
+        } else {
+            bookingRequestEntry.setCustomLoyaltyCredit(Math.min(bookingRequestEntry.getCustomLoyaltyCredit(), userEntry.getRewardPoints()));
+        }
+        bookingRequestEntry.setCustomLoyaltyCredit(Math.max(0L, bookingRequestEntry.getCustomLoyaltyCredit()));
         Set<HotelServiceType> bookingRequestHotelServiceTypeSet = bookingRequestEntry.getServiceTypeSet();
         RoomEntry roomEntryLocked = roomService.findOneByIdWithLock(roomId);
         Long hotelId = roomEntryLocked.getHotelId();
@@ -168,7 +194,8 @@ public class ReservationService {
             reservationCompleted.setTransactionId(reservationCompleted.getId());
             reservationCompleted = patchUpdate( reservationCompleted.getId(), reservationCompleted);
         }
-        publishForRemoval( reservationCompleted);
+        userService.updateRewards( userId, bookingRequestEntry.getCustomLoyaltyCredit()*(-1));
+        publishForRemoval( reservationCompleted.getId(), bookingRequestEntry.getCustomLoyaltyCredit());
         return convertToDetails(Collections.singletonList(reservationCompleted)).get(0);
     }
 
@@ -185,7 +212,8 @@ public class ReservationService {
         return convertToDetails(updatedEntries);
     }
 
-    public void publishForRemoval( ReservationEntry reservationEntry) throws JsonProcessingException {
-        sqsUtils.publishMessage( sqsConfiguration.getGetUnReservingQueueUrl(), null, reservationEntry, 600);
+    public void publishForRemoval( Long reservationId, Long customLoyaltyCredit) throws JsonProcessingException {
+        UnreservingMessageEntry unreservingMessageEntry = new UnreservingMessageEntry( reservationId, customLoyaltyCredit);
+        sqsUtils.publishMessage( sqsConfiguration.getGetUnReservingQueueUrl(), null, unreservingMessageEntry, 120);
     }
 }

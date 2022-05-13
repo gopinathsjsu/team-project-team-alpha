@@ -1,9 +1,12 @@
 package com.booking.alpha.utils;
 
 import com.booking.alpha.entry.HolidayDateEntry;
+import com.booking.alpha.entry.RoomEntry;
+import com.booking.alpha.entry.ServiceEntry;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.springframework.stereotype.Service;
+import org.springframework.util.ObjectUtils;
 
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -20,6 +23,8 @@ public class AccountingUtils {
 
     private final List<HolidayDateEntry> holidayDateEntries;
 
+    private final Long DAY_IN_MILLISECONDS;
+
     public AccountingUtils() {
         holidayDateEntries = Arrays.asList(
                 new HolidayDateEntry( 1, 17),
@@ -29,6 +34,7 @@ public class AccountingUtils {
                 new HolidayDateEntry( 11, 24),
                 new HolidayDateEntry( 12, 25)
         );
+        DAY_IN_MILLISECONDS = 24L*60L*60L*1000L;
     }
 
     public Date getCheckInTime(String startDate) throws ParseException {
@@ -51,6 +57,21 @@ public class AccountingUtils {
         DateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
         dateFormat.setTimeZone(timeZone);
         return dateFormat.format(date);
+    }
+
+    public Long getTotalCost(RoomEntry roomEntry, List<ServiceEntry> serviceEntries) {
+        Long cost = roomEntry.getCost();
+        if(!ObjectUtils.isEmpty(serviceEntries)) {
+            for(ServiceEntry serviceEntry: serviceEntries) {
+                cost = cost + serviceEntry.getCost();
+            }
+        }
+        return cost;
+    }
+
+    public Long getDurationInDays( Long startTime, Long endTime) {
+        Long diff = endTime - startTime + 1;
+        return diff/DAY_IN_MILLISECONDS;
     }
 
     public Date getDate(Integer year, HolidayDateEntry holidayDateEntry) {

@@ -9,7 +9,7 @@ create table user(
 
 insert into user( name, email_id, password, reward_points)
     values
-        ( 'Mayank', 'mayank.verma@sjsu.edu','abc', 0),
-        ( 'Vivek', 'vivek.joshi@sjsu.edu','abc', 0),
-        ( 'Suharsh', 'suharsh.cherukunnonarippa@sjsu.edu','abc', 0),
-        ( 'Akshay', 'akshaykumar.bhimsenraokulkarni@sjsu.edu','abc', 0);
+        ( 'Mayank', 'mayank.verma@sjsu.edu','abc', 10),
+        ( 'Vivek', 'vivek.joshi@sjsu.edu','abc', 20),
+        ( 'Suharsh', 'suharsh.cherukunnonarippa@sjsu.edu','abc', 40),
+        ( 'Akshay', 'akshaykumar.bhimsenraokulkarni@sjsu.edu','abc', 10);
