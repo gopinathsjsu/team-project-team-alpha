@@ -8,7 +8,8 @@ import {
   GET_HOTEL_ROOMS,
   SET_SELECTED_AMENITIES,
   SET_SELECTED_ROOM,
-  ADD_TO_CART
+  ADD_TO_CART,
+  SET_BOOKINGS
 } from "./types";
 
 
@@ -131,6 +132,21 @@ axios.post(`${backendServer}/v1/reservation/book/${userId}`)
     alert(err);
     return false;
   });
+};
+
+export const viewOrders = 
+(userId) => async (dispatch) => {
+  axios.get(`${backendServer}/v1/reservation/user/${userId}`)
+    .then((response) => {
+      dispatch({
+        type: SET_BOOKINGS,
+        payload: response.data
+      })
+    })
+    .catch((err) => {
+      alert(err);
+      return false;
+    });
 };
 
 

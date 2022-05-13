@@ -17,7 +17,7 @@ export default function ConfirmedBooking() {
     const navigate = useNavigate();
 
     const onViewStatus = () => {
-      navigate('/customer/orders');
+      navigate('/customer/bookings');
     };
   
     return (
@@ -29,7 +29,8 @@ export default function ConfirmedBooking() {
             <Paper variant="outlined" sx={{ my: { xs: 3, md: 6 }, p: { xs: 2, md: 3 } }}>
                   <>
                     <Typography variant="h5" gutterBottom>
-                      Thank you for choosing us.
+                      Life is a choice. You took the right one!
+                      <br/>Thank you for choosing us.
                     </Typography>
                     <Typography variant="subtitle1">
                       Your booking is confirmed. You can check more details in the bookings page.

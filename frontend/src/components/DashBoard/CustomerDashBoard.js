@@ -131,8 +131,8 @@ export default function CustomerDashBoard() {
                 >
                   Welcome back!
                 </Typography>
-                <Typography variant="h5" align="center" color="text.secondary" paragraph>
-                  Find your perfect place to stay
+                <Typography variant="h7" align="center" color="text.secondary" paragraph>
+                  Find your perfect place to stay.Your comfort is our responsibility!
                 </Typography>
               </Container>
             </Box>
