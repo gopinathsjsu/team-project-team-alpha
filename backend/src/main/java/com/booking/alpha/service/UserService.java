@@ -151,10 +151,10 @@ public class UserService {
         try {
             UserEntry oldUserEntry = findOneById(id);
             oldUserEntry.setName(userEntry.getName());
-            oldUserEntry.setEmailId(userEntry.getEmailId());
-            oldUserEntry.setPassword(userEntry.getPassword());
-            oldUserEntry.setRewardPoints(userEntry.getRewardPoints());
-            oldUserEntry.setId(userEntry.getId());
+            // oldUserEntry.setEmailId(userEntry.getEmailId());
+            // oldUserEntry.setPassword(userEntry.getPassword());
+            // oldUserEntry.setRewardPoints(userEntry.getRewardPoints());
+            // oldUserEntry.setId(userEntry.getId());
 
             UserEntity userEntity = convertToEntity(oldUserEntry);
             UserEntity updatedUserEntity = userRepository.save(userEntity);
