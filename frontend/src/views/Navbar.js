@@ -243,11 +243,11 @@ export const Navbar = (props) => {
 
 
   // dropdown 
-  // const [value, setValue] = useState('')
+  const [value1, setValue1] = useState('')
 
-  // const handleBtnChange = e => setValue(e.target.value)
+  const handleBtnChange = e => setValue1(e.target.value)
 
-  //console.log("filter Value", value)
+  console.log("filter Value", value1)
 
 
 
@@ -331,12 +331,10 @@ export const Navbar = (props) => {
             }}>
               <InputLabel>Hotel Filter</InputLabel>
               <Select value={value} onChange={(event) => props.handleBtnChange(event)}>
-                <MenuItem value="All Orders">All Orders</MenuItem>
-                <MenuItem value="Order Received">Order Received</MenuItem>
-                <MenuItem value="Preparing">Preparing</MenuItem>
-                <MenuItem value="Pick Up Ready">Pick Up Ready</MenuItem>
-                <MenuItem value="Picked Up">Picked Up</MenuItem>
-                <MenuItem value="Cancel Order">Cancel Order</MenuItem>
+                <MenuItem value="All Orders">SUITE</MenuItem>
+                <MenuItem value="Order Received">SINGLE</MenuItem>
+                <MenuItem value="Preparing">DOUBLE</MenuItem>
+                
               </Select>
             </FormControl>
 
@@ -347,12 +345,9 @@ export const Navbar = (props) => {
             }}>
               <InputLabel>Hotel Filter</InputLabel>
               <Select value={value} onChange={(event) => props.handleBtnChange(event)}>
-                <MenuItem value="All Orders">All Orders</MenuItem>
-                <MenuItem value="Order Received">Order Received</MenuItem>
-                <MenuItem value="Preparing">Preparing</MenuItem>
-                <MenuItem value="On The Way">On The Way</MenuItem>
-                <MenuItem value="Delivered">Delivered</MenuItem>
-                <MenuItem value="Cancel Order">Cancel Order</MenuItem>
+              <MenuItem value="All Orders">SUITE</MenuItem>
+                <MenuItem value="Order Received">SINGLE</MenuItem>
+                <MenuItem value="Preparing">DOUBLE</MenuItem>
 
               </Select>
             </FormControl>)}
