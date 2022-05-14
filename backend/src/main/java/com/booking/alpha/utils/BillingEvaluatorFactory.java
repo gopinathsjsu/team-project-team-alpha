@@ -1,11 +1,9 @@
 package com.booking.alpha.utils;
 
 import com.booking.alpha.constant.BillingType;
-import com.booking.alpha.entry.HolidayDateEntry;
 import org.springframework.stereotype.Service;
 
-import java.util.Arrays;
-import java.util.List;
+import java.util.Date;
 
 @Service
 public class BillingEvaluatorFactory {
@@ -18,17 +16,21 @@ public class BillingEvaluatorFactory {
 
     private final BillingEvaluator weekendBillingEvaluator;
 
+    private final AccountingUtils accountingUtils;
+
     public BillingEvaluatorFactory( HolidayBillingEvaluator holidayBillingEvaluator,
                                     OffSeasonBillingEvaluator offSeasonBillingEvaluator,
                                     VacationBillingEvaluator vacationBillingEvaluator,
-                                    WeekendBillingEvaluator weekendBillingEvaluator) {
+                                    WeekendBillingEvaluator weekendBillingEvaluator,
+                                    AccountingUtils accountingUtils) {
         this.holidayBillingEvaluator = holidayBillingEvaluator;
         this.offSeasonBillingEvaluator = offSeasonBillingEvaluator;
         this.vacationBillingEvaluator = vacationBillingEvaluator;
         this.weekendBillingEvaluator = weekendBillingEvaluator;
+        this.accountingUtils = accountingUtils;
     }
 
-    public BillingEvaluator BillingEvaluatorFactory(BillingType billingType) {
+    public BillingEvaluator getBillingEvaluator(BillingType billingType) {
         if(billingType.equals(BillingType.HOLIDAY)) {
             return holidayBillingEvaluator;
         } else if(billingType.equals(BillingType.VACATION)) {
@@ -37,6 +39,18 @@ public class BillingEvaluatorFactory {
             return weekendBillingEvaluator;
         } else {
             return offSeasonBillingEvaluator;
+        }
+    }
+
+    public BillingType getBillingType( Long startDate, Long endDate) {
+        if(accountingUtils.isWithinInHoliday( new Date(startDate), new Date(endDate))) {
+            return BillingType.HOLIDAY;
+        } else if(accountingUtils.isWithinVacations( new Date(startDate), new Date(endDate))) {
+            return BillingType.VACATION;
+        } else  if(accountingUtils.isOverWeekend( new Date(startDate), new Date(endDate))) {
+            return BillingType.WEEKEND;
+        } else {
+            return BillingType.OFF_SEASON;
         }
     }
 }

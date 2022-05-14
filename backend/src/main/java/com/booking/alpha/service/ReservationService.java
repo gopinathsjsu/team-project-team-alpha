@@ -1,6 +1,7 @@
 package com.booking.alpha.service;
 
 import com.booking.alpha.configuration.SQSConfiguration;
+import com.booking.alpha.constant.BillingType;
 import com.booking.alpha.constant.BookingState;
 import com.booking.alpha.constant.ConsumerKeys;
 import com.booking.alpha.constant.HotelServiceType;
@@ -8,6 +9,8 @@ import com.booking.alpha.entity.ReservationEntity;
 import com.booking.alpha.entry.*;
 import com.booking.alpha.respository.ReservationRepository;
 import com.booking.alpha.utils.AccountingUtils;
+import com.booking.alpha.utils.BillingEvaluator;
+import com.booking.alpha.utils.BillingEvaluatorFactory;
 import com.booking.alpha.utils.SQSUtils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.springframework.beans.BeanUtils;
@@ -41,9 +44,11 @@ public class ReservationService {
 
     private final UserService userService;
 
+    private final BillingEvaluatorFactory billingEvaluatorFactory;
+
     public ReservationService( ReservationRepository reservationRepository, AccountingUtils accountingUtils,
             RoomService roomService, HotelService hotelService, SQSUtils sqsUtils,
-            SQSConfiguration sqsConfiguration, UserService userService) {
+            SQSConfiguration sqsConfiguration, UserService userService, BillingEvaluatorFactory billingEvaluatorFactory) {
         this.reservationRepository = reservationRepository;
         this.accountingUtils = accountingUtils;
         this.roomService = roomService;
@@ -51,6 +56,7 @@ public class ReservationService {
         this.sqsUtils = sqsUtils;
         this.sqsConfiguration = sqsConfiguration;
         this.userService = userService;
+        this.billingEvaluatorFactory = billingEvaluatorFactory;
     }
 
     public ReservationEntry convertToEntry(ReservationEntity reservationEntity) {
@@ -161,6 +167,7 @@ public class ReservationService {
         Long roomId = bookingRequestEntry.getRoomId();
         Long startDate = accountingUtils.getCheckInTime(bookingRequestEntry.getStartDate()).getTime();
         Long endDate = accountingUtils.getCheckOutTime(bookingRequestEntry.getEndDate()).getTime();
+        Long duration = accountingUtils.getDurationInDays( startDate, endDate);
         UserEntry userEntry = userService.findOneById(userId);
         if(ObjectUtils.isEmpty(bookingRequestEntry.getCustomLoyaltyCredit())) {
             bookingRequestEntry.setCustomLoyaltyCredit(0L);
@@ -176,6 +183,9 @@ public class ReservationService {
             return null;
         }
         HotelEntry hotelEntry = hotelService.findOneById(hotelId);
+        BillingType billingType = billingEvaluatorFactory.getBillingType( startDate, endDate);
+        billingEvaluatorFactory.getBillingEvaluator(billingType).normaliseHotels(Collections.singletonList(hotelEntry), duration);
+        billingEvaluatorFactory.getBillingEvaluator(billingType).normaliseRooms(Collections.singletonList(roomToBook), duration);
         List<ServiceEntry> hotelEntryServiceList = hotelEntry.getServiceList();
         Map<HotelServiceType, ServiceEntry> serviceTypeServiceEntryMap = hotelEntryServiceList.stream().collect(Collectors.toMap(ServiceEntry::getType, serviceEntry -> serviceEntry));
         List<ServiceEntry> serviceEntriesToCreate = new ArrayList<>();

@@ -1,12 +1,16 @@
 package com.booking.alpha.controller;
 
 
+import com.booking.alpha.constant.BillingType;
 import com.booking.alpha.constant.RoomType;
 import com.booking.alpha.entity.RoomEntity;
+import com.booking.alpha.entry.BookingRequestEntry;
 import com.booking.alpha.entry.HotelEntry;
 import com.booking.alpha.entry.RoomEntry;
 import com.booking.alpha.entry.RoomSearchPagedRequest;
 import com.booking.alpha.service.RoomService;
+import com.booking.alpha.utils.AccountingUtils;
+import com.booking.alpha.utils.BillingEvaluatorFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +21,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 @RequestMapping("/v1/room")
@@ -26,6 +31,12 @@ public class RoomController {
 
     @Autowired
     RoomService roomService;
+
+    @Autowired
+    AccountingUtils accountingUtils;
+
+    @Autowired
+    BillingEvaluatorFactory billingEvaluatorFactory;
 
     @GetMapping("/type")
     public ResponseEntity<List<RoomType>> getType() {
@@ -84,5 +95,10 @@ public class RoomController {
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
-
+    @PostMapping("/test")
+    public ResponseEntity<BillingType> test(@RequestBody BookingRequestEntry bookingRequestEntry) throws Exception{
+        Date startDate = accountingUtils.getCheckInTime(bookingRequestEntry.getStartDate());
+        Date endDate = accountingUtils.getCheckOutTime(bookingRequestEntry.getEndDate());
+        return new ResponseEntity<>( billingEvaluatorFactory.getBillingType( startDate.getTime(), endDate.getTime()), HttpStatus.OK);
+    }
 }

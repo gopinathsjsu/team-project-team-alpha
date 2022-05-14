@@ -25,6 +25,11 @@ public class HotelController {
         this.hotelService = hotelService;
     }
 
+    @GetMapping("/all-cities")
+    public ResponseEntity<List<String>> getAllCities() {
+        return new ResponseEntity<>(hotelService.getAllCities(), HttpStatus.OK);
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<HotelEntry> findOneById( @PathVariable("id") Long id) {
         HotelEntry hotelEntry = hotelService.findOneById(id);
