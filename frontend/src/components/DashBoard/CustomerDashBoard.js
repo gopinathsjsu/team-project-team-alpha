@@ -20,16 +20,9 @@ import {
 } from '@mui/material/styles';
 import { useEffect, useState } from 'react';
 import axios from 'axios';
-import { Navigate, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import TablePagination from '@material-ui/core/TablePagination';
-import IconButton from '@mui/material/IconButton';
-import FavoriteIcon from '@mui/icons-material/Favorite';
-import VisibilityIcon from '@mui/icons-material/Visibility';
-import ButtonBase from '@material-ui/core/ButtonBase';
 import { makeStyles } from '@material-ui/core/styles';
-import { Navbar } from '../../views/Navbar';
-import { ColorButton4 } from '../Commons';
-import landingPage from '../../images/landingPage.jpeg';
 import { NavbarDashBoard } from '../Navigation/NavbarDashBoard';
 import SearchHotels from './SearchHotels';
 import { useDispatch, useSelector } from 'react-redux';
@@ -80,6 +73,10 @@ export default function CustomerDashBoard() {
   };
 
   useEffect(() => {
+    let userId = sessionStorage.getItem("userId");
+    if(userId===null){
+      navigate("/");
+    }
     if(searchData.city){
       let payload = {
         city: searchData.city,

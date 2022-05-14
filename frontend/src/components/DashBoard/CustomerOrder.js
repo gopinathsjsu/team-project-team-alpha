@@ -117,7 +117,10 @@ const CustomerOrder = () => {
   };
 
   useEffect(() => {
-    let userId = "1";
+    let userId = sessionStorage.getItem("userId");
+    if(userId===null){
+      navigate("/");
+    }
     dispatch(viewOrders(userId));
     let bookingsByPeriod = {};
     cards.forEach((booking) => {
@@ -214,27 +217,6 @@ const CustomerOrder = () => {
               >
                 {/* <Button variant="outlined">View Orders</Button> */}
               </Stack>
-
-              <TextField
-                margin="normal"
-                required
-                fullWidth
-                select
-                value={status}
-                onChange={onStatusChange}
-                name="status"
-                label="Order Status"
-                type="text"
-                id="status"
-                autoComplete="status"
-              >
-                {statuses.map((option) => (
-                  <MenuItem key={option.key} value={option.value}>
-                    {option.value}
-                  </MenuItem>
-                ))}
-              </TextField>
-
             </Container>
           </Box>
           <Container sx={{ py: 4 }} maxWidth="md">
