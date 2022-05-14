@@ -18,7 +18,6 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.TimeZone;
 import java.util.Calendar;
-import java.util.GregorianCalendar;
 
 @Service
 public class AccountingUtils {
@@ -30,6 +29,8 @@ public class AccountingUtils {
     private final List<HolidayDateEntry> holidayDateEntries;
 
     private final Long DAY_IN_MILLISECONDS;
+
+    private final TimeZone timeZone;
 
     public AccountingUtils() {
 
@@ -47,18 +48,19 @@ public class AccountingUtils {
                 new HolidayDateEntry( 12, 25),
                 new HolidayDateEntry( 12, 31)
         );
+
         DAY_IN_MILLISECONDS = 24L*60L*60L*1000L;
+
+        timeZone = TimeZone.getTimeZone("PST");
     }
 
     public Date getCheckInTime(String startDate) throws ParseException {
-        TimeZone timeZone = TimeZone.getTimeZone("GMT-7");
         DateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
         dateFormat.setTimeZone(timeZone);
         return new DateTime(dateFormat.parse(startDate)).withZone(DateTimeZone.forTimeZone(timeZone)).withTimeAtStartOfDay().plusHours(12).toDate();
     }
 
     public Date getCheckOutTime(String endDate) throws ParseException {
-        TimeZone timeZone = TimeZone.getTimeZone("GMT-7");
         DateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
         dateFormat.setTimeZone(timeZone);
         return new DateTime(dateFormat.parse(endDate)).withZone(DateTimeZone.forTimeZone(timeZone)).withTimeAtStartOfDay().plusHours(12).plusMillis(-1).toDate();
@@ -66,7 +68,6 @@ public class AccountingUtils {
 
     public String convertToString( Long currentTime) {
         Date date = new Date(currentTime);
-        TimeZone timeZone = TimeZone.getTimeZone("GMT-7");
         DateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
         dateFormat.setTimeZone(timeZone);
         return dateFormat.format(date);
@@ -88,10 +89,16 @@ public class AccountingUtils {
     }
 
     public Date getDate(Integer year, HolidayDateEntry holidayDateEntry) {
-        Calendar calendar = new GregorianCalendar();
-        TimeZone timeZone = TimeZone.getTimeZone("GMT-7");
+        Calendar calendar = Calendar.getInstance();
+        TimeZone timeZone = TimeZone.getTimeZone("PST");
         calendar.setTimeZone(timeZone);
-        calendar.set( year, holidayDateEntry.getMonth(), holidayDateEntry.getDay(), 0, 0, 0);
+        calendar.set(Calendar.YEAR, year);
+        calendar.set(Calendar.MONTH, holidayDateEntry.getMonth()-1);
+        calendar.set(Calendar.DAY_OF_MONTH, holidayDateEntry.getDay());
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
         return calendar.getTime();
     }
 
@@ -103,7 +110,7 @@ public class AccountingUtils {
         );
         for(Integer year: years) {
             Date holidayStartDate = getDate( year, holidayDateEntry);
-            Date holidayEndDate = new DateTime(holidayStartDate).plusHours(24).toDate();
+            Date holidayEndDate = new DateTime(holidayStartDate).plusHours(24).plusMillis(-1).toDate();
             if((holidayEndDate.before(queryStartDate)) || (queryEndDate.before(holidayStartDate))) {
                 continue;
             } else {

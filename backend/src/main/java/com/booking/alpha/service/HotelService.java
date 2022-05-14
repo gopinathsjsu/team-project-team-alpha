@@ -72,6 +72,10 @@ public class HotelService {
         return hotelEntity;
     }
 
+    public List<String> getAllCities() {
+        return hotelRepository.findAllCities();
+    }
+
     public HotelEntry findOneById( Long id) {
         return convertToEntry(hotelRepository.findById( id).get());
     }
@@ -196,7 +200,7 @@ public class HotelService {
         Date startDate = accountingUtils.getCheckInTime(hotelSearchPagedRequest.getStartDate());
         Date endDate = accountingUtils.getCheckInTime(hotelSearchPagedRequest.getEndDate());
         BillingType billingType = billingEvaluatorFactory.getBillingType( startDate.getTime(), endDate.getTime());
-        billingEvaluatorFactory.getBillingEvaluator(billingType).normaliseHotels(hotelEntries);
+        billingEvaluatorFactory.getBillingEvaluator(billingType).normaliseHotels(hotelEntries, 1L);
         Map<Long, HotelEntry> hotelEntryMap = hotelEntries.stream().collect(Collectors.toMap(HotelEntry::getId,hotelEntry -> hotelEntry));
         List<HotelAvailabilityEntry> hotelAvailabilityEntries = new ArrayList<>();
         for(Long hotelId: hotelAvailabilityMap.keySet()) {

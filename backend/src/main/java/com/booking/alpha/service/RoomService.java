@@ -90,7 +90,7 @@ public class RoomService {
         }
         List<RoomEntry> roomEntries = roomEntities.stream().map(this::convertToEntry).collect(Collectors.toList());
         BillingType billingType = billingEvaluatorFactory.getBillingType( startDate, endDate);
-        billingEvaluatorFactory.getBillingEvaluator(billingType).normaliseRooms(roomEntries);
+        billingEvaluatorFactory.getBillingEvaluator(billingType).normaliseRooms(roomEntries, 1L);
         return roomEntries;
     }
 

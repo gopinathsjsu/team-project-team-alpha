@@ -7,7 +7,7 @@ import java.util.List;
 
 public abstract class BillingEvaluator {
 
-    public abstract void normaliseHotels(List<HotelEntry> hotelEntryList);
+    public abstract void normaliseHotels(List<HotelEntry> hotelEntryList, Long duration);
 
-    public abstract void normaliseRooms(List<RoomEntry> roomEntries);
+    public abstract void normaliseRooms(List<RoomEntry> roomEntries, Long duration);
 }

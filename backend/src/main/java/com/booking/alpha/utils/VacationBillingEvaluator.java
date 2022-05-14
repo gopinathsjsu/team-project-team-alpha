@@ -12,7 +12,7 @@ import java.util.List;
 public class VacationBillingEvaluator extends BillingEvaluator{
 
     @Override
-    public void normaliseHotels(List<HotelEntry> hotelEntryList) {
+    public void normaliseHotels(List<HotelEntry> hotelEntryList, Long duration) {
         if(ObjectUtils.isEmpty(hotelEntryList)) {
             return;
         }
@@ -23,18 +23,20 @@ public class VacationBillingEvaluator extends BillingEvaluator{
             }
             for(ServiceEntry serviceEntry: serviceEntries) {
                 Long newCost = serviceEntry.getCost() + serviceEntry.getCost()/10;
+                newCost = duration*newCost;
                 serviceEntry.setCost(newCost);
             }
         }
     }
 
     @Override
-    public void normaliseRooms(List<RoomEntry> roomEntries) {
+    public void normaliseRooms(List<RoomEntry> roomEntries, Long duration) {
         if(ObjectUtils.isEmpty(roomEntries)) {
             return;
         }
         for(RoomEntry roomEntry: roomEntries) {
             Long newCost = roomEntry.getCost() + roomEntry.getCost()/10;
+            newCost = duration*newCost;
             roomEntry.setCost(newCost);
         }
     }
