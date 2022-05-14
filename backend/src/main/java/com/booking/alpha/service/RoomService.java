@@ -1,5 +1,6 @@
 package com.booking.alpha.service;
 
+import com.booking.alpha.constant.BillingType;
 import com.booking.alpha.constant.BookingState;
 import com.booking.alpha.constant.RoomType;
 import com.booking.alpha.entity.HotelEntity;
@@ -11,6 +12,7 @@ import com.booking.alpha.respository.HotelRepository;
 import com.booking.alpha.respository.RoomRepository;
 import com.booking.alpha.utils.AccountingUtils;
 import com.booking.alpha.utils.AccountingUtils;
+import com.booking.alpha.utils.BillingEvaluatorFactory;
 import com.booking.alpha.utils.S3Utils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.BeanUtils;
@@ -41,10 +43,14 @@ public class RoomService {
 
     private final AccountingUtils accountingUtils;
 
-    public RoomService(RoomRepository roomRepository, AccountingUtils accountingUtils, S3Utils s3Utils) {
+    private final BillingEvaluatorFactory billingEvaluatorFactory;
+
+    public RoomService(RoomRepository roomRepository, AccountingUtils accountingUtils,
+                       S3Utils s3Utils, BillingEvaluatorFactory billingEvaluatorFactory) {
         this.roomRepository = roomRepository;
         this.accountingUtils = accountingUtils;
         this.s3Utils = s3Utils;
+        this.billingEvaluatorFactory = billingEvaluatorFactory;
     }
 
     RoomEntity convertToEntity( RoomEntry roomEntry) {
@@ -82,7 +88,10 @@ public class RoomService {
         if(ObjectUtils.isEmpty(roomEntities)) {
             return new ArrayList<>();
         }
-        return roomEntities.stream().map(this::convertToEntry).collect(Collectors.toList());
+        List<RoomEntry> roomEntries = roomEntities.stream().map(this::convertToEntry).collect(Collectors.toList());
+        BillingType billingType = billingEvaluatorFactory.getBillingType( startDate, endDate);
+        billingEvaluatorFactory.getBillingEvaluator(billingType).normaliseRooms(roomEntries, 1L);
+        return roomEntries;
     }
 
     /*
@@ -163,8 +172,7 @@ public class RoomService {
         List<RoomEntity> rooms = roomRepository.findByHotelIdIs(hotelId);
         List<RoomEntry> roomEntries = new ArrayList<>();
         if(rooms.size() > 0){
-            for (RoomEntity roomEntity:rooms
-                 ) {
+            for (RoomEntity roomEntity:rooms) {
                 RoomEntry temp = convertToEntry(roomEntity);
                 roomEntries.add(temp);
             }

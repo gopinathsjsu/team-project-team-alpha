@@ -58,7 +58,7 @@ public class UserController {
 
     @PutMapping("/{id}")
     public ResponseEntity<UserEntry> updateRewards(@PathVariable("id") Long id, @RequestParam("rewards") Long reward){
-        UserEntry userEntry = userService.updateRewards(reward, id);
+        UserEntry userEntry = userService.updateRewards(id, reward);
         if(userEntry != null){
             return new ResponseEntity<>( userEntry, HttpStatus.OK);
         }

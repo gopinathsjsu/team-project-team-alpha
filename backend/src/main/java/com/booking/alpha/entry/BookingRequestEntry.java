@@ -22,6 +22,8 @@ public class BookingRequestEntry {
 
     Long userId;
 
+    Long customLoyaltyCredit;
+
     Long roomId;
 
     String startDate;

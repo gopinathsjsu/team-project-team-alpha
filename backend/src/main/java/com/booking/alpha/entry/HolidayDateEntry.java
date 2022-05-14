@@ -1,6 +1,5 @@
 package com.booking.alpha.entry;
 
-import com.booking.alpha.constant.BookingState;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -17,21 +16,9 @@ import java.util.List;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @AllArgsConstructor
 @NoArgsConstructor
-public class ReservationEntry {
+public class HolidayDateEntry {
 
-    Long id;
+    Integer month;
 
-    Long transactionId;
-
-    Long userId;
-
-    Long roomId;
-
-    Long startTime;
-
-    Long endTime;
-
-    BookingState bookingState;
-
-    List<ServiceEntry> serviceList;
+    Integer day;
 }

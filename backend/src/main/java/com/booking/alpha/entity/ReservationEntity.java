@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
+import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
 import org.springframework.lang.NonNull;
@@ -33,6 +34,9 @@ public class ReservationEntity {
     @Column
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
+
+    @Column
+    Long transactionId;
 
     @Column
     @NonNull
