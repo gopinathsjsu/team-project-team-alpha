@@ -33,9 +33,9 @@ public class AccountingUtils {
 
     public AccountingUtils() {
 
-        weekendDays = new HashSet<>(Arrays.asList( 6, 7));
+        weekendDays = new HashSet<>(Arrays.asList( 0, 6));
 
-        vacationMonths = new HashSet<>(Arrays.asList( 5, 6, 12));
+        vacationMonths = new HashSet<>(Arrays.asList( 4, 5, 11));
 
         holidayDateEntries = Arrays.asList(
                 new HolidayDateEntry( 1, 1),
@@ -97,9 +97,9 @@ public class AccountingUtils {
 
     public Boolean isIntersecting( Date queryStartDate, Date queryEndDate, HolidayDateEntry holidayDateEntry) {
         List<Integer> years = Arrays.asList(
-                queryStartDate.getYear()-1,
-                queryStartDate.getYear(),
-                queryStartDate.getYear()+1
+                1900+queryStartDate.getYear()-1,
+                1900+queryStartDate.getYear(),
+                1900+queryStartDate.getYear()+1
         );
         for(Integer year: years) {
             Date holidayStartDate = getDate( year, holidayDateEntry);
@@ -132,11 +132,15 @@ public class AccountingUtils {
         Integer startDateDay = startDate.getDay();
         Integer endDateDay = endDate.getDay();
         Integer currDateDay = startDateDay;
-        do{
+        while(true){
             if (weekendDays.contains(currDateDay)) {
                 return true;
             }
-        } while(!currDateDay.equals(endDateDay));
+            if(currDateDay==endDateDay) {
+                break;
+            }
+            currDateDay = (currDateDay+1)%7;
+        }
         return false;
     }
 }
