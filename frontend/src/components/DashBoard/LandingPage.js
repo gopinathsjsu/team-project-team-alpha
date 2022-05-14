@@ -1,9 +1,11 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import SearchHotels from './SearchHotels';
 import '../styles.css';
 import { LicenseInfo } from '@mui/x-license-pro';
 import landingPage from '../../images/landingPage9.jpeg';
 import { NavbarDashBoard } from '../Navigation/NavbarDashBoard';
+import { useNavigate } from 'react-router-dom';
+
 
 
 LicenseInfo.setLicenseKey(
@@ -11,6 +13,13 @@ LicenseInfo.setLicenseKey(
 );
 
 const Home = () => {
+  const navigate = useNavigate();
+  useEffect(() => {
+    let userId = sessionStorage.getItem("userId");
+    if(userId===null){
+      navigate("/");
+    }
+  }, []);
   return (
     <div style={{
       backgroundImage: `url(${landingPage})`, height: "100vh",

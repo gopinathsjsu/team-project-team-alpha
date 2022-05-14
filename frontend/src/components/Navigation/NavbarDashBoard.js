@@ -133,17 +133,17 @@ const menuItems = [
   {
     listIcon: <FaceIcon />,
     listText: 'Profile',
-    listPath: '/HotelProfile'
+    listPath: '/customerProfile'
   },
   {
     listIcon: <Home />,
     listText: 'Bookings',
-    listPath: '/HotelBooking'
+    listPath: '/customerDashBoard'
   },
   {
     listIcon: <ShoppingCartIcon />,
     listText: 'Rooms',
-    listPath: '/HotelDashboard'
+    listPath: '/customer/bookings'
   },
 ]
 
@@ -222,7 +222,7 @@ export const NavbarDashBoard = (props) => {
 
 
   const onCheckOut = () => {
-    let userId = 4;
+    let userId = sessionStorage.getItem("userId");
     dispatch(confirmCart(userId));
     navigate('/customer/booking-confirmed');
   };

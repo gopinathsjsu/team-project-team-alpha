@@ -92,7 +92,7 @@ export default function RoomAmenitiesDialog(props) {
       room: selectedRoom,
       amenities: service
     }
-    let userId = "4"
+    let userId = sessionStorage.getItem("userId");
     dispatch(addToCart(item,cart,startDate,endDate, userId))
     setState({});
     onClose(value);

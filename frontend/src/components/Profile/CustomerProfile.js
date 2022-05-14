@@ -11,7 +11,7 @@ import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
-import { Input, MenuItem } from '@mui/material';
+import { Input } from '@mui/material';
 import axios from 'axios';
 import IconButton from '@mui/material/IconButton';
 import PhotoCamera from '@mui/icons-material/PhotoCamera';
@@ -19,7 +19,9 @@ import { useNavigate } from 'react-router-dom';
 import Grid from '@mui/material/Grid';
 import Paper from '@mui/material/Paper';
 import { useEffect, useState } from 'react';
-import { Navbar } from '../Navigation/Navbar';
+import backendServer from '../../Config';
+import { SettingsSystemDaydreamOutlined } from '@material-ui/icons';
+import { NavbarDashBoard } from '../Navigation/NavbarDashBoard';
 
 const theme = createTheme();
 
@@ -64,23 +66,11 @@ const locations = [
 export default function CustomerProfile() {
   const [image, setImage] = useState('');
   const [imageUrl, setImageUrl] = useState('');
+  const [email, setEmail] = useState('');
   const [name, setName] = useState('');
-  const [state, setState] = useState('');
-  const [country, setCountry] = useState('');
-  const [city, setCity] = useState('');
-  const [nickname, setNickName] = useState('');
-  const [dob, setDOB] = useState('00-00-0000');
-  const [phone, setPhone] = useState('');
-  const [pincode, setPincode] = useState('');
-  const [cities, setCities] = useState([]);
   const [nameError, setNameError] = useState(false);
   const [nameHelper, setNameHelper] = useState('');
-  const [dobError, setDobError] = useState(false);
-  const [dobHelper, setDobHelper] = useState('');
-  const [phoneNumberError, setPhoneNumberError] = useState(false);
-  const [phoneNumberHelper, setPhoneNumberHelper] = useState('');
-  const [zipError, setZipError] = useState(false);
-  const [zipHelper, setZipHelper] = useState('');
+  const [rewards, setRewards] = useState('0');
 
   const navigate = useNavigate();
 
@@ -91,48 +81,57 @@ export default function CustomerProfile() {
       setNameHelper('Name should contain only characters');
       return false;
     }
-    const phoneRegex = new RegExp('^[0-9]{10}$');
-    if (!phoneRegex.test(payload.PhoneNumber)) {
-      setPhoneNumberError(true);
-      setPhoneNumberHelper('Phone number should only contain 10 digits');
-      return false;
-    }
-    const zipRegex = new RegExp('^[0-9]{5}$');
-    if (!zipRegex.test(payload.Pincode)) {
-      setZipError(true);
-      setZipHelper('Pincode must only contain 5 digits');
-      return false;
-    }
-    const now = new Date();
-    now.setDate(now.getDate() - 1);
-    const selectedDoB = new Date(payload.DateOfBirth);
-    if (selectedDoB >= now) {
-      setDobError(true);
-      setDobHelper('Date of Birth cant be a future date');
-      return false;
-    }
     return true;
   };
 
   const handleSubmit = async (event) => {
-   
+    event.preventDefault();
+    let url = "";
+    let userId = sessionStorage.getItem("userId");
+    const data = new FormData(event.currentTarget);
+    if (image) {
+      let imageData = new FormData()
+      imageData.append('file', image)
+      let response = await axios.post(`${backendServer}/v1/user/${userId}/upload-image`, imageData);
+      url = response.data.imageUrl
+      setImageUrl(url);
+    }
+    let payload = {
+      emailId: email,
+      id: userId,
+      imageUrl: imageUrl,
+      name: name,
+      rewardPoints: rewards
+    };
+    axios.put(`${backendServer}/v1/user/${userId}/update`, payload)
+      .then(response => {
+        navigate("/landingPage")
+      })
+      .catch(err => {
+        console.log("Error");
+      });
+
   };
 
-  const filterCities = (country) => {
-    const records = locations.filter((loc) => loc.value === country);
-    if (records.length) { setCities(records[0].cities); } else { setCities([]); }
-  };
+  useEffect(() => {
+    let userId = sessionStorage.getItem("userId");
+    const url = `${backendServer}/v1/user/${userId}`;
+    axios
+      .get(url)
+      .then((response) => {
+        setEmail(response.data.emailId);
+        setImageUrl(response.data.imageUrl);
+        setRewards(response.data.rewards);
+        setName(response.data.name);
+      })
+      .catch(() => {
+      });
+  }, []);
 
   const onPhotoChange = (event) => {
     const file = event.target.files[0];
     setImage(file);
     setImageUrl(URL.createObjectURL(file));
-  };
-
-  const onCountryChange = (event) => {
-    setCountry(event.target.value);
-    const records = locations.filter((loc) => loc.value === event.target.value);
-    setCities(records[0].cities || []);
   };
 
   const fileStyle = {
@@ -145,7 +144,7 @@ export default function CustomerProfile() {
 
   return (
     <>
-      <Navbar/>
+      <NavbarDashBoard />
       <ThemeProvider theme={theme}>
         <main>
           {/* Hero unit */}
@@ -165,9 +164,6 @@ export default function CustomerProfile() {
                 gutterBottom
               >
                 Your Profile!
-              </Typography>
-              <Typography variant="h6" align="center" color="text.secondary" paragraph>
-                Tell us more about yourself...
               </Typography>
             </Container>
           </Box>
@@ -209,16 +205,16 @@ export default function CustomerProfile() {
 
                   <Grid item xs={12}>
                     <TextField
-                      margin="none"
-                      required
+                      margin="normal"
                       fullWidth
-                      type="text"
-                      id="nickname"
-                      label="Nick Name"
-                      name="nickname"
-                      onChange={(e) => setNickName(e.target.value)}
-                      autoComplete="nick name"
-                      value={nickname}
+                      value={email}
+                      data-testid="email"
+                      id="email"
+                      label="Email Address"
+                      name="email"
+                      disabled
+                      autoComplete="email"
+                      autoFocus
                     />
                   </Grid>
 
@@ -227,113 +223,16 @@ export default function CustomerProfile() {
                       margin="none"
                       required
                       fullWidth
-                      id="dob"
-                      type="date"
-                      value={dob}
-                      error={dobError}
-                      helperText={dobHelper}
-                      label="Date of Birth"
-                      name="dob"
-                      onChange={(e) => { setDOB(e.target.value); setDobHelper(''); setDobError(false); }}
-                      autoComplete="dob"
+                      type="number"
+                      id="reward"
+                      label="Reward Points"
+                      name="rewards"
+                      disabled
+                      value={rewards}
+                      autoComplete="rewards"
                     />
                   </Grid>
 
-                  <Grid item xs={12} sm={4}>
-                    <TextField
-                      margin="none"
-                      required
-                      fullWidth
-                      select
-                      name="country"
-                      label="Country"
-                      type="text"
-                      id="country"
-                      value={country}
-                      onChange={(event) => { onCountryChange(event); }}
-                      autoComplete="country"
-                    >
-                      {locations.map((option) => (
-                        <MenuItem key={option.key} value={option.value}>
-                          {option.value}
-                        </MenuItem>
-                      ))}
-                    </TextField>
-                  </Grid>
-
-                  <Grid item xs={12} sm={4}>
-                    <TextField
-                      margin="none"
-                      required
-                      fullWidth
-                      type="text"
-                      id="state"
-                      label="State"
-                      value={state}
-                      name="state"
-                      onChange={(e) => setState(e.target.value)}
-                      autoComplete="state"
-                    />
-                  </Grid>
-
-                  <Grid item xs={12} sm={4}>
-                    <TextField
-                      margin="none"
-                      required
-                      fullWidth
-                      select
-                      name="city"
-                      label="City"
-                      type="text"
-                      id="city"
-                      // helperText={cityHelper}
-                      value={city}
-                      // error={cityError}
-                      defaultValue=""
-                      onChange={(e) => setCity(e.target.value)}
-                      autoComplete="city"
-                    >
-                      {cities.map((option) => (
-                        <MenuItem key={option.key} value={option.value}>
-                          {option.value}
-                        </MenuItem>
-                      ))}
-                    </TextField>
-                  </Grid>
-
-                  <Grid item xs={12} sm={6}>
-                    <TextField
-                      margin="none"
-                      required
-                      fullWidth
-                      type="text"
-                      id="phone"
-                      label="Phone Number"
-                      name="phone"
-                      error={phoneNumberError}
-                      helperText={phoneNumberHelper}
-                      value={phone}
-                      onChange={(e) => { setPhone(e.target.value); setPhoneNumberHelper(''); setPhoneNumberError(false); }}
-                      autoComplete="phone"
-                    />
-                  </Grid>
-
-                  <Grid item xs={12} sm={6}>
-                    <TextField
-                      margin="none"
-                      required
-                      fullWidth
-                      type="text"
-                      id="pin"
-                      label="Pin Code"
-                      name="pincode"
-                      error={zipError}
-                      helperText={zipHelper}
-                      value={pincode}
-                      onChange={(e) => { setPincode(e.target.value); setZipError(false); setZipHelper(''); }}
-                      autoComplete="pincode"
-                    />
-                  </Grid>
                   <Grid item xs={12}>
                     <Button
                       type="submit"
