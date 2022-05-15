@@ -18,5 +18,5 @@
 ### Database Design
 ![DB Diagram](DB_Design.png)
 
-### UML Class Diagram
+### Class Diagram
 ![UML CLass Diagram](Hotel_Reservation_UML.png)
