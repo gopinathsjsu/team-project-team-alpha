@@ -24,7 +24,7 @@ import { styled, alpha } from '@mui/material/styles';
 import InputBase from '@mui/material/InputBase';
 import FaceIcon from '@mui/icons-material/Face';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
-import { Badge } from '@mui/material';
+import { Badge, Grid } from '@mui/material';
 import MenuItem from '@material-ui/core/MenuItem';
 import bg from "../../images/trivago.svg"
 import { TextField } from '@material-ui/core';
@@ -36,8 +36,9 @@ import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
+import ListAltIcon from '@mui/icons-material/ListAlt';
 import Button from '@material-ui/core/Button';
-import { confirmCart } from '../../state/action-creators/hotelActions';
+import { confirmCart, logout } from '../../state/action-creators/hotelActions';
 
 
 
@@ -137,18 +138,15 @@ const menuItems = [
   },
   {
     listIcon: <Home />,
-    listText: 'Bookings',
+    listText: 'Dashboard',
     listPath: '/customerDashBoard'
   },
   {
-    listIcon: <ShoppingCartIcon />,
-    listText: 'Rooms',
+    listIcon: <ListAltIcon />,
+    listText: 'Bookings',
     listPath: '/customer/bookings'
-  },
+  }
 ]
-
-
-
 
 const styleimg = {
   display: 'block',
@@ -159,6 +157,15 @@ const stylebg = {
   background: '#6f42c1'
 }
 
+
+const options = {
+  CONTINENTAL_BREAKFAST: 'Daily Continental Breakfast',
+  FITNESS_ROOM: 'Access to fitness room',
+  SWIMMING_POOL: 'Access to Swimming Pool/Jacuzzi',
+  DAILY_PARKING: 'Daily Parking',
+  ALL_MEALS_INCLUDED: 'All meals included (Breakfast, Lunch, Dinner)'
+};
+
 export const NavbarDashBoard = (props) => {
   const classes = useStyles();
 
@@ -168,7 +175,6 @@ export const NavbarDashBoard = (props) => {
   const [openCart, setOpenCart] = useState(false);
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const userId = "1";
 
 
   const cart = useSelector((state) => state.hotels.cart);
@@ -211,14 +217,16 @@ export const NavbarDashBoard = (props) => {
 
   const getTotalPrice = () => {
     let price = 0.00;
-    for(let item in cart){
-      price = price + item.cost;
-      for(let amenity in cart.amenities){
-        price = price + cart.amenities[amenity];
-      }
+    for (let i in cart) {
+      price = price + cart[i].totalCost;
     }
-    return price?price:0.00;
+    return price;
   };
+
+  const onLogout = () => {
+    dispatch(logout());
+    sessionStorage.removeItem("userId");
+  }
 
 
   const onCheckOut = () => {
@@ -229,33 +237,33 @@ export const NavbarDashBoard = (props) => {
 
   return (
     <>
-    <div className={classes.root}>
-      <AppBar position="static">
-        <Toolbar>
-          <MobileeRightMenuSlider open={state.left}
-            onClose={toggleSlider('left', false)}
-            anchor='left' > {sideList('left')} </MobileeRightMenuSlider> <
-              IconButton onClick={toggleSlider('left', true)} >
-            <DehazeIcon style={
-              { color: 'white' }} />
-          </IconButton>
-          <IconButton edge="start" className={classes.menuButton} color="inherit" aria-label="menu">
-            {/* <MenuIcon /> */}
-          </IconButton>
-          <Typography variant="h2" className={classes.title}>
-            <a href="/"><img src={bg} width={'160'} height={'80'} alt='' /> </a>
-          </Typography>
-          <IconButton aria-label="view cart" onClick={onViewCart}>
+      <div className={classes.root}>
+        <AppBar position="static">
+          <Toolbar>
+            <MobileeRightMenuSlider open={state.left}
+              onClose={toggleSlider('left', false)}
+              anchor='left' > {sideList('left')} </MobileeRightMenuSlider> <
+                IconButton onClick={toggleSlider('left', true)} >
+              <DehazeIcon style={
+                { color: 'white' }} />
+            </IconButton>
+            <IconButton edge="start" className={classes.menuButton} color="inherit" aria-label="menu">
+              {/* <MenuIcon /> */}
+            </IconButton>
+            <Typography variant="h2" className={classes.title}>
+              <a href="/"><img src={bg} width={'160'} height={'80'} alt='' /> </a>
+            </Typography>
+            <IconButton aria-label="view cart" onClick={onViewCart}>
               <Badge badgeContent={getNumberOfItemsInCart()} color="primary">
-                  <ShoppingCartIcon />
+                <ShoppingCartIcon />
               </Badge>
-          </IconButton>
-          <a href="/UserProfile"> <AccountCircle ></AccountCircle></a>
-        </Toolbar>
-      </AppBar>
-    </div>
-    <div>
-   <Dialog open={openCart} aria-labelledby="form-dialog-title">
+            </IconButton>
+            <a href="/"> <AccountCircle onClick={() => onLogout()}></AccountCircle></a>
+          </Toolbar>
+        </AppBar>
+      </div>
+      <div>
+        <Dialog open={openCart} aria-labelledby="form-dialog-title">
           <DialogTitle id="form-dialog-title">Order Summary</DialogTitle>
           <DialogContent>
             <DialogContentText>
@@ -263,14 +271,39 @@ export const NavbarDashBoard = (props) => {
             </DialogContentText>
             <List disablePadding>
               {cart.map((item) => (
-                <ListItem key={item.room.id} sx={{ py: 0, px: 0 }}>
-                  <ListItemText primary={item.room.name} />
-                  <ListItemText primary={item.room.type} />
-                  <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
-                    $
-                    {item.room.cost?item.room.cost:0}
-                  </Typography>
-                </ListItem>
+                <>
+                   <ListItem key={item.transactionId} sx={{ py: 0, px: 0 }}>
+                   <ListItemText primary={item.roomEntry.name} /><br />
+                   </ListItem>
+                  <ListItem key={item.transactionId} sx={{ py: 0, px: 0 }}>
+                    <ListItemText primary={item.roomEntry.type} /><br />
+                    <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
+                      $
+                      {item.roomEntry.cost ? item.roomEntry.cost : 0}
+                    </Typography>
+                  </ListItem>
+                  <ListItem key={item.transactionId} sx={{ py: 0, px: 0 }}>
+                    <ListItemText secondary={"Booking from: "} />
+                    <ListItemText secondary={item.startTime} />
+                  </ListItem>
+                  <ListItem key={item.transactionId} sx={{ py: 0, px: 0 }}>
+                    <ListItemText secondary={"Booking to: "} />
+                    <ListItemText secondary={item.endTime} />
+                  </ListItem>
+                  <ListItem key={item.transactionId} sx={{ py: 0, px: 0 }}>
+                    <ListItemText secondary={"Total duration of stay: "} />
+                    <ListItemText secondary={item.duration + " days"} />
+                  </ListItem>
+                  {
+                    item.serviceEntryList.map(service => (
+                      <ListItem key={service.type} sx={{ py: 0, px: 0 }}>
+                        <ListItemText secondary={options[service.type]} />
+                        <ListItemText secondary={": $" + service.cost} />
+                      </ListItem>
+
+                    ))
+                  }
+                </>
               ))}
               <ListItem sx={{ py: 1, px: 0 }}>
                 <ListItemText primary="Total" />
@@ -290,7 +323,7 @@ export const NavbarDashBoard = (props) => {
             </Button>
           </DialogActions>
         </Dialog>
-    </div>
+      </div>
     </>
   );
 }

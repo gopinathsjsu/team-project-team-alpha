@@ -121,7 +121,7 @@ export default function CustomerProfile() {
       .then((response) => {
         setEmail(response.data.emailId);
         setImageUrl(response.data.imageUrl);
-        setRewards(response.data.rewards);
+        setRewards(response.data.rewardPoints);
         setName(response.data.name);
       })
       .catch(() => {

@@ -8,7 +8,9 @@ import {
     SET_SELECTED_CART,
     ADD_TO_CART,
     CONFIRM_CART,
-    SET_BOOKINGS
+    SET_BOOKINGS,
+    LOGOUT,
+    REMOVE_FROM_CART
 } from '../action-creators/types';
 
 const initialState = {
@@ -64,6 +66,13 @@ const initialState = {
           ...state,
           bookings: action.payload
         }
+      case REMOVE_FROM_CART:
+        return {
+          ...state,
+          cart: action.payload
+        }
+      case LOGOUT:
+        return initialState;
       default:
         return state;
     }
