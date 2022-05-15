@@ -78,10 +78,11 @@ export default function CustomerDashBoard() {
       navigate("/");
     }
     if(searchData.city){
+      
       let payload = {
         city: searchData.city,
-        endDate:  searchData.value[1]?searchData.value[1].toISOString().split('T')[0]: '',
-        startDate: searchData.value[0]?searchData.value[0].toISOString().split('T')[0]: ''
+        endDate:  searchData.value[1]?new Date(searchData.value[1]).toISOString().split('T')[0]: '',
+        startDate: searchData.value[0]?new Date(searchData.value[0]).toISOString().split('T')[0]: ''
       }
       dispatch(getHotelDetails(payload));
     }

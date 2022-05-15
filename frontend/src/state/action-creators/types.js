@@ -19,3 +19,5 @@ export const SET_SELECTED_ROOM = 'SET_SELECTED_ROOM';
 export const ADD_TO_CART = 'ADD_TO_CART';
 export const CONFIRM_CART = 'CONFIRM_CART';
 export const SET_BOOKINGS = 'SET_BOOKINGS';
+export const LOGOUT = 'LOGOUT';
+export const REMOVE_FROM_CART = "REMOVE_FROM_CART";

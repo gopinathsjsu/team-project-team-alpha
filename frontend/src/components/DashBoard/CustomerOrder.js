@@ -29,9 +29,11 @@ import { useDispatch, useSelector } from 'react-redux';
 import TablePagination from '@material-ui/core/TablePagination';
 // eslint-disable-next-line import/no-named-as-default
 import { NavbarDashBoard } from '../Navigation/NavbarDashBoard';
-import { viewOrders } from '../../state/action-creators/hotelActions';
+import { setSelectedHotel, viewOrders } from '../../state/action-creators/hotelActions';
 import { makeStyles } from '@material-ui/core';
 import Review from './Review';
+import UpdateHotelDialog from './UpdateHotelDialog';
+import backendServer from '../../Config';
 
 const theme = createTheme();
 
@@ -101,6 +103,8 @@ const CustomerOrder = () => {
   const [bookings, setBookings] = useState([]);
   const dispatch = useDispatch();
   const classes = useStyles()
+  const [openAmenitiesDialog, setOpenAmenitiesDialog] = useState(false);
+
 
 
   const onStatusChange = (event) => {
@@ -118,7 +122,7 @@ const CustomerOrder = () => {
 
   useEffect(() => {
     let userId = sessionStorage.getItem("userId");
-    if(userId===null){
+    if (userId === null) {
       navigate("/");
     }
     dispatch(viewOrders(userId));
@@ -137,33 +141,31 @@ const CustomerOrder = () => {
   useEffect(() => {
     let bookingsByPeriod = {};
     cards.forEach((booking) => {
-      const period = booking.startTime + "#" + booking.endTime;
-      const hotelId = booking.hotelEntry.id;
+      const period = booking.transactionId;
       if (!bookingsByPeriod[period]) {
         bookingsByPeriod[period] = [];
       }
-      if (!bookingsByPeriod[period][hotelId]) {
-        bookingsByPeriod[period][hotelId] = [];
-      }
-      bookingsByPeriod[period][hotelId].push(booking);
+      bookingsByPeriod[period].push(booking);
     })
-    let bookings = [];
-    for (let i in bookingsByPeriod) {
-      bookings = [...bookings, ...bookingsByPeriod[i]];
-    }
-    bookings = bookings.filter(e => e)
+    // let bookings = [];
+    // for (let i in bookingsByPeriod) {
+    //   bookings = [...bookings, ...bookingsByPeriod[i]];
+    // }
+    // bookings = bookings.filter(e => e)
+    let bookings = bookingsByPeriod;
     let order = [];
-    for (let i = 0; i < bookings.length; i++) {
+    for (let i in bookings) {
       let newOrder = {};
       newOrder.hotelEntry = bookings[i][0].hotelEntry;
-      let start = new Date(bookings[i][0].startTime);
-      let end = new Date(bookings[i][0].startTime);
+      let start = bookings[i][0].startTime;
+      let end = bookings[i][0].endTime;
       newOrder.startTime = start.toString();
       newOrder.endTime = end.toString();
+      newOrder.duration = bookings[i][0].duration;
       newOrder.userEntry = bookings[i][0].userEntry;
       newOrder.roomEntry = [];
       for (let j = 0; j < bookings[i].length; j++) {
-        newOrder.roomEntry.push(bookings[i][j].roomEntry);
+        newOrder.roomEntry.push({ ...bookings[i][j].roomEntry, totalCost: bookings[i][j].totalCost, startTime: bookings[i][j].startTime, endTime: bookings[i][j].endTime, serviceEntryList: bookings[i][j].serviceEntryList, duration: bookings[i][j].duration });
       }
       order.push(newOrder);
     }
@@ -171,14 +173,23 @@ const CustomerOrder = () => {
     setBookings(order);
   }, [cards]);
 
-  const onCancelOrder = (currentCard) => {
-    setOpenOrder(false);
+  const onCancelBooking = (currentCard) => {
   };
+
+  const onUpdateBooking = async (currentCard) => {
+      const response  = await axios.get(backendServer+`/v1/hotel/${currentCard.hotelEntry.id}`);
+      dispatch(setSelectedHotel(response.data));
+      setOpenAmenitiesDialog(true);
+  }
 
   const onView = (card) => {
     setCurrentCard(card);
     setOpenOrder(true);
   };
+
+  const onCloseAmenitiesDialog = () => {
+    setOpenAmenitiesDialog(false);
+  }
 
 
 
@@ -254,11 +265,16 @@ const CustomerOrder = () => {
                               <ReceiptIcon />
                             </IconButton> */}
                           </Grid>
-                          <Grid item xs={12} sm={6}>
-                            <Button variant="text" onClick={() => onView(card)}>View Reciept</Button>
-                            {card.OrderStatus === 'Order Recieved' && (
-                              <Button variant="text" onClick={() => onCancelOrder(card)}>Cancel Order</Button>
-                            )}
+                          <Grid container>
+                            <Grid item xs={12} sm={4}>
+                              <Button variant="text" onClick={() => onView(card)}>View Reciept</Button>
+                            </Grid>
+                            <Grid item xs={12} sm={4}>
+                              <Button variant="text" onClick={() => onCancelBooking(card)}>Cancel Booking</Button>
+                            </Grid>
+                            <Grid item xs={12} sm={4}>
+                              <Button variant="text" onClick={() => onUpdateBooking(card)}>Update Booking</Button>
+                            </Grid>
                           </Grid>
                         </Grid>
                       </CardContent>
@@ -268,6 +284,7 @@ const CustomerOrder = () => {
                 ))}
             </Grid>
           </Container>
+          <UpdateHotelDialog open={openAmenitiesDialog} onClose={()=> onCloseAmenitiesDialog()}></UpdateHotelDialog>
           <div>
             <Dialog open={openOrder} aria-labelledby="form-dialog-title">
               <DialogTitle id="form-dialog-title">Order Reciept</DialogTitle>

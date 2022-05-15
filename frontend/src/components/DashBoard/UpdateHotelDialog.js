@@ -25,7 +25,7 @@ const options = {
   ALL_MEALS_INCLUDED: 'All meals included (Breakfast, Lunch, Dinner)'
 };
 
-export default function RoomAmenitiesDialog(props) {
+export default function UpdateHotelDialog(props) {
   const { onClose, value: valueProp, open, ...other } = props;
   const [value, setValue] = React.useState(valueProp);
   const radioGroupRef = React.useRef(null);
@@ -121,7 +121,7 @@ export default function RoomAmenitiesDialog(props) {
       <DialogTitle>Select Amenities</DialogTitle>
       <DialogContent dividers>
         <FormGroup>
-          {selectedHotel.serviceList.map(service => (
+          {selectedHotel.serviceList!==undefined && selectedHotel.serviceList.map(service => (
             <>
               <Grid container>
                 <Grid item xs={12} sm={10}>
@@ -169,7 +169,7 @@ export default function RoomAmenitiesDialog(props) {
   );
 }
 
-RoomAmenitiesDialog.propTypes = {
+UpdateHotelDialog.propTypes = {
   onClose: PropTypes.func.isRequired,
   open: PropTypes.bool.isRequired,
   value: PropTypes.string.isRequired,

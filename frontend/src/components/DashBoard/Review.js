@@ -23,8 +23,15 @@ export default function Review(props) {
 
 
   const getFinalPrice = () => {
-    return 20.001
-  };
+
+    let price = 0.00;
+    for (let i in props.order.roomEntry) {
+      price = price + props.order.roomEntry[i].totalCost;
+    }
+    return price;  
+  }
+
+  
 
   const onInstructionChange = (event) => {
     
@@ -35,129 +42,61 @@ export default function Review(props) {
   };
 
 
+const options = {
+  CONTINENTAL_BREAKFAST: 'Daily Continental Breakfast',
+  FITNESS_ROOM: 'Access to fitness room',
+  SWIMMING_POOL: 'Access to Swimming Pool/Jacuzzi',
+  DAILY_PARKING: 'Daily Parking',
+  ALL_MEALS_INCLUDED: 'All meals included (Breakfast, Lunch, Dinner)'
+};
+
+
   return (
     <>
       <List disablePadding>
         {props.order.roomEntry.map((item) => (
-          <ListItem key={item.id} sx={{ py: 1, px: 0 }}>
-            <Grid container>
-              <ListItemText primary={item.name} secondary={item.description} />
-              <Grid item xs={12} sm={6}>
-                <Grid container>
-                  <Grid item xs={12} sm={6}>
-                    <Typography variant="body2">
-                      Type :
-                      {item.type}
-                    </Typography>
-                  </Grid>
-                  <Grid item xs={12} sm={6}>
-                    <Typography variant="body2">
-                      Price :
-                      {item.cost}
-                    </Typography>
-                  </Grid>
-                </Grid>
-              </Grid>
-            </Grid>
-          </ListItem>
-        ))}
+             <>
+             <ListItem key={item.transactionId} sx={{ py: 0, px: 0 }}>
+             <ListItemText primary={item.name} /><br />
+             </ListItem>
+            <ListItem key={item.transactionId} sx={{ py: 0, px: 0 }}>
+              <ListItemText primary={item.type} /><br />
+              <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
+                $
+                {item.cost ? item.cost : 0}
+              </Typography>
+            </ListItem>
+            <ListItem key={item.id} sx={{ py: 0, px: 0 }}>
+              <ListItemText secondary={"Booking from: "} />
+              <ListItemText secondary={props.order.startTime} />
+            </ListItem>
+            <ListItem key={item.id} sx={{ py: 0, px: 0 }}>
+              <ListItemText secondary={"Booking to: "} />
+              <ListItemText secondary={item.endTime} />
+            </ListItem>
+            <ListItem key={item.id} sx={{ py: 0, px: 0 }}>
+              <ListItemText secondary={"Total duration of stay: "} />
+              <ListItemText secondary={item.duration + " days"} />
+            </ListItem>
+            {
+              item.serviceEntryList.map(service => (
+                <ListItem key={service.type} sx={{ py: 0, px: 0 }}>
+                  <ListItemText secondary={options[service.type]} />
+                  <ListItemText secondary={": $" + service.cost} />
+                </ListItem>
 
+              ))
+            }
+          </>
+        ))}
         <ListItem sx={{ py: 1, px: 0 }}>
           <ListItemText primary="Sub Total" />
           <Typography variant="subtitle1">
             $
-            {getTotalPrice().toFixed(2)}
+            {getFinalPrice().toFixed(2)}
           </Typography>
         </ListItem>
       </List>
-      { props.placeorder && (
-      <TextField
-        TextField
-        id="standard-basic"
-        variant="standard"
-        margin="none"
-        fullWidth
-        label="Any special instructions?"
-        name="name"
-        autoComplete="name"
-        value={instruction}
-        onChange={(event) => onInstructionChange(event)}
-      />
-      )}
-      <Grid container spacing={2}>
-        {/* <Grid visibility={getAddressVisibility()} item xs={12} sm={6}>
-          <Typography variant="h6" gutterBottom sx={{ mt: 2 }}>
-            Payment Due: $
-            {getFinalPrice().toFixed(2)}
-          </Typography>
-          <Typography variant="h6" gutterBottom sx={{ mt: 2 }}>
-            Hotel Details
-          </Typography>
-          <Typography gutterBottom>{deliveryAddress.AddressLine1}</Typography>
-          <Typography gutterBottom>{deliveryAddress.AddressLine2}</Typography>
-          <Typography gutterBottom>
-            {deliveryAddress.City}
-            ,
-            {deliveryAddress.State}
-            ,
-            {deliveryAddress.Pincode}
-          </Typography>
-        </Grid> */}
-        <Grid item container direction="column" xs={12} sm={6}>
-          <Typography variant="h6" gutterBottom sx={{ mt: 2 }}>
-            Price Details
-          </Typography>
-          <Grid container>
-            <>
-              <Grid item xs={6}>
-                <Typography gutterBottom>Sub Total</Typography>
-              </Grid>
-              <Grid item xs={6}>
-                <Typography gutterBottom>
-                  $
-                  {getTotalPrice().toFixed(2)}
-                </Typography>
-              </Grid>
-              <Grid item xs={6}>
-                <Typography gutterBottom>Delivery fee</Typography>
-              </Grid>
-              <Grid item xs={6}>
-                <Typography gutterBottom>
-                  $
-                  {(getTotalPrice() * 0.01).toFixed(2)}
-                </Typography>
-              </Grid>
-              <Grid item xs={6}>
-                <Typography gutterBottom>Service fee</Typography>
-              </Grid>
-              <Grid item xs={6}>
-                <Typography gutterBottom>
-                  $
-                  {(getTotalPrice() * 0.02).toFixed(2)}
-                </Typography>
-              </Grid>
-              <Grid item xs={6}>
-                <Typography gutterBottom>Tax</Typography>
-              </Grid>
-              <Grid item xs={6}>
-                <Typography gutterBottom>
-                  $
-                  {(getTotalPrice() * 0.09).toFixed(2)}
-                </Typography>
-              </Grid>
-              <Grid item xs={6}>
-                <Typography gutterBottom>Total</Typography>
-              </Grid>
-              <Grid item xs={6}>
-                <Typography gutterBottom>
-                  $
-                  {getFinalPrice().toFixed(2)}
-                </Typography>
-              </Grid>
-            </>
-          </Grid>
-        </Grid>
-      </Grid>
     </>
   );
 }

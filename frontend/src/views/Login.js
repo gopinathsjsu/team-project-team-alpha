@@ -80,7 +80,7 @@ const menuItems = [
     {
         listIcon: <Home />,
         listText: 'SignUp',
-        listPath: '/Register'
+        listPath: '/customerRegistration'
     },
     {
         listIcon: <Home />,

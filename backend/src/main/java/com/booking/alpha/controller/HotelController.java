@@ -14,7 +14,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-
+// @CrossOrigin(origins = "http://localhost:3000")
 @RestController
 @RequestMapping("/v1/hotel")
 public class HotelController {

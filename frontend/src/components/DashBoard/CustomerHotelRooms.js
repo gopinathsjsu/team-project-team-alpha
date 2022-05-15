@@ -76,20 +76,17 @@ const useStyles = makeStyles((theme) => ({
 
 export default function CustomerHotelRooms() {
   const classes = useStyles();
-  const [initialLoad, setInitialLoad] = useState([]);
-  const [tempCart, setTempCart] = useState([]);
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [multipleOrderDialog, setMultipleOrderDialog] = useState(false);
   // const [currentHotelDetails, setcurrentHotelDetails] = useState([]);
-  const [filterType, setFilterType] = useState('All');
-  const [filterCategory, setFilterCategory] = useState('All');
   const [openAmenitiesDialog, setOpenAmenitiesDialog] = useState(false);
   const selectedHotel = useSelector((state)=> state.hotels.selectedHotel);
   const cards = useSelector((state)=>state.hotels.hotelRooms);
   const searchData = useSelector((state) => state.hotels.searchParams);
-  let endDate =  searchData.value[1]?searchData.value[1].toISOString().split('T')[0]: '';
-  let startDate = searchData.value[0]?searchData.value[0].toISOString().split('T')[0]: '';
+  const cart = useSelector((state)=>state.hotels.cart);
+  let endDate =  searchData.value[1]?new Date(searchData.value[1]).toISOString().split('T')[0]: '';
+  let startDate = searchData.value[0]?new Date(searchData.value[0]).toISOString().split('T')[0]: '';
 
   const onNewOrder = () => {
 
@@ -110,8 +107,8 @@ export default function CustomerHotelRooms() {
     setOpenAmenitiesDialog(true);
   };
 
-  const onRemoveFromCart = (dish) => {
-
+  const onRemoveFromCart = (card) => {
+    console.log(cart);
   };
 
   const onCloseAmenitiesDialog = () => {

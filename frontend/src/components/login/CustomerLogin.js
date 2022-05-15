@@ -18,6 +18,8 @@ import { useState } from 'react';
 import bgimage from '../../images/customer-login.webp';
 import backendServer from '../../Config';
 import { useNavigate } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import { logout } from '../../state/action-creators/hotelActions';
 
 const theme = createTheme();
 
@@ -29,6 +31,7 @@ export default function CustomerLogin() {
   const [emailHelper, setEmailHelper] = useState('');
   const [passwordhelper, setPasswordHelper] = useState('');
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const onLogin = (event) => {
     event.preventDefault();
@@ -57,6 +60,11 @@ export default function CustomerLogin() {
         setPasswordHelper('Invald username or password');
       });
   };
+
+
+  React.useEffect(()=>{
+      dispatch(logout());
+  },[])
 
   const clearErrors = () => {
     setEmailError(false);
