@@ -85,9 +85,6 @@ public class ReservationService {
 
     public ReservationEntry patchUpdate( Long id, ReservationEntry reservationEntry) {
         ReservationEntry existingEntry = findOneById(id);
-        if(!ObjectUtils.isEmpty(reservationEntry.getServiceList())) {
-            existingEntry.setServiceList(reservationEntry.getServiceList());
-        }
         if(!ObjectUtils.isEmpty(reservationEntry.getTransactionId())) {
             existingEntry.setTransactionId(reservationEntry.getTransactionId());
         }
@@ -106,7 +103,7 @@ public class ReservationService {
                     .stream()
                     .filter(serviceEntry -> hotelServiceTypesToAvail.contains(serviceEntry.getType()))
                     .collect(Collectors.toList());
-            reservationEntry.setServiceList(serviceEntriesToUpdate);
+            existingEntry.setServiceList(serviceEntriesToUpdate);
         }
         ReservationEntry updatedEntry = convertToEntry(reservationRepository.save(convertToEntity(existingEntry)));
         return updatedEntry;
