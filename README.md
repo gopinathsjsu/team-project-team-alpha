@@ -24,3 +24,7 @@
 
 ### Class Diagram
 ![UML CLass Diagram](Hotel_Reservation_UML.png)
+
+### Use Case Diagram
+![img.png](img.png)
+![img_1.png](img_1.png)
