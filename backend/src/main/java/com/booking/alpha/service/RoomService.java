@@ -136,7 +136,7 @@ public class RoomService {
 
     public RoomEntry findOneById( Long id) {
         try {
-            RoomEntity roomEntity = roomRepository.findById(id).get();
+            RoomEntity roomEntity = roomRepository.getById(id);
             return convertToEntry(roomEntity);
         }catch (Exception exception){
             System.out.println("Exception in RoomEntry findOneById( Long id), msg : " + exception.getMessage());
