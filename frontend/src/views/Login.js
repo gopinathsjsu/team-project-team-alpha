@@ -75,7 +75,7 @@ const menuItems = [
     {
         listIcon: <Home />,
         listText: 'Sign In',
-        listPath: '/UserLogin'
+        listPath: '/customerLogin'
     },
     {
         listIcon: <Home />,

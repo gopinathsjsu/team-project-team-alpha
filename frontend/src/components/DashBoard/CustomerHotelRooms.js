@@ -78,7 +78,7 @@ export default function CustomerHotelRooms() {
   const classes = useStyles();
   const [initialLoad, setInitialLoad] = useState([]);
   const [tempCart, setTempCart] = useState([]);
-  const history = useNavigate();
+  const navigate = useNavigate();
   const dispatch = useDispatch();
   const [multipleOrderDialog, setMultipleOrderDialog] = useState(false);
   // const [currentHotelDetails, setcurrentHotelDetails] = useState([]);
@@ -96,6 +96,10 @@ export default function CustomerHotelRooms() {
   };
 
   useEffect(() => {
+    let userId = sessionStorage.getItem("userId");
+    if(userId===null){
+      navigate("/");
+    }
     dispatch(getHotelRoomDetails(selectedHotel.id, startDate, endDate));
  },[]);
 

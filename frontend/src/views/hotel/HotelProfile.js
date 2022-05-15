@@ -59,6 +59,7 @@ export default function HotelProfile() {
     const [state, setState] = useState('');
     const [country, setCountry] = useState('');
     const [city, setCity] = useState('');
+    const [password, setPassword] = useState('');
     const [fromHrs, setFrmHrs] = useState('');
     const [toHrs, setToHrs] = useState('');
     const [phone, setPhone] = useState('');

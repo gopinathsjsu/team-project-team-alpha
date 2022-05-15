@@ -1,6 +1,6 @@
 import Login from '../Login';
 import Form from "react-bootstrap/Form";
-import Button from "react-bootstrap/Button";
+import Button from '@mui/material/Button';
 import react, { useState, useEffect } from "react";
 import '.././../images//style.css';
 import axios from 'axios';
@@ -48,10 +48,10 @@ const HotelLogin = () => {
       //sessionStorage.setItem('city',response.data.City);
 
       // dispatch(logged(response.data[0].CustomerName, response.data[0].EmailId ));
-      history.go('/HotelDashboard')
+      history('/HotelDashboard')
     })
       .catch((error) => {
-        setAlert("Invalid User Name or Password")
+        setAlert(error)
       })
 
     //    return email.length > 0 && password.length > 0;
