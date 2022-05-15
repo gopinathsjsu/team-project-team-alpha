@@ -132,7 +132,12 @@ public class ReservationService {
                     Long roomId = reservationEntry.getRoomId();
                     Long hotelId = roomIdMap.get(roomId).getHotelId();
                     Long duration = accountingUtils.getDurationInDays(reservationEntry.getStartTime(), reservationEntry.getEndTime());
-                    Long totalCost = accountingUtils.getTotalCost(roomIdMap.get(roomId), hotelIdMap.get(hotelId).getServiceList())*duration;
+                    Set<HotelServiceType> serviceTypes = reservationEntry.getServiceList().stream().map(ServiceEntry::getType).collect(Collectors.toSet());
+                    List<ServiceEntry> serviceEntries = new ArrayList<>();
+                    if(!ObjectUtils.isEmpty(reservationEntry.getServiceList())) {
+                        serviceEntries = hotelIdMap.get(hotelId).getServiceList().stream().filter(serviceEntry -> serviceTypes.contains(serviceEntry.getType())).collect(Collectors.toList());
+                    }
+                    Long totalCost = accountingUtils.getTotalCost(roomIdMap.get(roomId),serviceEntries)*duration;
                     return new ReservationDetailsEntry(
                         reservationEntry.getTransactionId(),
                         reservationEntry.getId(),
