@@ -13,14 +13,21 @@ import com.booking.alpha.utils.BillingEvaluator;
 import com.booking.alpha.utils.BillingEvaluatorFactory;
 import com.booking.alpha.utils.SQSUtils;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import io.swagger.models.auth.In;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
 
 import java.text.ParseException;
-import java.util.*;
+import java.util.Set;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.stream.Collectors;
+import java.util.Arrays;
 
 @Service
 public class ReservationService {
@@ -80,6 +87,20 @@ public class ReservationService {
         }
         if(!ObjectUtils.isEmpty(reservationEntry.getBookingState())) {
             existingEntry.setBookingState(reservationEntry.getBookingState());
+        }
+        if(!ObjectUtils.isEmpty(reservationEntry.getServiceList())) {
+            RoomEntry roomEntry = roomService.findOneById(existingEntry.getRoomId());
+            HotelEntry hotelEntry = hotelService.findOneById(roomEntry.getHotelId());
+            Set<HotelServiceType> hotelServiceTypesToAvail = reservationEntry.getServiceList().stream().map(ServiceEntry::getType).collect(Collectors.toSet());
+            Long duration = accountingUtils.getDurationInDays( existingEntry.getStartTime(), existingEntry.getEndTime());
+            BillingType billingType = billingEvaluatorFactory.getBillingType( existingEntry.getStartTime(), existingEntry.getEndTime());
+            BillingEvaluator billingEvaluator = billingEvaluatorFactory.getBillingEvaluator(billingType);
+            billingEvaluator.normaliseHotels(Collections.singletonList(hotelEntry), duration);
+            List<ServiceEntry> serviceEntriesToUpdate = hotelEntry.getServiceList()
+                    .stream()
+                    .filter(serviceEntry -> hotelServiceTypesToAvail.contains(serviceEntry.getType()))
+                    .collect(Collectors.toList());
+            reservationEntry.setServiceList(serviceEntriesToUpdate);
         }
         ReservationEntry updatedEntry = convertToEntry(reservationRepository.save(convertToEntity(existingEntry)));
         return updatedEntry;
