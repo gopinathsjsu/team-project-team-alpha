@@ -16,6 +16,7 @@ import java.util.Set;
 
 // @CrossOrigin(origins = "http://localhost:3000")
 @RestController
+@CrossOrigin(origins = "*", allowedHeaders = "*")
 @RequestMapping("/v1/hotel")
 public class HotelController {
 

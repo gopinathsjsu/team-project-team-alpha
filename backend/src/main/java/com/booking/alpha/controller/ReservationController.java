@@ -17,6 +17,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Arrays;
 
+@CrossOrigin(origins = "*", allowedHeaders = "*")
 @RequestMapping("/v1/reservation")
 @RestController
 public class ReservationController {
