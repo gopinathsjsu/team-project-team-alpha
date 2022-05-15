@@ -15,6 +15,10 @@
 
 
 
+### EC2 Deployment with Load Balancer
+![EC2_LB1](LB1.png)
+![EC2_LB2](LB2.png)
+
 ### Database Design
 ![DB Diagram](DB_Design.png)
 
