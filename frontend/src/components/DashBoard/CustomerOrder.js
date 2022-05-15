@@ -102,7 +102,9 @@ const CustomerOrder = () => {
   const [status, setStatus] = useState('All Orders');
   const [bookings, setBookings] = useState([]);
   const dispatch = useDispatch();
+  const [order,setOrder] = useState({});
   const classes = useStyles()
+  const [refresh, setRefresh] = useState(false);
   const [openAmenitiesDialog, setOpenAmenitiesDialog] = useState(false);
 
 
@@ -126,60 +128,33 @@ const CustomerOrder = () => {
       navigate("/");
     }
     dispatch(viewOrders(userId));
-    let bookingsByPeriod = {};
-    cards.forEach((booking) => {
-      const period = booking.startTime + "#" + booking.endTime;
-      if (bookingsByPeriod[period]) {
-        bookingsByPeriod[period].push(booking);
-      } else {
-        bookingsByPeriod[period] = [booking];
-      }
-    })
-    // console.log(bookingsByPeriod);
+    console.log(cards);
+    setBookings(cards);
   }, []);
 
   useEffect(() => {
-    let bookingsByPeriod = {};
-    cards.forEach((booking) => {
-      const period = booking.transactionId;
-      if (!bookingsByPeriod[period]) {
-        bookingsByPeriod[period] = [];
-      }
-      bookingsByPeriod[period].push(booking);
-    })
-    // let bookings = [];
-    // for (let i in bookingsByPeriod) {
-    //   bookings = [...bookings, ...bookingsByPeriod[i]];
-    // }
-    // bookings = bookings.filter(e => e)
-    let bookings = bookingsByPeriod;
-    let order = [];
-    for (let i in bookings) {
-      let newOrder = {};
-      newOrder.hotelEntry = bookings[i][0].hotelEntry;
-      let start = bookings[i][0].startTime;
-      let end = bookings[i][0].endTime;
-      newOrder.startTime = start.toString();
-      newOrder.endTime = end.toString();
-      newOrder.duration = bookings[i][0].duration;
-      newOrder.userEntry = bookings[i][0].userEntry;
-      newOrder.roomEntry = [];
-      for (let j = 0; j < bookings[i].length; j++) {
-        newOrder.roomEntry.push({ ...bookings[i][j].roomEntry, totalCost: bookings[i][j].totalCost, startTime: bookings[i][j].startTime, endTime: bookings[i][j].endTime, serviceEntryList: bookings[i][j].serviceEntryList, duration: bookings[i][j].duration });
-      }
-      order.push(newOrder);
+    let userId = sessionStorage.getItem("userId");
+    if (userId === null) {
+      navigate("/");
     }
-    console.log(order);
-    setBookings(order);
-  }, [cards]);
+    dispatch(viewOrders(userId));
+    console.log(cards);
+    setBookings(cards);
+  }, [refresh]);
 
-  const onCancelBooking = (currentCard) => {
+ 
+
+  const onCancelBooking = async (currentCard) => {
+    console.log(currentCard);
+    await axios.post(backendServer + "/v1/reservation/cancel/" + currentCard.reservationId);
+    setRefresh(!refresh);
   };
 
   const onUpdateBooking = async (currentCard) => {
-      const response  = await axios.get(backendServer+`/v1/hotel/${currentCard.hotelEntry.id}`);
-      dispatch(setSelectedHotel(response.data));
-      setOpenAmenitiesDialog(true);
+    setOrder(currentCard);
+    const response = await axios.get(backendServer + `/v1/hotel/${currentCard.hotelEntry.id}`);
+    dispatch(setSelectedHotel(response.data));
+    setOpenAmenitiesDialog(true);
   }
 
   const onView = (card) => {
@@ -188,7 +163,13 @@ const CustomerOrder = () => {
   };
 
   const onCloseAmenitiesDialog = () => {
+    const userId = sessionStorage.getItem("userId");
     setOpenAmenitiesDialog(false);
+    dispatch(viewOrders(userId));
+    setRefresh(!refresh);
+    // let result = cards.filter(item=>item.reservationId===order.reservationId)
+    // console.log(result);
+    // setOrder(result[0]);
   }
 
 
@@ -234,7 +215,7 @@ const CustomerOrder = () => {
             <TablePagination
               rowsPerPageOptions={[2, 5, 10]}
               component="div"
-              count={bookings.length}
+              count={cards.length}
               rowsPerPage={rowsPerPage}
               page={page}
               onChangePage={handleChangePage}
@@ -242,8 +223,8 @@ const CustomerOrder = () => {
             />
             <Grid container spacing={1}>
               {(rowsPerPage > 0
-                ? bookings.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                : bookings).map((card) => (
+                ? cards.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                : cards).map((card) => (
                   <Grid item key={card.roomEntry.id} xs={12}>
                     <Card>
                       <CardContent>
@@ -261,6 +242,12 @@ const CustomerOrder = () => {
                             <Typography>
                               Booking to: {card.endTime}
                             </Typography>
+                            <Typography>
+                              Status : {card.bookingState}
+                            </Typography>
+                            <Typography>
+                              Duration of stay : {card.duration}
+                            </Typography>
                             {/* <IconButton label="View Reciept" onClick={() => onView(card)} aria-label="view restaurant">
                               <ReceiptIcon />
                             </IconButton> */}
@@ -269,12 +256,13 @@ const CustomerOrder = () => {
                             <Grid item xs={12} sm={4}>
                               <Button variant="text" onClick={() => onView(card)}>View Reciept</Button>
                             </Grid>
-                            <Grid item xs={12} sm={4}>
+                            {card.bookingState !== "CANCELLED" && (<Grid item xs={12} sm={4}>
                               <Button variant="text" onClick={() => onCancelBooking(card)}>Cancel Booking</Button>
-                            </Grid>
-                            <Grid item xs={12} sm={4}>
-                              <Button variant="text" onClick={() => onUpdateBooking(card)}>Update Booking</Button>
-                            </Grid>
+                            </Grid>)}
+                            {card.bookingState !== "CANCELLED" && (
+                              <Grid item xs={12} sm={4}>
+                                <Button variant="text" onClick={() => onUpdateBooking(card)}>Update Booking</Button>
+                              </Grid>)}
                           </Grid>
                         </Grid>
                       </CardContent>
@@ -284,7 +272,7 @@ const CustomerOrder = () => {
                 ))}
             </Grid>
           </Container>
-          <UpdateHotelDialog open={openAmenitiesDialog} onClose={()=> onCloseAmenitiesDialog()}></UpdateHotelDialog>
+          <UpdateHotelDialog order={order} open={openAmenitiesDialog} onClose={() => onCloseAmenitiesDialog()}></UpdateHotelDialog>
           <div>
             <Dialog open={openOrder} aria-labelledby="form-dialog-title">
               <DialogTitle id="form-dialog-title">Order Reciept</DialogTitle>

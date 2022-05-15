@@ -16,6 +16,8 @@ import Typography from '@mui/material/Typography';
 import { addToCart, setSelectedAmenities, setSelectedHotel } from '../../state/action-creators/hotelActions';
 import { SwapVertOutlined } from '@material-ui/icons';
 import { Grid, TextField } from '@mui/material';
+import axios from 'axios';
+import backendServer from '../../Config';
 
 const options = {
   CONTINENTAL_BREAKFAST: 'Daily Continental Breakfast',
@@ -42,10 +44,8 @@ export default function UpdateHotelDialog(props) {
   const selectedRoom = useSelector((state) => state.hotels.selectedRoom);
   const cart = useSelector((state) => state.hotels.cart);
   const searchData = useSelector((state) => state.hotels.searchParams);
-  let endDate = searchData.value[1] ? new Date(searchData.value[1]).toISOString().split('T')[0] : '';
-  let startDate = searchData.value[0] ? new Date(searchData.value[0]).toISOString().split('T')[0] : '';
-  const [serviceCostMap, setServiceCostMap] = useState({});
-  const dispatch = useDispatch();
+    const [serviceCostMap, setServiceCostMap] = useState({});
+   const dispatch = useDispatch();
   const user = JSON.parse(sessionStorage.getItem("user"));
   const [points, setPoints] = useState(0);
 
@@ -74,30 +74,30 @@ export default function UpdateHotelDialog(props) {
     onClose();
   };
 
-  const handleConfirm = () => {
-    let service = {}
+  const handleConfirm = async () => {
+    let service = []
     if (CONTINENTAL_BREAKFAST) {
-      service.CONTINENTAL_BREAKFAST = serviceCostMap["CONTINENTAL_BREAKFAST"];
+      service.push({cost: serviceCostMap["CONTINENTAL_BREAKFAST"]*props.order.duration, type: "CONTINENTAL_BREAKFAST"});
     }
     if (FITNESS_ROOM) {
-      service.FITNESS_ROOM = serviceCostMap["FITNESS_ROOM"];
+      service.push({cost: serviceCostMap["FITNESS_ROOM"]*props.order.duration, type: "FITNESS_ROOM"});
     }
     if (SWIMMING_POOL) {
-      service.SWIMMING_POOL = serviceCostMap["SWIMMING_POOL"];
+      service.push({cost: serviceCostMap["SWIMMING_POOL"]*props.order.duration,type: "SWIMMING_POOL"});
     }
     if (DAILY_PARKING) {
-      service.DAILY_PARKING = serviceCostMap["DAILY_PARKING"];
+      service.push({cost: serviceCostMap["DAILY_PARKING"]*props.order.duration, type: "DAILY_PARKING"});
     }
     if (ALL_MEALS_INCLUDED) {
-      service.ALL_MEALS_INCLUDED = serviceCostMap["ALL_MEALS_INCLUDED"];
+      service.push({cost: serviceCostMap["ALL_MEALS_INCLUDED"]*props.order.duration, type:"ALL_MEALS_INCLUDED"});
     }
-    dispatch(setSelectedAmenities(service));
-    let item = {
-      room: selectedRoom,
-      amenities: service
+    let payload = {
+      serviceList: service
     }
-    let userId = sessionStorage.getItem("userId");
-    dispatch(addToCart(item, cart, startDate, endDate, userId,points))
+    const response = await axios.patch(backendServer + `/v1/reservation/${props.order.reservationId}`,payload)
+    if(response==null){
+      alert("Error while updating the booking");
+    }
     setState({});
     onClose(value);
   };

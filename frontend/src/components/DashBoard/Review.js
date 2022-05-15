@@ -13,7 +13,7 @@ import { TextField } from '@mui/material';
 import { useEffect } from 'react';
 
 export default function Review(props) {
-  
+
   const dispatch = useDispatch();
   const instruction = useState('');
 
@@ -22,80 +22,64 @@ export default function Review(props) {
   }, []);
 
 
-  const getFinalPrice = () => {
-
-    let price = 0.00;
-    for (let i in props.order.roomEntry) {
-      price = price + props.order.roomEntry[i].totalCost;
-    }
-    return price;  
-  }
-
-  
-
-  const onInstructionChange = (event) => {
-    
+  const options = {
+    CONTINENTAL_BREAKFAST: 'Daily Continental Breakfast',
+    FITNESS_ROOM: 'Access to fitness room',
+    SWIMMING_POOL: 'Access to Swimming Pool/Jacuzzi',
+    DAILY_PARKING: 'Daily Parking',
+    ALL_MEALS_INCLUDED: 'All meals included (Breakfast, Lunch, Dinner)'
   };
-
-  const getTotalPrice = () => {
-      return 20.001
-  };
-
-
-const options = {
-  CONTINENTAL_BREAKFAST: 'Daily Continental Breakfast',
-  FITNESS_ROOM: 'Access to fitness room',
-  SWIMMING_POOL: 'Access to Swimming Pool/Jacuzzi',
-  DAILY_PARKING: 'Daily Parking',
-  ALL_MEALS_INCLUDED: 'All meals included (Breakfast, Lunch, Dinner)'
-};
 
 
   return (
     <>
       <List disablePadding>
-        {props.order.roomEntry.map((item) => (
-             <>
-             <ListItem key={item.transactionId} sx={{ py: 0, px: 0 }}>
-             <ListItemText primary={item.name} /><br />
-             </ListItem>
-            <ListItem key={item.transactionId} sx={{ py: 0, px: 0 }}>
-              <ListItemText primary={item.type} /><br />
-              <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
-                $
-                {item.cost ? item.cost : 0}
-              </Typography>
-            </ListItem>
-            <ListItem key={item.id} sx={{ py: 0, px: 0 }}>
-              <ListItemText secondary={"Booking from: "} />
-              <ListItemText secondary={props.order.startTime} />
-            </ListItem>
-            <ListItem key={item.id} sx={{ py: 0, px: 0 }}>
-              <ListItemText secondary={"Booking to: "} />
-              <ListItemText secondary={item.endTime} />
-            </ListItem>
-            <ListItem key={item.id} sx={{ py: 0, px: 0 }}>
-              <ListItemText secondary={"Total duration of stay: "} />
-              <ListItemText secondary={item.duration + " days"} />
-            </ListItem>
-            {
-              item.serviceEntryList.map(service => (
-                <ListItem key={service.type} sx={{ py: 0, px: 0 }}>
-                  <ListItemText secondary={options[service.type]} />
-                  <ListItemText secondary={": $" + service.cost} />
-                </ListItem>
 
-              ))
-            }
-          </>
-        ))}
-        <ListItem sx={{ py: 1, px: 0 }}>
-          <ListItemText primary="Sub Total" />
-          <Typography variant="subtitle1">
-            $
-            {getFinalPrice().toFixed(2)}
-          </Typography>
-        </ListItem>
+        <>
+          {/* <ListItem key={props.order.transactionId} sx={{ py: 0, px: 0 }}>
+            <ListItemText primary={props.order.roomEntry.name} /><br />
+          </ListItem> */}
+          <ListItem key={props.order.transactionId} sx={{ py: 0, px: 0 }}>
+            <ListItemText primary={props.order.roomEntry.type} /><br />
+          </ListItem>
+          <ListItem key={props.order.transactionId} sx={{ py: 0, px: 0 }}>
+            <ListItemText secondary={"Room Base Price after taxes"} />
+            <ListItemText secondary={": $" + props.order.roomBasePrice} />
+          </ListItem>
+          <ListItem key={props.order.transactionId} sx={{ py: 0, px: 0 }}>
+            <ListItemText secondary={"Booking from: "} />
+            <ListItemText secondary={props.order.startTime} />
+          </ListItem>
+          <ListItem key={props.order.transactionId} sx={{ py: 0, px: 0 }}>
+            <ListItemText secondary={"Booking to: "} />
+            <ListItemText secondary={props.order.endTime} />
+          </ListItem>
+          <ListItem key={props.order.transactionId} sx={{ py: 0, px: 0 }}>
+            <ListItemText secondary={"Total duration of stay: "} />
+            <ListItemText secondary={props.order.duration + " days"} />
+          </ListItem>
+          {
+            props.order.serviceEntryList.map(service => (
+              <ListItem key={service.type} sx={{ py: 0, px: 0 }}>
+                <ListItemText secondary={options[service.type]} />
+                <ListItemText secondary={": $" + service.cost} />
+              </ListItem>
+
+            ))
+          }
+          <ListItem key={props.order.transactionId} sx={{ py: 0, px: 0 }}>
+            <ListItemText secondary={"Actual cost after tax + services"} />
+            <ListItemText secondary={": $" + props.order.actualCost} />
+          </ListItem>
+          <ListItem key={props.order.transactionId} sx={{ py: 0, px: 0 }}>
+            <ListItemText secondary={"Reward points used"} />
+            <ListItemText secondary={": $" + props.order.rewardPoints} />
+          </ListItem>
+          <ListItem key={props.order.transactionId} sx={{ py: 0, px: 0 }}>
+            <ListItemText secondary={"Cost after discount"} />
+            <ListItemText secondary={": $" + props.order.totalCost} />
+          </ListItem>
+        </>
       </List>
     </>
   );

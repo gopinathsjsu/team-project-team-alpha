@@ -34,7 +34,6 @@ export default function AutoComplete(props) {
       options={places}
       renderInput={(params) => (
         <TextField
-          color="secondary"
           {...params}
           label="Where are you going?"
           InputProps={{
