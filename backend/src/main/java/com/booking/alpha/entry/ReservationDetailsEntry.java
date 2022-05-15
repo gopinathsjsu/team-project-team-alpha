@@ -23,6 +23,8 @@ public class ReservationDetailsEntry {
 
     Long reservationId;
 
+    BookingState bookingState;
+
     UserEntry userEntry;
 
     HotelEntry hotelEntry;

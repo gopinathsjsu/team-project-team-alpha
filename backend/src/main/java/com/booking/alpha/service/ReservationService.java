@@ -165,6 +165,7 @@ public class ReservationService {
                     return new ReservationDetailsEntry(
                         reservationEntry.getTransactionId(),
                         reservationEntry.getId(),
+                        reservationEntry.getBookingState(),
                         userIdMap.get(reservationEntry.getUserId()),
                         hotelIdMap.get(hotelId),
                         roomIdMap.get(roomId),
