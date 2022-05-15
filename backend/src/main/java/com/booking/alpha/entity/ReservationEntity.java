@@ -62,4 +62,8 @@ public class ReservationEntity {
     @Type(type = "json")
     @Column(columnDefinition = "json")
     List<ServiceEntry> serviceList;
+
+    @Column
+    @NonNull
+    Long rewardPoints;
 }

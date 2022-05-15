@@ -13,6 +13,9 @@ import com.booking.alpha.utils.BillingEvaluator;
 import com.booking.alpha.utils.BillingEvaluatorFactory;
 import com.booking.alpha.utils.SQSUtils;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import io.swagger.models.auth.In;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,6 +29,7 @@ import java.util.Map;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.stream.Collectors;
+import java.util.Arrays;
 
 @Service
 public class ReservationService {
@@ -46,9 +50,12 @@ public class ReservationService {
 
     private final BillingEvaluatorFactory billingEvaluatorFactory;
 
+    private final ObjectMapper objectMapper;
+
     public ReservationService( ReservationRepository reservationRepository, AccountingUtils accountingUtils,
             RoomService roomService, HotelService hotelService, SQSUtils sqsUtils,
-            SQSConfiguration sqsConfiguration, UserService userService, BillingEvaluatorFactory billingEvaluatorFactory) {
+            SQSConfiguration sqsConfiguration, UserService userService,
+            BillingEvaluatorFactory billingEvaluatorFactory, ObjectMapper objectMapper) {
         this.reservationRepository = reservationRepository;
         this.accountingUtils = accountingUtils;
         this.roomService = roomService;
@@ -57,6 +64,7 @@ public class ReservationService {
         this.sqsConfiguration = sqsConfiguration;
         this.userService = userService;
         this.billingEvaluatorFactory = billingEvaluatorFactory;
+        this.objectMapper = objectMapper;
     }
 
     public ReservationEntry convertToEntry(ReservationEntity reservationEntity) {
@@ -86,6 +94,20 @@ public class ReservationService {
         if(!ObjectUtils.isEmpty(reservationEntry.getBookingState())) {
             existingEntry.setBookingState(reservationEntry.getBookingState());
         }
+        if(!ObjectUtils.isEmpty(reservationEntry.getServiceList())) {
+            RoomEntry roomEntry = roomService.findOneById(existingEntry.getRoomId());
+            HotelEntry hotelEntry = hotelService.findOneById(roomEntry.getHotelId());
+            Set<HotelServiceType> hotelServiceTypesToAvail = reservationEntry.getServiceList().stream().map(ServiceEntry::getType).collect(Collectors.toSet());
+            Long duration = accountingUtils.getDurationInDays( existingEntry.getStartTime(), existingEntry.getEndTime());
+            BillingType billingType = billingEvaluatorFactory.getBillingType( existingEntry.getStartTime(), existingEntry.getEndTime());
+            BillingEvaluator billingEvaluator = billingEvaluatorFactory.getBillingEvaluator(billingType);
+            billingEvaluator.normaliseHotels(Collections.singletonList(hotelEntry), duration);
+            List<ServiceEntry> serviceEntriesToUpdate = hotelEntry.getServiceList()
+                    .stream()
+                    .filter(serviceEntry -> hotelServiceTypesToAvail.contains(serviceEntry.getType()))
+                    .collect(Collectors.toList());
+            reservationEntry.setServiceList(serviceEntriesToUpdate);
+        }
         ReservationEntry updatedEntry = convertToEntry(reservationRepository.save(convertToEntity(existingEntry)));
         return updatedEntry;
     }
@@ -94,9 +116,7 @@ public class ReservationService {
     public void expireBooking( UnreservingMessageEntry unreservingMessageEntry) {
         ReservationEntry reservationEntryExisting  = findOneById(unreservingMessageEntry.getReservationId());
         if(reservationEntryExisting.getBookingState().equals(BookingState.PENDING)) {
-            patchUpdate( reservationEntryExisting.getId(), new ReservationEntry( null, null, null, null, null, null, BookingState.EXPIRED, null));
-        }
-        if(reservationEntryExisting.getBookingState().equals(BookingState.PENDING) || reservationEntryExisting.getBookingState().equals(BookingState.CANCELLED)) {
+            patchUpdate( reservationEntryExisting.getId(), new ReservationEntry( null, null, null, null, null, null, BookingState.EXPIRED, null, null));
             userService.updateRewards( reservationEntryExisting.getUserId(), unreservingMessageEntry.getCustomLoyaltyCredit());
         }
     }
@@ -117,7 +137,7 @@ public class ReservationService {
         return convertToEntry(reservationEntity);
     }
 
-    public List<ReservationDetailsEntry> convertToDetails( List<ReservationEntry> reservationEntries) {
+    public List<ReservationDetailsEntry> convertToDetails( List<ReservationEntry> reservationEntries){
         if(ObjectUtils.isEmpty(reservationEntries)) {
             return new ArrayList<>();
         }
@@ -132,15 +152,16 @@ public class ReservationService {
                     Long roomId = reservationEntry.getRoomId();
                     Long hotelId = roomIdMap.get(roomId).getHotelId();
                     Long duration = accountingUtils.getDurationInDays(reservationEntry.getStartTime(), reservationEntry.getEndTime());
-                    Set<HotelServiceType> serviceTypesAvailed = reservationEntry.getServiceList().stream().map(ServiceEntry::getType).collect(Collectors.toSet());
-                    List<ServiceEntry> serviceEntries = new ArrayList<>();
-                    if(!ObjectUtils.isEmpty(reservationEntry.getServiceList())) {
-                        serviceEntries = hotelIdMap.get(hotelId).getServiceList()
-                                .stream()
-                                .filter(serviceEntry -> serviceTypesAvailed.contains(serviceEntry.getType()))
-                                .collect(Collectors.toList());
+                    RoomEntry roomEntry = null;
+                    try {
+                        roomEntry = objectMapper.readValue(objectMapper.writeValueAsString(roomIdMap.get(roomId)), new TypeReference<RoomEntry>() {});
+                    }catch (Exception e) {
+                        throw new RuntimeException(e);
                     }
-                    Long totalCost = accountingUtils.getTotalCost(roomIdMap.get(roomId),serviceEntries)*duration;
+                    BillingType billingType = billingEvaluatorFactory.getBillingType( reservationEntry.getStartTime(), reservationEntry.getEndTime());
+                    BillingEvaluator billingEvaluator = billingEvaluatorFactory.getBillingEvaluator(billingType);
+                    billingEvaluator.normaliseRooms(Collections.singletonList(roomEntry), duration);
+                    Long totalCost =  roomEntry.getCost() + accountingUtils.getTotalCost(reservationEntry.getServiceList());
                     return new ReservationDetailsEntry(
                         reservationEntry.getTransactionId(),
                         reservationEntry.getId(),
@@ -150,7 +171,10 @@ public class ReservationService {
                         accountingUtils.convertToString(reservationEntry.getStartTime()),
                         accountingUtils.convertToString(reservationEntry.getEndTime()),
                         duration,
+                        roomEntry.getCost(),
                         totalCost,
+                        reservationEntry.getRewardPoints(),
+                        totalCost-reservationEntry.getRewardPoints(),
                         reservationEntry.getServiceList());
                 }).collect(Collectors.toList());
     }
@@ -183,6 +207,7 @@ public class ReservationService {
             bookingRequestEntry.setCustomLoyaltyCredit(Math.min(bookingRequestEntry.getCustomLoyaltyCredit(), userEntry.getRewardPoints()));
         }
         bookingRequestEntry.setCustomLoyaltyCredit(Math.max(0L, bookingRequestEntry.getCustomLoyaltyCredit()));
+        Long customerLoyaltyPointsToAvail = bookingRequestEntry.getCustomLoyaltyCredit();
         Set<HotelServiceType> bookingRequestHotelServiceTypeSet = bookingRequestEntry.getServiceTypeSet();
         RoomEntry roomEntryLocked = roomService.findOneByIdWithLock(roomId);
         Long hotelId = roomEntryLocked.getHotelId();
@@ -202,7 +227,7 @@ public class ReservationService {
                 serviceEntriesToCreate.add(serviceTypeServiceEntryMap.get(hotelServiceType));
             }
         }
-        ReservationEntry reservationEntryToCreate = new ReservationEntry(null, null, bookingRequestEntry.getUserId(), roomToBook.getId(), startDate, endDate, BookingState.PENDING, serviceEntriesToCreate);
+        ReservationEntry reservationEntryToCreate = new ReservationEntry(null, null, bookingRequestEntry.getUserId(), roomToBook.getId(), startDate, endDate, BookingState.PENDING, serviceEntriesToCreate, customerLoyaltyPointsToAvail);
         ReservationEntry existingReservation = getAnyReservationForUser( userId, new HashSet<>(Collections.singletonList(BookingState.PENDING)));
         if(!ObjectUtils.isEmpty(existingReservation)) {
             reservationEntryToCreate.setTransactionId(existingReservation.getTransactionId());
@@ -215,6 +240,20 @@ public class ReservationService {
         userService.updateRewards( userId, bookingRequestEntry.getCustomLoyaltyCredit()*(-1));
         publishForRemoval( reservationCompleted.getId(), bookingRequestEntry.getCustomLoyaltyCredit());
         return convertToDetails(Collections.singletonList(reservationCompleted)).get(0);
+    }
+
+    public ReservationDetailsEntry removeFromReservation( Long reservationId, BookingState bookingState) {
+        ReservationEntry reservationEntry = findOneById(reservationId);
+        Set<BookingState> bookingStates = new HashSet<>(Arrays.asList( BookingState.PENDING, BookingState.CONFIRMED));
+        if(!bookingStates.contains(reservationEntry.getBookingState())) {
+            return convertToDetails(Collections.singletonList(reservationEntry)).get(0);
+        }
+        Long userId = reservationEntry.getUserId();
+        userService.updateRewards( userId, reservationEntry.getRewardPoints());
+        ReservationEntry reservationEntryToUpdate = new ReservationEntry();
+        reservationEntryToUpdate.setBookingState(bookingState);
+        ReservationEntry updatedReservationEntry = patchUpdate( reservationId, reservationEntryToUpdate);
+        return convertToDetails(Collections.singletonList(updatedReservationEntry)).get(0);
     }
 
     public List<ReservationDetailsEntry> makeBooking( Long userId) {

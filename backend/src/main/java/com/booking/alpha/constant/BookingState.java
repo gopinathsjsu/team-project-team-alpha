@@ -2,5 +2,5 @@ package com.booking.alpha.constant;
 
 public enum BookingState {
 
-    PENDING, EXPIRED, CONFIRMED, CANCELLED;
+    PENDING, EXPIRED, REMOVED_FROM_CART, CONFIRMED, CANCELLED;
 }
