@@ -6,6 +6,7 @@ import com.booking.alpha.entry.ServiceEntry;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -21,11 +22,13 @@ public class HolidayBillingEvaluator extends BillingEvaluator{
             if(ObjectUtils.isEmpty(serviceEntries)) {
                 continue;
             }
+            List<ServiceEntry> scaledServiceEntries = new ArrayList<>();
             for(ServiceEntry serviceEntry: serviceEntries) {
                 Long newCost = serviceEntry.getCost() + serviceEntry.getCost()/4;
                 newCost = newCost*duration;
-                serviceEntry.setCost(newCost);
+                scaledServiceEntries.add(new ServiceEntry(newCost, serviceEntry.getType()));
             }
+            hotelEntry.setServiceList(scaledServiceEntries);
         }
     }
 
