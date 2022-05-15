@@ -10,7 +10,8 @@ import {
   SET_SELECTED_ROOM,
   ADD_TO_CART,
   SET_BOOKINGS,
-  LOGOUT
+  LOGOUT,
+  REMOVE_FROM_CART
 } from "./types";
 
 
@@ -121,6 +122,23 @@ export const addToCart =
         return false;
       });
   };
+
+  export const removeFromCart =
+  (roomId,cart) => async (dispatch) => {
+    cart = cart.filter(item=> item.roomEntry.id!==roomId);
+    axios.post(`${backendServer}/v1/reservation/remove-from-cart/${roomId}`)
+      .then((response) => {
+        dispatch({
+          type: REMOVE_FROM_CART,
+          payload: cart
+        });
+      })
+      .catch((err) => {
+        alert(err);
+        return false;
+      });
+  };
+
 
 export const confirmCart =
   (userId) => async (dispatch) => {

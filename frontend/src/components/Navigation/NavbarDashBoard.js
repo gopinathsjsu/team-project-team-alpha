@@ -275,12 +275,16 @@ export const NavbarDashBoard = (props) => {
                    <ListItem key={item.transactionId} sx={{ py: 0, px: 0 }}>
                    <ListItemText primary={item.roomEntry.name} /><br />
                    </ListItem>
-                  <ListItem key={item.transactionId} sx={{ py: 0, px: 0 }}>
+                  {/* <ListItem key={item.transactionId} sx={{ py: 0, px: 0 }}>
                     <ListItemText primary={item.roomEntry.type} /><br />
                     <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
                       $
                       {item.roomEntry.cost ? item.roomEntry.cost : 0}
                     </Typography>
+                  </ListItem> */}
+                  <ListItem key={item.transactionId} sx={{ py: 0, px: 0 }}>
+                    <ListItemText secondary={"Room Base Price after taxes"} />
+                    <ListItemText secondary={": $"+ item.roomBasePrice} />
                   </ListItem>
                   <ListItem key={item.transactionId} sx={{ py: 0, px: 0 }}>
                     <ListItemText secondary={"Booking from: "} />
@@ -303,6 +307,18 @@ export const NavbarDashBoard = (props) => {
 
                     ))
                   }
+                  <ListItem key={item.transactionId} sx={{ py: 0, px: 0 }}>
+                    <ListItemText secondary={"Actual cost after tax + services"} />
+                    <ListItemText secondary={": $" + item.actualCost} />
+                  </ListItem>
+                  <ListItem key={item.transactionId} sx={{ py: 0, px: 0 }}>
+                    <ListItemText secondary={"Reward points used"} />
+                    <ListItemText secondary={": $" + item.rewardPoints} />
+                  </ListItem>
+                  <ListItem key={item.transactionId} sx={{ py: 0, px: 0 }}>
+                    <ListItemText secondary={"Cost after discount"} />
+                    <ListItemText secondary={": $" + item.totalCost} />
+                  </ListItem>
                 </>
               ))}
               <ListItem sx={{ py: 1, px: 0 }}>

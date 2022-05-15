@@ -20,6 +20,7 @@ import backendServer from '../../Config';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { logout } from '../../state/action-creators/hotelActions';
+import { NavbarDashBoard } from '../Navigation/NavbarDashBoard';
 
 const theme = createTheme();
 
@@ -75,6 +76,7 @@ export default function CustomerLogin() {
 
   return (
     <>
+      <NavbarDashBoard />
       <ThemeProvider theme={theme}>
         <Grid container component="main" sx={{ height: '100vh' }}>
           <CssBaseline />

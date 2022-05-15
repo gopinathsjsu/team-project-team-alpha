@@ -34,7 +34,7 @@ import RoomAmenitiesDialog from './RoomAmenitiesDialog';
 import { useDispatch, useSelector } from 'react-redux';
 import { useEffect } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
-import { getHotelRoomDetails, setSelectedRoom } from '../../state/action-creators/hotelActions';
+import { getHotelRoomDetails, removeFromCart, setSelectedRoom } from '../../state/action-creators/hotelActions';
 import { NavbarDashBoard } from '../Navigation/NavbarDashBoard';
 
 const theme = createTheme();
@@ -87,7 +87,6 @@ export default function CustomerHotelRooms() {
   const cart = useSelector((state)=>state.hotels.cart);
   let endDate =  searchData.value[1]?new Date(searchData.value[1]).toISOString().split('T')[0]: '';
   let startDate = searchData.value[0]?new Date(searchData.value[0]).toISOString().split('T')[0]: '';
-
   const onNewOrder = () => {
 
   };
@@ -108,6 +107,7 @@ export default function CustomerHotelRooms() {
   };
 
   const onRemoveFromCart = (card) => {
+    dispatch(removeFromCart(card.id,cart));
     console.log(cart);
   };
 
