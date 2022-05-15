@@ -35,6 +35,8 @@ public class ReservationDetailsEntry {
 
     Long duration;
 
+    Long roomBasePrice;
+
     Long actualCost;
 
     Long rewardPoints;

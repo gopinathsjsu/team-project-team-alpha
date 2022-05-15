@@ -73,8 +73,8 @@ public class AccountingUtils {
         return dateFormat.format(date);
     }
 
-    public Long getTotalCost(RoomEntry roomEntry, List<ServiceEntry> serviceEntries) {
-        Long cost = roomEntry.getCost();
+    public Long getTotalCost(List<ServiceEntry> serviceEntries) {
+        Long cost = 0L;
         if(!ObjectUtils.isEmpty(serviceEntries)) {
             for(ServiceEntry serviceEntry: serviceEntries) {
                 cost = cost + serviceEntry.getCost();
