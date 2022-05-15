@@ -64,13 +64,12 @@ const ViewBooking = () => {
 
     const history = useNavigate();
 
-  if(!localStorage.getItem("RestaurantId")){
-    history.push("/RestaurantLogin")
-  }
+ 
     const [OrderResponse, setOrderResponse] = useState([]);
 
     const [searchValue, setSearch] = useState('');
     const [filteredPosts, setFilteredPosts] = useState([]);
+
 
     const [value, setValue] = useState([])
     //const [value2, setValue2] = useState([])
@@ -200,6 +199,8 @@ const ViewBooking = () => {
        .then((response) =>{
         console.log("cancelled orders", response.data)
        setBookState(true);
+       history("/ViewBooking")
+
         // setOrderResponse(response.data)
         // setValue(response.data)
        })
@@ -260,7 +261,7 @@ const ViewBooking = () => {
             ( <TableCell align="center">Confirmed</TableCell>)}
                
               
-              <TableCell align="center"><Button onClick={(event) => {cancelOrder(event,row.reservationId)}} type="button"><span>Cancel Reservation</span></Button></TableCell>
+              <TableCell align="center"><Button onClick={(event) => {cancelOrder(event,row.reservationId)}} type="button">Cancel Reservation</Button></TableCell>
 
               {/* <TableCell align="center"> 
               <Button onClick={handleClickOpen(row.OrderId)}>Edit Order</Button>
