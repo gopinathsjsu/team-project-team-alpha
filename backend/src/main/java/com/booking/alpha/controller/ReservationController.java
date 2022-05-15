@@ -39,7 +39,7 @@ public class ReservationController {
 
     @GetMapping("/user/{userId}")
     ResponseEntity<List<ReservationDetailsEntry>> getReservationForUser(@PathVariable("userId") Long userId) {
-        return new ResponseEntity<>( reservationService.getReservationDetails(userId, new HashSet<>(Arrays.asList(BookingState.CONFIRMED, BookingState.PENDING))), HttpStatus.OK);
+        return new ResponseEntity<>( reservationService.getReservationDetails(userId, new HashSet<>(Arrays.asList(BookingState.CONFIRMED, BookingState.PENDING, BookingState.CANCELLED))), HttpStatus.OK);
     }
 
     @GetMapping("/hotel/{hotelId}")
@@ -62,9 +62,13 @@ public class ReservationController {
         return new ResponseEntity<>( reservationService.makeBooking(userId), HttpStatus.OK);
     }
 
+    @PostMapping("/cancel/{id}")
+    public ResponseEntity<ReservationDetailsEntry> cancel(@PathVariable("id") Long reservationId) {
+        return new ResponseEntity<>( reservationService.removeFromReservation( reservationId, BookingState.CANCELLED), HttpStatus.OK);
+    }
+
     @PostMapping("/remove-from-cart/{id}")
     public ResponseEntity<ReservationDetailsEntry> unreserve(@PathVariable("id") Long reservationId) {
-        ReservationEntry updatedReservationEntry = reservationService.patchUpdate(reservationId, new ReservationEntry( null, null, null, null, null, null, BookingState.CANCELLED, null));
-        return new ResponseEntity<>( reservationService.convertToDetails(Collections.singletonList(updatedReservationEntry)).get(0), HttpStatus.OK);
+        return new ResponseEntity<>( reservationService.removeFromReservation( reservationId, BookingState.REMOVED_FROM_CART), HttpStatus.OK);
     }
 }

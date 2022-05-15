@@ -34,4 +34,6 @@ public class ReservationEntry {
     BookingState bookingState;
 
     List<ServiceEntry> serviceList;
+
+    Long rewardPoints;
 }

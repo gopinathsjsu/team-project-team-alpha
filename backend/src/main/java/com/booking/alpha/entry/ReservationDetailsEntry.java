@@ -35,6 +35,10 @@ public class ReservationDetailsEntry {
 
     Long duration;
 
+    Long actualCost;
+
+    Long rewardPoints;
+
     Long totalCost;
 
     List<ServiceEntry> serviceEntryList;
