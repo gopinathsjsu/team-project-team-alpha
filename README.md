@@ -36,4 +36,4 @@
 <br>
 
 ### Class Diagram
-![UML CLass Diagram](Hotel_Reservation_UML.png)
+![UML CLass Diagram](UML class.png)
