@@ -36,4 +36,4 @@
 <br>
 
 ### Class Diagram
-![UML CLass Diagram](UML class.png)
+![UML CLass Diagram](UML_class.png)
